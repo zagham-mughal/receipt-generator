@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt Generator - Professional POS System</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="print.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧾 Receipt Generator</h1>
+            <p>Professional Point of Sale System</p>
+        </header>
+
+        <div class="main-content">
+            <form id="receiptForm">
+                <!-- Country Selection -->
+                <div class="section">
+                    <h2>🌎 Select Country</h2>
+                    <div class="form-group">
+                        <label for="country">Select Country *</label>
+                        <select id="country" name="country" required>
+                            <option value="">-- Select a Country --</option>
+                            <option value="United States of America">🇺🇸 United States of America</option>
+                            <option value="Canada">🇨🇦 Canada</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Company Selection -->
+                <div class="section">
+                    <h2>🏢 Select Company</h2>
+                    <div class="form-group">
+                        <label for="designId">Select Company *</label>
+                        <select id="designId" name="designId" required>
+                            <!-- Company options will be loaded dynamically from database -->
+                        </select>
+                    </div>
+                    <div class="form-group" id="storeSelectionGroup" style="display: none;">
+                        <label for="storeSearch">Select Store Location *</label>
+                        <input type="text" id="storeSearch" placeholder="🔍 Search store by code or location..." autocomplete="off" style="margin-bottom: 8px;">
+                        <select id="storeId" name="storeId" required>
+                            <option value="">-- Select a store --</option>
+                        </select>
+                        <small style="color: #666; display: block; margin-top: 5px;">
+                            📍 Store address and phone will appear on receipt
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Items Section -->
+                <div class="section">
+                    <h2>🛒 Items</h2>
+                    <div id="itemsList">
+                        <!-- Items will be added here -->
+                    </div>
+                    <button type="button" id="addItemBtn" class="btn btn-secondary">+ Add Item</button>
+                </div>
+
+                <!-- Date and Payment -->
+                <div class="section">
+                    <h2>💳 Payment & Date</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="date">Date *</label>
+                            <input type="datetime-local" id="date" name="date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="paymentMethod">Payment Method *</label>
+                            <select id="paymentMethod" name="paymentMethod" required>
+                                <option value="Cash">💵 Cash</option>
+                                <option value="EFS">💳 EFS</option>
+                                <option value="Master">💳 Master</option>
+                                <option value="TCH">💳 TCH</option>
+                                <option value="Visa">💳 Visa</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row" id="cardDetailsRow" style="display: none;">
+                        <div class="form-group">
+                            <label for="cardLast4">Card Last 4 Digits *</label>
+                            <input type="text" id="cardLast4" name="cardLast4" maxlength="4" pattern="[0-9]{4}" placeholder="eg: 3948" inputmode="numeric">
+                        </div>
+                        <div class="form-group">
+                            <label for="cardEntryMethod">Card Entry Method *</label>
+                            <select id="cardEntryMethod" name="cardEntryMethod">
+                                <option value="INSERT">📥 INSERT</option>
+                                <option value="SWIPE">💳 SWIPE</option>
+                                <option value="TAP">📱 TAP</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="copyTypeGroup" style="display: none;">
+                            <label for="copyType">Copy Type</label>
+                            <select id="copyType" name="copyType">
+                                <option value="Original">Original</option>
+                                <option value="Mobile Copy">Mobile Copy</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Vehicle Details and Company Name -->
+                    <div class="form-row" id="vehicleDetailsRow" style="display: none;">
+                        <div class="form-group">
+                            <label for="vehicleId">Vehicle ID</label>
+                            <input type="text" id="vehicleId" name="vehicleId" placeholder="101">
+                        </div>
+                        <div class="form-group">
+                            <label for="dlNumber">DL Number</label>
+                            <input type="text" id="dlNumber" name="dlNumber" placeholder="0">
+                        </div>
+                    </div>
+                    
+                    <!-- EFS Details for TravelCenters -->
+                    <div class="form-row" id="efsDetailsRow" style="display: none;">
+                        <div class="form-group" id="companyNameGroup" style="display: none;">
+                            <label for="driverCompanyName">Company Name</label>
+                            <input type="text" id="driverCompanyName" name="driverCompanyName" placeholder="Enter company name">
+                        </div>
+                        <div class="form-group">
+                            <label for="checkNumber">Check Number</label>
+                            <input type="text" id="checkNumber" name="checkNumber" placeholder="2001243357" pattern="[0-9]*" inputmode="numeric" maxlength="10">
+                        </div>
+                        <div class="form-group">
+                            <label for="checkNumberConfirm">Check Number Confirm</label>
+                            <input type="text" id="checkNumberConfirm" name="checkNumberConfirm" placeholder="2001243357" pattern="[0-9]*" inputmode="numeric" maxlength="10">
+                        </div>
+                        <div class="form-group">
+                            <label for="driverFirstName">Driver First Name</label>
+                            <input type="text" id="driverFirstName" name="driverFirstName" placeholder="John" pattern="[a-zA-Z\s]*" maxlength="50">
+                        </div>
+                        <div class="form-group">
+                            <label for="driverLastName">Driver Last Name</label>
+                            <input type="text" id="driverLastName" name="driverLastName" placeholder="Smith" pattern="[a-zA-Z\s]*" maxlength="50">
+                        </div>
+                        <div class="form-group">
+                            <label for="vehicleId">Vehicle ID</label>
+                            <input type="text" id="vehicleId" name="vehicleId" placeholder="101">
+                        </div>
+                        <div class="form-group" id="signatureCheckboxGroup" style="display: none;">
+                            <label for="includeSignature">
+                                <input type="checkbox" id="includeSignature" name="includeSignature">
+                                Include Signature
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Preview -->
+                <div class="section total-preview">
+                    <h3>Total Preview</h3>
+                    <div class="total-line">
+                        <span>Subtotal:</span>
+                        <span id="subtotalPreview">$0.00</span>
+                    </div>
+                    <div class="total-line">
+                        <span>Tax (8%):</span>
+                        <span id="taxPreview">$0.00</span>
+                    </div>
+                    <div class="total-line total-amount">
+                        <span>TOTAL:</span>
+                        <span id="totalPreview">$0.00</span>
+                    </div>
+                </div>
+
+                <!-- Generate Button -->
+                <button type="submit" class="btn btn-primary" id="generateBtn">
+                    Generate Receipt 🧾
+                </button>
+            </form>
+
+            <!-- Success Message -->
+            <div id="successMessage" class="success-message" style="display: none;">
+                <h3>✅ Receipt Generated Successfully!</h3>
+                <p id="receiptInfo"></p>
+                <div class="button-group">
+                    <button type="button" id="printBtn" class="btn btn-primary">🖨️ Print Receipt</button>
+                    <a id="downloadLink" href="#" class="btn btn-success" download>📥 Download PDF</a>
+                    <button type="button" id="newReceiptBtn" class="btn btn-secondary">Create New Receipt</button>
+                </div>
+            </div>
+
+            <!-- Receipt Preview -->
+            <div id="receiptPreviewContainer" style="display: none; margin-top: 30px;">
+                <div style="background-color: #f0f0f0; padding: 15px; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center; border: 2px solid #ccc; border-bottom: none;">
+                    <h3 style="margin: 0; color: #333;">📄 Receipt Preview</h3>
+                    <button type="button" id="closeReceiptPreview" class="btn btn-secondary" style="padding: 8px 20px;">✕ Close</button>
+                </div>
+                <div id="receiptPreviewContent" style="background: white; border: 2px solid #ccc; border-top: none; border-radius: 0 0 8px 8px; padding: 30px; max-width: 400px; margin: 0 auto; font-family: 'Courier New', monospace; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                    <!-- Receipt content will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Receipt Preview for Printing -->
+            <div id="printReceipt"></div>
+        </div>
+    </div>
+
+    <script src="app-compiled.js"></script>
+</body>
+</html>
+

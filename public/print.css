@@ -1,0 +1,104 @@
+/* Print-specific styles for receipts */
+
+@media print {
+    /* Hide everything except receipt */
+    body * {
+        visibility: hidden;
+    }
+    
+    #printReceipt, #printReceipt * {
+        visibility: visible;
+    }
+    
+    #printReceipt {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 80mm; /* Thermal printer width */
+        margin: 0;
+        padding: 0;
+    }
+    
+    /* Remove page margins */
+    @page {
+        margin: 0;
+        size: 80mm auto; /* Thermal printer paper size */
+    }
+    
+    /* Ensure proper line breaks */
+    .print-line {
+        page-break-inside: avoid;
+    }
+    
+    /* Hide print button when printing */
+    .no-print {
+        display: none !important;
+    }
+}
+
+/* Receipt preview styling */
+#printReceipt {
+    display: none;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    line-height: 1.4;
+    max-width: 80mm;
+    margin: 20px auto;
+    padding: 10mm;
+    background: white;
+    border: 1px solid #ddd;
+}
+
+#printReceipt.show-preview {
+    display: block;
+}
+
+.receipt-header {
+    text-align: center;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.receipt-store-name {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.receipt-divider {
+    border-top: 1px dashed #000;
+    margin: 8px 0;
+}
+
+.receipt-solid-divider {
+    border-top: 1px solid #000;
+    margin: 8px 0;
+}
+
+.receipt-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 3px 0;
+}
+
+.receipt-item {
+    margin: 5px 0;
+}
+
+.receipt-total {
+    font-weight: bold;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+.receipt-footer {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 10px;
+}
+
+.receipt-barcode {
+    text-align: center;
+    margin: 10px 0;
+    font-family: 'Courier New', monospace;
+}
+

@@ -1,0 +1,11 @@
+node_modules/
+dist/
+*.log
+.env
+.DS_Store
+receipts/*.pdf
+data/
+public/app-compiled.js
+public/app-compiled.js.map
+public/app.js
+public/app.js.map
