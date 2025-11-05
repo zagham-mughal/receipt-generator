@@ -127,6 +127,18 @@ document.addEventListener('DOMContentLoaded', async (): Promise<void> => {
             const selectedCompanyId = companySelect.value ? parseInt(companySelect.value) : null;
             const selectedCompany = selectedCompanyId ? companies.find(c => c.id === selectedCompanyId) : null;
             const isUSACompany = selectedCompany && selectedCompany.country === 'United States of America';
+            const isFlyingJCanada = selectedCompany && selectedCompany.name.toLowerCase().includes('flying j') && selectedCompany.country === 'Canada';
+            
+            // Hide Vehicle ID for Flying J Canada
+            if (isFlyingJCanada) {
+                const vehicleIdField = document.getElementById('vehicleId') as HTMLInputElement | null;
+                const vehicleIdGroup = vehicleIdField?.closest('.form-group') as HTMLElement | null;
+                if (vehicleIdGroup) vehicleIdGroup.style.display = 'none';
+                if (vehicleIdField) {
+                    vehicleIdField.required = false;
+                    vehicleIdField.removeAttribute('required');
+                }
+            }
             
             if (isUSACompany) {
                 const companyNameGroup = document.getElementById('companyNameGroup') as HTMLElement | null;
@@ -299,6 +311,31 @@ async function loadCompanies(): Promise<void> {
 }
 
 // Toggle card fields based on payment method
+// Helper function to ensure all vehicleId fields are properly handled (there can be multiple)
+function handleAllVehicleIdFields(): void {
+    // Get all vehicleId fields (there are multiple - one in vehicleDetailsRow and one in efsDetailsRow)
+    const allVehicleIdFields = document.querySelectorAll('#vehicleId') as NodeListOf<HTMLInputElement>;
+    
+    allVehicleIdFields.forEach(field => {
+        const formGroup = field.closest('.form-group') as HTMLElement | null;
+        const parentRow = formGroup?.parentElement as HTMLElement | null;
+        
+        // Check if field or any ancestor is hidden
+        const formGroupHidden = formGroup && (formGroup.style.display === 'none' || window.getComputedStyle(formGroup).display === 'none');
+        const parentRowHidden = parentRow && (parentRow.style.display === 'none' || window.getComputedStyle(parentRow).display === 'none');
+        const notInRenderingTree = (field as HTMLElement).offsetParent === null;
+        
+        const isHidden = !formGroup || formGroupHidden || parentRowHidden || notInRenderingTree;
+        
+        if (isHidden) {
+            // Remove required and disable if hidden
+            field.required = false;
+            field.removeAttribute('required');
+            field.disabled = true;
+        }
+    });
+}
+
 // Helper function to restore required attributes for visible fields
 function restoreRequiredAttributes(): void {
     // Check if this is a Husky + Visa combination - if so, don't restore required attributes
@@ -313,8 +350,35 @@ function restoreRequiredAttributes(): void {
     const isAnyCanadaCompany = selectedCompany && selectedCompany.country === 'Canada';
     const isOne9Company = selectedCompany && (selectedCompany.name.toLowerCase().includes('one 9') || selectedCompany.name.toLowerCase().includes('one9'));
     const isLovesCompany = selectedCompany && (selectedCompany.name.toLowerCase().includes('love') || selectedCompany.name.toLowerCase().includes("love's"));
+    const isPilotCompany = selectedCompany && selectedCompany.name.toLowerCase().includes('pilot');
     const isOne9Master = isOne9Company && paymentMethod === 'Master';
+    const isOne9EFS = isOne9Company && paymentMethod === 'EFS';
+    const isPilotEFS = isPilotCompany && paymentMethod === 'EFS';
     const isLovesEFS = isLovesCompany && paymentMethod === 'EFS';
+    
+    // For One9 + EFS and Pilot + EFS, ensure check number and driver name fields remain hidden and not required
+    if (isOne9EFS || isPilotEFS) {
+        const checkNumberField = document.getElementById('checkNumber') as HTMLInputElement | null;
+        const checkNumberConfirmField = document.getElementById('checkNumberConfirm') as HTMLInputElement | null;
+        const driverFirstNameField = document.getElementById('driverFirstName') as HTMLInputElement | null;
+        const driverLastNameField = document.getElementById('driverLastName') as HTMLInputElement | null;
+        
+        const hideField = (field: HTMLInputElement | null) => {
+            if (field) {
+                field.required = false;
+                field.removeAttribute('required');
+                const formGroup = field.closest('.form-group') as HTMLElement | null;
+                if (formGroup) {
+                    formGroup.style.display = 'none';
+                }
+            }
+        };
+        
+        hideField(checkNumberField);
+        hideField(checkNumberConfirmField);
+        hideField(driverFirstNameField);
+        hideField(driverLastNameField);
+    }
     const isHuskyVisa = isHuskyCompany && (paymentMethod === 'Visa' || paymentMethod === 'Master' || paymentMethod === 'Mastercard' || paymentMethod === 'Interac' || paymentMethod === 'American Express' || paymentMethod === 'EFS' || paymentMethod === 'TCH');
     const isPetroCanadaAny = isPetroCanadaCompany; // Hide for any payment method
     const isBVDPetroleumAny = isBVDPetroleumCompany; // Hide for any payment method
@@ -350,6 +414,18 @@ function restoreRequiredAttributes(): void {
         if (vehicleDetailsRowVehicleId) {
             vehicleDetailsRowVehicleId.required = false;
             vehicleDetailsRowVehicleId.removeAttribute('required');
+        }
+    }
+    
+    // For Pilot + Master, ensure Vehicle ID in vehicleDetailsRow is not required (since it's hidden)
+    const isPilotMaster = isPilotCompany && paymentMethod === 'Master';
+    if (isPilotMaster) {
+        const vehicleDetailsRow = document.getElementById('vehicleDetailsRow') as HTMLElement | null;
+        const vehicleDetailsRowVehicleId = vehicleDetailsRow?.querySelector('#vehicleId') as HTMLInputElement | null;
+        if (vehicleDetailsRowVehicleId) {
+            vehicleDetailsRowVehicleId.required = false;
+            vehicleDetailsRowVehicleId.removeAttribute('required');
+            vehicleDetailsRowVehicleId.disabled = true;
         }
     }
     
@@ -665,22 +741,48 @@ function toggleCardFields(): void {
             if (companyNameGroup) companyNameGroup.style.display = 'none';
             return;
         }
-        // Show ALL vehicle/company fields for Canadian Flying J + Master
+        // Show vehicle/company fields for Canadian Flying J + Master (but hide Vehicle ID)
         if (selectedCompany && selectedCompany.name.toLowerCase().includes('flying j') && getCurrentCountry() === 'Canada' && paymentMethod === 'Master') {
             console.log('Showing vehicle details for Canadian Flying J + Master');
             vehicleDetailsRow.style.display = 'grid';
+            const efsDetailsRow = document.getElementById('efsDetailsRow') as HTMLElement | null;
             const vehicleIdField = document.getElementById('vehicleId') as HTMLInputElement;
             const dlNumberField = document.getElementById('dlNumber') as HTMLInputElement;
             const companyNameField = document.getElementById('driverCompanyName') as HTMLInputElement;
             const vehicleIdGroup = vehicleIdField?.closest('.form-group') as HTMLElement | null;
             const dlNumberGroup = dlNumberField?.closest('.form-group') as HTMLElement | null;
             const companyNameGroup = document.getElementById('companyNameGroup') as HTMLElement | null;
-            if (vehicleIdGroup) vehicleIdGroup.style.display = 'block';
+            // Hide Vehicle ID for Flying J Canada
+            if (vehicleIdGroup) vehicleIdGroup.style.display = 'none';
+            if (vehicleIdField) { vehicleIdField.required = false; vehicleIdField.removeAttribute('required'); }
+            // Show DL Number
             if (dlNumberGroup) dlNumberGroup.style.display = 'block';
-            if (companyNameGroup) companyNameGroup.style.display = 'block';
-            if (vehicleIdField) { vehicleIdField.disabled = false; vehicleIdField.required = true; vehicleIdField.setAttribute('required', 'required'); }
             if (dlNumberField) { dlNumberField.disabled = false; dlNumberField.required = true; dlNumberField.setAttribute('required', 'required'); }
-            if (companyNameField) { companyNameField.disabled = false; companyNameField.required = true; companyNameField.setAttribute('required', 'required'); }
+            // For Company Name: only set as required if it's actually focusable
+            // Check if companyNameGroup is inside efsDetailsRow and if efsDetailsRow is hidden
+            if (companyNameGroup) {
+                companyNameGroup.style.display = 'block';
+                // Check if parent efsDetailsRow is hidden
+                const isEfsRowHidden = efsDetailsRow ? 
+                    (window.getComputedStyle(efsDetailsRow).display === 'none' || 
+                     window.getComputedStyle(efsDetailsRow).visibility === 'hidden' ||
+                     efsDetailsRow.style.display === 'none' ||
+                     efsDetailsRow.style.visibility === 'hidden') : false;
+                
+                // Only set as required if field is actually focusable (not inside hidden container)
+                if (companyNameField && !isEfsRowHidden && companyNameField.offsetParent !== null) {
+                    companyNameField.disabled = false;
+                    companyNameField.required = true;
+                    companyNameField.setAttribute('required', 'required');
+                } else {
+                    // Field is not focusable, don't set as required
+                    if (companyNameField) {
+                        companyNameField.disabled = false;
+                        companyNameField.required = false;
+                        companyNameField.removeAttribute('required');
+                    }
+                }
+            }
             return;
         }
         // Show Vehicle ID and Company Name for One9 + Master
@@ -1214,12 +1316,29 @@ function toggleCardFields(): void {
             if (vehicleIdField && !isUSA) vehicleIdField.required = false;
             if (dlNumberField) dlNumberField.required = false;
         } else if (paymentMethod === 'EFS' && isOne9Company) {
-            // Show Vehicle ID and DL Number for EFS payment with One9 company
+            // Show Vehicle ID for EFS payment with One9 company
+            // Hide Check Number, Check Number Confirm, Driver First Name, Driver Last Name
             vehicleDetailsRow.style.display = 'grid';
             // Hide DL Number field for One9 + EFS combination
             const dlNumberField = document.getElementById('dlNumber') as HTMLInputElement;
             const dlNumberGroup = dlNumberField?.closest('.form-group') as HTMLElement;
             if (dlNumberGroup) dlNumberGroup.style.display = 'none';
+            
+            // Hide EFS-only fields (check numbers and driver names)
+            const efsDetailsRow = document.getElementById('efsDetailsRow') as HTMLElement | null;
+            if (efsDetailsRow) efsDetailsRow.style.display = 'grid';
+            
+            const hideFieldGroup = (input: HTMLInputElement | null) => {
+                if (!input) return;
+                input.required = false;
+                const g = input.closest('.form-group') as HTMLElement | null;
+                if (g) g.style.display = 'none';
+            };
+            
+            hideFieldGroup(document.getElementById('checkNumber') as HTMLInputElement | null);
+            hideFieldGroup(document.getElementById('checkNumberConfirm') as HTMLInputElement | null);
+            hideFieldGroup(document.getElementById('driverFirstName') as HTMLInputElement | null);
+            hideFieldGroup(document.getElementById('driverLastName') as HTMLInputElement | null);
             
             // Make Vehicle ID required when visible
             const vehicleIdField = document.getElementById('vehicleId') as HTMLInputElement;
@@ -1376,8 +1495,25 @@ function toggleCardFields(): void {
             const vehicleIdGroup = vehicleIdField?.closest('.form-group') as HTMLElement;
             if (vehicleIdGroup) vehicleIdGroup.style.display = 'block';
             if (vehicleIdField) vehicleIdField.required = true;
+        } else if (paymentMethod === 'Master' && isPilotCompany) {
+            // Hide vehicleDetailsRow for Pilot + Master (Vehicle ID will be shown in efsDetailsRow)
+            vehicleDetailsRow.style.display = 'none';
+            // Remove required attribute from Vehicle ID in vehicleDetailsRow when hidden
+            // Use querySelector to get the specific Vehicle ID field within vehicleDetailsRow
+            const vehicleIdFieldInVehicleDetailsRow = vehicleDetailsRow.querySelector('#vehicleId') as HTMLInputElement | null;
+            const dlNumberField = document.getElementById('dlNumber') as HTMLInputElement;
+            if (vehicleIdFieldInVehicleDetailsRow) {
+                vehicleIdFieldInVehicleDetailsRow.required = false;
+                vehicleIdFieldInVehicleDetailsRow.removeAttribute('required');
+                // Also disable it to prevent validation
+                vehicleIdFieldInVehicleDetailsRow.disabled = true;
+            }
+            if (dlNumberField) {
+                dlNumberField.required = false;
+                dlNumberField.removeAttribute('required');
+            }
         } else if (paymentMethod === 'Master' && !isUSA) {
-            // Hide Vehicle ID and DL Number for Master payment with other companies (but not USA)
+            // Hide Vehicle ID and DL Number for Master payment with other companies (but not USA, not Pilot)
             vehicleDetailsRow.style.display = 'none';
             // Remove required attribute when hidden
             const vehicleIdField = document.getElementById('vehicleId') as HTMLInputElement;
@@ -1456,6 +1592,9 @@ function toggleCardFields(): void {
             }
             if (dlNumberField) dlNumberField.required = true;
         }
+        
+        // Always ensure all vehicleId fields are properly handled (remove required from hidden ones)
+        handleAllVehicleIdFields();
     }
     
     // Toggle company name field and signature checkbox based on payment method and company
@@ -1670,6 +1809,28 @@ function toggleCardFields(): void {
             // Make Company Name required when visible
             const companyNameField = document.getElementById('driverCompanyName') as HTMLInputElement;
             if (companyNameField) companyNameField.required = true;
+            
+            // Hide EFS-specific fields for Pilot + EFS
+            const checkNumberField = document.getElementById('checkNumber') as HTMLInputElement | null;
+            const checkNumberConfirmField = document.getElementById('checkNumberConfirm') as HTMLInputElement | null;
+            const driverFirstNameField = document.getElementById('driverFirstName') as HTMLInputElement | null;
+            const driverLastNameField = document.getElementById('driverLastName') as HTMLInputElement | null;
+            
+            const hideFieldGroup = (field: HTMLInputElement | null) => {
+                if (field) {
+                    field.required = false;
+                    field.removeAttribute('required');
+                    const formGroup = field.closest('.form-group') as HTMLElement | null;
+                    if (formGroup) {
+                        formGroup.style.display = 'none';
+                    }
+                }
+            };
+            
+            hideFieldGroup(checkNumberField);
+            hideFieldGroup(checkNumberConfirmField);
+            hideFieldGroup(driverFirstNameField);
+            hideFieldGroup(driverLastNameField);
         } else if (paymentMethod === 'Cash' && !isUSA) {
             // Hide Company Name and Signature checkbox for Cash payment with other companies (but not USA)
             companyNameGroup.style.display = 'none';
@@ -1684,6 +1845,33 @@ function toggleCardFields(): void {
             // Remove required attribute when hidden
             const companyNameField = document.getElementById('driverCompanyName') as HTMLInputElement;
             if (companyNameField) companyNameField.required = false;
+            // Also handle Vehicle ID field - ensure it's not required and is disabled
+            const vehicleDetailsRow = document.getElementById('vehicleDetailsRow') as HTMLElement | null;
+            if (vehicleDetailsRow) {
+                vehicleDetailsRow.style.display = 'none';
+                // Remove required attribute from Vehicle ID in vehicleDetailsRow
+                const vehicleIdFieldInVehicleDetailsRow = vehicleDetailsRow.querySelector('#vehicleId') as HTMLInputElement | null;
+                if (vehicleIdFieldInVehicleDetailsRow) {
+                    vehicleIdFieldInVehicleDetailsRow.required = false;
+                    vehicleIdFieldInVehicleDetailsRow.removeAttribute('required');
+                    vehicleIdFieldInVehicleDetailsRow.disabled = true;
+                }
+            }
+            // Also check efsDetailsRow for Vehicle ID field
+            const efsDetailsRow = document.getElementById('efsDetailsRow') as HTMLElement | null;
+            if (efsDetailsRow) {
+                const vehicleIdFieldInEfsRow = efsDetailsRow.querySelector('#vehicleId') as HTMLInputElement | null;
+                if (vehicleIdFieldInEfsRow) {
+                    vehicleIdFieldInEfsRow.required = false;
+                    vehicleIdFieldInEfsRow.removeAttribute('required');
+                    vehicleIdFieldInEfsRow.disabled = true;
+                    // Hide the Vehicle ID group in efsDetailsRow
+                    const vehicleIdGroupInEfsRow = vehicleIdFieldInEfsRow.closest('.form-group') as HTMLElement | null;
+                    if (vehicleIdGroupInEfsRow) {
+                        vehicleIdGroupInEfsRow.style.display = 'none';
+                    }
+                }
+            }
         } else if (paymentMethod === 'TCH' && isOne9Company) {
             // Show Company Name for TCH payment with One9 company
             companyNameGroup.style.display = 'block';
@@ -1728,11 +1916,25 @@ function toggleCardFields(): void {
             if (companyNameField) companyNameField.required = false;
         } else if (paymentMethod === 'EFS' && isOne9Company) {
             // Show Company Name and Signature checkbox for EFS payment with One9 company
+            // Hide Check Number, Check Number Confirm, Driver First Name, Driver Last Name
             companyNameGroup.style.display = 'block';
             signatureCheckboxGroup.style.display = 'flex';
             // Make Company Name required when visible
             const companyNameField = document.getElementById('driverCompanyName') as HTMLInputElement;
             if (companyNameField) companyNameField.required = true;
+            
+            // Hide EFS-only fields (check numbers and driver names)
+            const hideFieldGroup = (input: HTMLInputElement | null) => {
+                if (!input) return;
+                input.required = false;
+                const g = input.closest('.form-group') as HTMLElement | null;
+                if (g) g.style.display = 'none';
+            };
+            
+            hideFieldGroup(document.getElementById('checkNumber') as HTMLInputElement | null);
+            hideFieldGroup(document.getElementById('checkNumberConfirm') as HTMLInputElement | null);
+            hideFieldGroup(document.getElementById('driverFirstName') as HTMLInputElement | null);
+            hideFieldGroup(document.getElementById('driverLastName') as HTMLInputElement | null);
         } else if (paymentMethod === 'EFS' && !isUSA) {
             // Hide Company Name for EFS payment with other companies (but not USA)
             companyNameGroup.style.display = 'none';
@@ -1754,9 +1956,115 @@ function toggleCardFields(): void {
                 companyNameField.disabled = false;
             }
         } else if (paymentMethod === 'Master' && isPilotCompany) {
-            // Show Company Name and Signature checkbox for Master payment with Pilot company
+            // Show Vehicle ID, Company Name, and Signature checkbox for Master payment with Pilot company
             const efsRow = document.getElementById('efsDetailsRow') as HTMLElement | null;
-            if (efsRow) efsRow.style.display = 'grid';
+            if (efsRow) {
+                efsRow.style.display = 'grid';
+                
+                // Get Vehicle ID from efsDetailsRow (there's one in there)
+                const vehicleIdInEfsRow = efsRow.querySelector('#vehicleId') as HTMLInputElement | null;
+                const vehicleIdGroupInEfsRow = vehicleIdInEfsRow?.closest('.form-group') as HTMLElement | null;
+                
+                
+                // Get Company Name field
+                const companyNameField = document.getElementById('driverCompanyName') as HTMLInputElement | null;
+                
+                // Clear Vehicle ID and Company Name values for Pilot + Master
+                if (vehicleIdInEfsRow) {
+                    vehicleIdInEfsRow.value = '';
+                }
+                if (companyNameField) {
+                    companyNameField.value = '';
+                }
+                
+                // Ensure companyNameGroup is in efsDetailsRow
+                if (companyNameGroup && companyNameGroup.parentElement !== efsRow) {
+                    efsRow.appendChild(companyNameGroup);
+                }
+                
+                // Ensure signatureCheckboxGroup is in efsDetailsRow
+                if (signatureCheckboxGroup && signatureCheckboxGroup.parentElement !== efsRow) {
+                    efsRow.appendChild(signatureCheckboxGroup);
+                }
+                
+                // Show Vehicle ID from efsDetailsRow
+                if (vehicleIdGroupInEfsRow) {
+                    vehicleIdGroupInEfsRow.style.display = 'block';
+                }
+                if (vehicleIdInEfsRow) {
+                    vehicleIdInEfsRow.required = true;
+                }
+                
+                // Ensure efsRow uses grid layout (same as other form-rows)
+                efsRow.style.display = 'grid';
+                efsRow.style.gridTemplateColumns = 'repeat(auto-fit, minmax(250px, 1fr))';
+                efsRow.style.gap = '20px';
+                
+                // Order: Vehicle ID -> Company Name (in same row), Signature Checkbox (on new line)
+                if (vehicleIdGroupInEfsRow && companyNameGroup && signatureCheckboxGroup) {
+                    // Remove all from row first
+                    if (vehicleIdGroupInEfsRow.parentElement === efsRow) efsRow.removeChild(vehicleIdGroupInEfsRow);
+                    if (companyNameGroup.parentElement === efsRow) efsRow.removeChild(companyNameGroup);
+                    if (signatureCheckboxGroup.parentElement === efsRow) efsRow.removeChild(signatureCheckboxGroup);
+                    
+                    // Add Vehicle ID and Company Name in same row first
+                    efsRow.appendChild(vehicleIdGroupInEfsRow);
+                    efsRow.appendChild(companyNameGroup);
+                    
+                    // Ensure Vehicle ID and Company Name form-groups take full width of their grid columns
+                    // Match the spacing and width of Card Last 4 Digits and Card Entry Method
+                    vehicleIdGroupInEfsRow.style.width = '100%';
+                    vehicleIdGroupInEfsRow.style.maxWidth = '100%';
+                    vehicleIdGroupInEfsRow.style.minWidth = '0';
+                    vehicleIdGroupInEfsRow.style.marginTop = '0';
+                    vehicleIdGroupInEfsRow.style.marginBottom = '0';
+                    vehicleIdGroupInEfsRow.style.marginLeft = '0';
+                    vehicleIdGroupInEfsRow.style.marginRight = '0';
+                    // Keep default form-group margin-bottom for proper spacing (24px)
+                    vehicleIdGroupInEfsRow.style.marginBottom = '24px';
+                    
+                    companyNameGroup.style.width = '100%';
+                    companyNameGroup.style.maxWidth = '100%';
+                    companyNameGroup.style.minWidth = '0';
+                    companyNameGroup.style.marginTop = '0';
+                    companyNameGroup.style.marginBottom = '0';
+                    companyNameGroup.style.marginLeft = '0';
+                    companyNameGroup.style.marginRight = '0';
+                    // Keep default form-group margin-bottom for proper spacing (24px)
+                    companyNameGroup.style.marginBottom = '24px';
+                    
+                    // Ensure the input fields inside also take full width
+                    const vehicleIdInput = vehicleIdGroupInEfsRow.querySelector('input') as HTMLInputElement | null;
+                    const companyNameInput = companyNameGroup.querySelector('input') as HTMLInputElement | null;
+                    if (vehicleIdInput) {
+                        vehicleIdInput.style.width = '100%';
+                        vehicleIdInput.style.maxWidth = '100%';
+                        vehicleIdInput.style.boxSizing = 'border-box';
+                    }
+                    if (companyNameInput) {
+                        companyNameInput.style.width = '100%';
+                        companyNameInput.style.maxWidth = '100%';
+                        companyNameInput.style.boxSizing = 'border-box';
+                    }
+                    
+                    // Add signature checkbox on new line (after Vehicle ID and Company Name)
+                    efsRow.appendChild(signatureCheckboxGroup);
+                    
+                    // Make signature checkbox take full width (new line) and minimize vertical gap
+                    signatureCheckboxGroup.style.width = '100%';
+                    signatureCheckboxGroup.style.gridColumn = '1 / -1';
+                    // Use negative margin to minimize gap (form-row has 20px gap, so we compensate)
+                    signatureCheckboxGroup.style.marginTop = '-10px'; // Reduce gap from 20px to ~10px
+                    signatureCheckboxGroup.style.marginBottom = '0';
+                    signatureCheckboxGroup.style.marginLeft = '0';
+                    signatureCheckboxGroup.style.marginRight = '0';
+                    signatureCheckboxGroup.style.paddingTop = '0';
+                    signatureCheckboxGroup.style.paddingBottom = '0';
+                    // Override any default form-group margin
+                    signatureCheckboxGroup.style.setProperty('margin-top', '-10px', 'important');
+                    signatureCheckboxGroup.style.setProperty('margin-bottom', '0', 'important');
+                }
+            }
             companyNameGroup.style.display = 'block';
             signatureCheckboxGroup.style.display = 'flex';
             // Make Company Name required when visible
@@ -1823,8 +2131,8 @@ function toggleCardFields(): void {
             hideFieldGroup(document.getElementById('checkNumberConfirm') as HTMLInputElement | null);
             hideFieldGroup(document.getElementById('driverFirstName') as HTMLInputElement | null);
             hideFieldGroup(document.getElementById('driverLastName') as HTMLInputElement | null);
-        } else if (paymentMethod === 'Master' && !isUSA) {
-            // Hide Company Name for Master payment with other companies (but not USA)
+        } else if (paymentMethod === 'Master' && !isUSA && !isPilotCompany) {
+            // Hide Company Name for Master payment with other companies (but not USA, not Pilot)
             companyNameGroup.style.display = 'none';
             signatureCheckboxGroup.style.display = 'none';
             // Remove required attribute when hidden
@@ -1841,12 +2149,13 @@ function toggleCardFields(): void {
             if (companyNameField) { companyNameField.required = true; companyNameField.disabled = false; }
         } else if (paymentMethod === 'Visa' && isLovesCompany && !isUSA) {
             // Hide Company Name for Visa payment with Love's company (but not for USA)
+            // Note: Signature checkbox will be shown next to copy type dropdown (handled later)
             companyNameGroup.style.display = 'none';
-            signatureCheckboxGroup.style.display = 'none';
+            // Don't hide signature checkbox here - it will be shown in copyTypeRow for Love's + Visa
             const companyNameField = document.getElementById('driverCompanyName') as HTMLInputElement;
             if (companyNameField) companyNameField.required = false;
-        } else {
-            // Show Company Name for other payment methods
+        } else if (!(paymentMethod === 'Master' && isPilotCompany)) {
+            // Show Company Name for other payment methods (but not Pilot + Master, which is handled above)
             companyNameGroup.style.display = 'block';
             signatureCheckboxGroup.style.display = 'none';
             // Make Company Name required when visible
@@ -1916,16 +2225,17 @@ function toggleCardFields(): void {
         }
         if (copyTypeRow) copyTypeRow.style.display = 'none';
     }
-    // Ensure EFS details row is hidden for non-EFS, except keep it for Pilot + Visa, TA + Visa, TA + Master, Love's + Cash, Love's + Master, and USA Flying J + Master to show Company Name only
+    // Ensure EFS details row is hidden for non-EFS, except keep it for Pilot + Visa, Pilot + Master, TA + Visa, TA + Master, Love's + Cash, Love's + Master, and USA Flying J + Master to show Company Name and Signature checkbox
     if (paymentMethod !== 'EFS') {
         const efsRow = document.getElementById('efsDetailsRow') as HTMLElement | null;
         const keepForPilotVisa = paymentMethod === 'Visa' && isPilotCompany;
+        const keepForPilotMaster = paymentMethod === 'Master' && isPilotCompany;
         const keepForTAVisas = paymentMethod === 'Visa' && isTravelCentersCompany;
         const keepForTAMaster = paymentMethod === 'Master' && isTravelCentersCompany;
         const keepForLovesCash = paymentMethod === 'Cash' && isLovesCompany;
         const keepForLovesMaster = paymentMethod === 'Master' && isLovesCompany;
         const keepForUSAFlyingJMaster = paymentMethod === 'Master' && selectedCompany && selectedCompany.name.toLowerCase().includes('flying j') && getCurrentCountry() === 'United States of America';
-        const keepRow = keepForPilotVisa || keepForTAVisas || keepForTAMaster || keepForLovesCash || keepForLovesMaster || keepForUSAFlyingJMaster;
+        const keepRow = keepForPilotVisa || keepForPilotMaster || keepForTAVisas || keepForTAMaster || keepForLovesCash || keepForLovesMaster || keepForUSAFlyingJMaster;
         if (efsRow) efsRow.style.display = keepRow ? 'grid' : 'none';
         const companyNameField = document.getElementById('driverCompanyName') as HTMLInputElement | null;
         if (companyNameField) {
@@ -1937,9 +2247,7 @@ function toggleCardFields(): void {
                 companyNameField.removeAttribute('required');
             }
         }
-        // Hide EFS-only sub-fields when showing row for Pilot + Visa, TA + Visa, Love's + Cash, Love's + Master, but show them for TA + Master and USA Flying J + Master
-        // Also hide these fields specifically for Pilot + Master
-        const keepForPilotMaster = paymentMethod === 'Master' && isPilotCompany;
+        // Hide EFS-only sub-fields when showing row for Pilot + Visa, Pilot + Master, TA + Visa, Love's + Cash, Love's + Master, but show them for TA + Master and USA Flying J + Master
         
         if (keepRow) {
             const checkNumberField = document.getElementById('checkNumber') as HTMLInputElement | null;
@@ -1996,10 +2304,10 @@ function toggleCardFields(): void {
                 }
                 hideFieldGroup(driverLastNameField);
             }
-            // Show signature checkbox for Love's + Master, USA Flying J + Master, and TA + Master
+            // Show signature checkbox for Pilot + Master, Love's + Master, USA Flying J + Master, and TA + Master
             // Hide it for Pilot + Visa, TA + Visa, Love's + Cash
-            if (keepForLovesMaster || keepForUSAFlyingJMaster || keepForTAMaster) {
-                // Show signature checkbox for Love's + Master, USA Flying J + Master, and TA + Master
+            if (keepForPilotMaster || keepForLovesMaster || keepForUSAFlyingJMaster || keepForTAMaster) {
+                // Show signature checkbox for Pilot + Master, Love's + Master, USA Flying J + Master, and TA + Master
                 if (sigGroup) sigGroup.style.display = 'flex';
             } else {
                 // Hide signature checkbox for other combinations
@@ -2007,12 +2315,13 @@ function toggleCardFields(): void {
             }
         }
         
-        // Explicitly hide EFS fields for Pilot + Master (even if EFS row is shown elsewhere)
+        // Explicitly hide EFS fields for Pilot + Master (even if EFS row is shown elsewhere) and ensure signature checkbox is visible
         if (keepForPilotMaster) {
             const checkNumberField = document.getElementById('checkNumber') as HTMLInputElement | null;
             const checkNumberConfirmField = document.getElementById('checkNumberConfirm') as HTMLInputElement | null;
             const driverFirstNameField = document.getElementById('driverFirstName') as HTMLInputElement | null;
             const driverLastNameField = document.getElementById('driverLastName') as HTMLInputElement | null;
+            const signatureCheckboxGroup = document.getElementById('signatureCheckboxGroup') as HTMLElement | null;
             
             const hideFieldGroup = (input: HTMLInputElement | null) => {
                 if (!input) return;
@@ -2025,6 +2334,11 @@ function toggleCardFields(): void {
             hideFieldGroup(checkNumberConfirmField);
             hideFieldGroup(driverFirstNameField);
             hideFieldGroup(driverLastNameField);
+            
+            // Ensure signature checkbox is visible for Pilot + Master
+            if (signatureCheckboxGroup) {
+                signatureCheckboxGroup.style.display = 'flex';
+            }
         }
     }
     
@@ -2039,19 +2353,36 @@ function toggleCardFields(): void {
     
     // Check if the selected company supports copyType
     // Exclude Pilot with Master payment method
+    // Exclude Pilot with VISA payment method
+    // Exclude Pilot with EFS payment method
+    // Exclude Pilot with TCH payment method
+    // Exclude Pilot with Cash payment method
     // Exclude One9 with Master payment method
+    // Exclude One9 with EFS payment method
+    // Exclude One9 with TCH payment method
+    // Exclude One9 with VISA payment method
     const pilotWithMaster = isPilotCompany && paymentMethod === 'Master';
+    const pilotWithVisa = isPilotCompany && paymentMethod === 'Visa';
+    const pilotWithEFS = isPilotCompany && paymentMethod === 'EFS';
+    const pilotWithTCH = isPilotCompany && paymentMethod === 'TCH';
+    const pilotWithCash = isPilotCompany && paymentMethod === 'Cash';
     const one9WithMaster = isOne9Company && paymentMethod === 'Master';
+    const one9WithEFS = isOne9Company && paymentMethod === 'EFS';
+    const one9WithTCH = isOne9Company && paymentMethod === 'TCH';
+    const one9WithVisa = isOne9Company && paymentMethod === 'Visa';
     const companySupportsCopyType = isOne9Company || isTravelCentersCompany || isHuskyCompany || isLovesCompany;
     
     // Only show copy type for supported companies and appropriate payment methods
     // For Love's, show for Cash payment method
-    // Hide for Pilot + Master and One9 + Master
+    // For Travel Centers, show for Cash payment method
+    // Hide for Pilot + Master, Pilot + VISA, Pilot + EFS, Pilot + TCH, Pilot + Cash, One9 + Master, One9 + EFS, One9 + TCH, and One9 + VISA
     const lovesCash = isLovesCompany && paymentMethod === 'Cash';
+    const travelCentersCash = isTravelCentersCompany && paymentMethod === 'Cash';
     
     // Show copy type for:
-    // - One9, TA, Husky with Visa/Master/TCH/EFS/Interac (but not One9+Master)
+    // - One9, TA, Husky with Visa/Master/TCH/Interac (but not One9+Master, not One9+EFS, not One9+TCH, not One9+VISA)
     // - Love's with Cash
+    // - Travel Centers with Cash
     // - Love's with EFS (shown in efsDetailsRow, not copyTypeRow)
     const lovesEFS = isLovesCompany && paymentMethod === 'EFS';
     let showCopyType = false;
@@ -2063,12 +2394,20 @@ function toggleCardFields(): void {
             paymentMethod,
             companyName: selectedCompany?.name
         });
+    } else if (travelCentersCash) {
+        // Travel Centers + Cash: always show copy type
+        showCopyType = true;
+        console.log('Travel Centers + Cash detected, showing copy type dropdown', {
+            isTravelCentersCompany,
+            paymentMethod,
+            companyName: selectedCompany?.name
+        });
     } else if (lovesEFS) {
         // Love's + EFS: copy type is handled in efsDetailsRow section, don't show in copyTypeRow
         showCopyType = false; // Will be shown in efsDetailsRow instead
     } else if (companySupportsCopyType && 
         (paymentMethod === 'Visa' || paymentMethod === 'Master' || paymentMethod === 'TCH' || paymentMethod === 'EFS' || paymentMethod === 'Interac') && 
-        !isUSAJWithMaster && !pilotWithMaster && !one9WithMaster) {
+        !isUSAJWithMaster && !pilotWithMaster && !pilotWithVisa && !pilotWithEFS && !pilotWithTCH && !pilotWithCash && !one9WithMaster && !one9WithEFS && !one9WithTCH && !one9WithVisa) {
         // Other supported companies with card payments
         showCopyType = true;
     }
@@ -2076,8 +2415,10 @@ function toggleCardFields(): void {
     console.log('Copy type visibility check:', {
         showCopyType,
         isLovesCompany,
+        isTravelCentersCompany,
         paymentMethod,
         lovesCash,
+        travelCentersCash,
         lovesEFS,
         companyName: selectedCompany?.name,
         companySupportsCopyType
@@ -2085,23 +2426,83 @@ function toggleCardFields(): void {
     
     // Show/hide the copy type row and group
     // For Love's + EFS, copy type is shown in efsDetailsRow, not copyTypeRow
-    if (!lovesEFS && copyTypeRow) {
+    // For One9 + EFS, copy type should be hidden
+    // For One9 + TCH, copy type should be hidden
+    // For One9 + VISA, copy type should be hidden
+    // For Pilot + VISA, copy type should be hidden
+    // For Pilot + EFS, copy type should be hidden
+    // For Pilot + TCH, copy type should be hidden
+    // For Pilot + Cash, copy type should be hidden
+    if (!lovesEFS && !one9WithEFS && !one9WithTCH && !one9WithVisa && !pilotWithVisa && !pilotWithEFS && !pilotWithTCH && !pilotWithCash && copyTypeRow) {
         copyTypeRow.style.display = showCopyType ? 'grid' : 'none';
-    } else if (lovesEFS && copyTypeRow) {
-        // Hide copyTypeRow for Love's + EFS since it's in efsDetailsRow
+    } else if ((lovesEFS || one9WithEFS || one9WithTCH || one9WithVisa || pilotWithVisa || pilotWithEFS || pilotWithTCH || pilotWithCash) && copyTypeRow) {
+        // Hide copyTypeRow for Love's + EFS (it's in efsDetailsRow), One9 + EFS (should be hidden), One9 + TCH (should be hidden), One9 + VISA (should be hidden), Pilot + VISA (should be hidden), Pilot + EFS (should be hidden), Pilot + TCH (should be hidden), and Pilot + Cash (should be hidden)
         copyTypeRow.style.display = 'none';
     }
-    // Only show copyTypeGroup in copyTypeRow if not Love's + EFS (Love's + EFS handles it separately)
-    if (!lovesEFS && copyTypeGroup) {
-        // Make sure copyTypeGroup is in copyTypeRow for non-Love's+EFS cases
+    // Only show copyTypeGroup in copyTypeRow if not Love's + EFS, not One9 + EFS, not One9 + TCH, not One9 + VISA, not Pilot + VISA, not Pilot + EFS, not Pilot + TCH, and not Pilot + Cash
+    if (!lovesEFS && !one9WithEFS && !one9WithTCH && !one9WithVisa && !pilotWithVisa && !pilotWithEFS && !pilotWithTCH && !pilotWithCash && copyTypeGroup) {
+        // Make sure copyTypeGroup is in copyTypeRow for non-Love's+EFS, non-One9+EFS, non-One9+TCH, non-One9+VISA, non-Pilot+VISA, non-Pilot+EFS, and non-Pilot+TCH cases
         const copyTypeRowEl = document.getElementById('copyTypeRow') as HTMLElement | null;
         if (copyTypeRowEl && copyTypeGroup.parentElement !== copyTypeRowEl) {
             copyTypeRowEl.appendChild(copyTypeGroup);
         }
         copyTypeGroup.style.display = showCopyType ? 'block' : 'none';
         console.log('Copy type group display set to:', copyTypeGroup.style.display);
+    } else if ((one9WithEFS || one9WithTCH || one9WithVisa || pilotWithVisa || pilotWithEFS || pilotWithTCH || pilotWithCash) && copyTypeGroup) {
+        // Explicitly hide copy type for One9 + EFS, One9 + TCH, One9 + VISA, Pilot + VISA, Pilot + EFS, Pilot + TCH, and Pilot + Cash
+        copyTypeGroup.style.display = 'none';
+        const copyTypeRowEl = document.getElementById('copyTypeRow') as HTMLElement | null;
+        if (copyTypeRowEl) copyTypeRowEl.style.display = 'none';
     } else if (!copyTypeGroup) {
         console.error('copyTypeGroup element not found!');
+    }
+    
+    // Handle Love's + Visa: Show signature checkbox next to copy type dropdown
+    const lovesVisa = isLovesCompany && paymentMethod === 'Visa';
+    if (lovesVisa) {
+        // Ensure copy type is shown for Love's + Visa
+        if (!showCopyType) {
+            showCopyType = true;
+        }
+        
+        if (copyTypeRow && copyTypeGroup && signatureCheckboxGroup) {
+            // Ensure copy type row is visible
+            copyTypeRow.style.display = 'grid';
+            copyTypeGroup.style.display = 'block';
+            
+            // Make sure copyTypeGroup is in copyTypeRow
+            if (copyTypeGroup.parentElement !== copyTypeRow) {
+                copyTypeRow.appendChild(copyTypeGroup);
+            }
+            
+            // Move signature checkbox into copyTypeRow if not already there
+            if (signatureCheckboxGroup.parentElement !== copyTypeRow) {
+                copyTypeRow.appendChild(signatureCheckboxGroup);
+            }
+            
+            // Show signature checkbox
+            signatureCheckboxGroup.style.display = 'flex';
+            
+            // Ensure copy type group comes before signature checkbox
+            if (copyTypeGroup.parentElement === copyTypeRow && 
+                signatureCheckboxGroup.parentElement === copyTypeRow) {
+                // Check if copy type is before signature checkbox
+                let copyTypeBeforeSignature = false;
+                let current = copyTypeGroup.nextSibling;
+                while (current) {
+                    if (current === signatureCheckboxGroup) {
+                        copyTypeBeforeSignature = true;
+                        break;
+                    }
+                    current = current.nextSibling;
+                }
+                if (!copyTypeBeforeSignature) {
+                    copyTypeRow.insertBefore(copyTypeGroup, signatureCheckboxGroup);
+                }
+            }
+            
+            console.log('Love\'s + Visa: Showing signature checkbox next to copy type dropdown');
+        }
     }
     
     // Restore required attributes for visible fields
@@ -2243,38 +2644,62 @@ function toggleCardFields(): void {
                         signatureCheckboxGroup.style.display = 'flex';
                     }
                 } else {
-                    // For other USA companies with EFS, show efsDetailsRow and EFS fields
-                    efsDetailsRowUSA.style.display = 'grid';
+                    // Check if this is One9 company - if so, don't show EFS fields (they're handled separately)
+                    const isOne9CompanyUSA = selectedCompany && (selectedCompany.name.toLowerCase().includes('one 9') || selectedCompany.name.toLowerCase().includes('one9'));
                     
-                    // Show EFS-specific fields (check number, check number confirm, driver names)
-                    const checkNumberField = document.getElementById('checkNumber') as HTMLInputElement | null;
-                    const checkNumberConfirmField = document.getElementById('checkNumberConfirm') as HTMLInputElement | null;
-                    const driverFirstNameField = document.getElementById('driverFirstName') as HTMLInputElement | null;
-                    const driverLastNameField = document.getElementById('driverLastName') as HTMLInputElement | null;
-                    
-                    if (checkNumberField) {
-                        const checkNumberGroup = checkNumberField.closest('.form-group') as HTMLElement | null;
-                        if (checkNumberGroup) checkNumberGroup.style.display = 'block';
-                        checkNumberField.required = true;
-                        checkNumberField.setAttribute('required', 'required');
-                    }
-                    if (checkNumberConfirmField) {
-                        const checkNumberConfirmGroup = checkNumberConfirmField.closest('.form-group') as HTMLElement | null;
-                        if (checkNumberConfirmGroup) checkNumberConfirmGroup.style.display = 'block';
-                        checkNumberConfirmField.required = true;
-                        checkNumberConfirmField.setAttribute('required', 'required');
-                    }
-                    if (driverFirstNameField) {
-                        const driverFirstNameGroup = driverFirstNameField.closest('.form-group') as HTMLElement | null;
-                        if (driverFirstNameGroup) driverFirstNameGroup.style.display = 'block';
-                        driverFirstNameField.required = true;
-                        driverFirstNameField.setAttribute('required', 'required');
-                    }
-                    if (driverLastNameField) {
-                        const driverLastNameGroup = driverLastNameField.closest('.form-group') as HTMLElement | null;
-                        if (driverLastNameGroup) driverLastNameGroup.style.display = 'block';
-                        driverLastNameField.required = true;
-                        driverLastNameField.setAttribute('required', 'required');
+                    if (!isOne9CompanyUSA) {
+                        // For other USA companies with EFS (but not One9), show efsDetailsRow and EFS fields
+                        efsDetailsRowUSA.style.display = 'grid';
+                        
+                        // Show EFS-specific fields (check number, check number confirm, driver names)
+                        const checkNumberField = document.getElementById('checkNumber') as HTMLInputElement | null;
+                        const checkNumberConfirmField = document.getElementById('checkNumberConfirm') as HTMLInputElement | null;
+                        const driverFirstNameField = document.getElementById('driverFirstName') as HTMLInputElement | null;
+                        const driverLastNameField = document.getElementById('driverLastName') as HTMLInputElement | null;
+                        
+                        if (checkNumberField) {
+                            const checkNumberGroup = checkNumberField.closest('.form-group') as HTMLElement | null;
+                            if (checkNumberGroup) checkNumberGroup.style.display = 'block';
+                            checkNumberField.required = true;
+                            checkNumberField.setAttribute('required', 'required');
+                        }
+                        if (checkNumberConfirmField) {
+                            const checkNumberConfirmGroup = checkNumberConfirmField.closest('.form-group') as HTMLElement | null;
+                            if (checkNumberConfirmGroup) checkNumberConfirmGroup.style.display = 'block';
+                            checkNumberConfirmField.required = true;
+                            checkNumberConfirmField.setAttribute('required', 'required');
+                        }
+                        if (driverFirstNameField) {
+                            const driverFirstNameGroup = driverFirstNameField.closest('.form-group') as HTMLElement | null;
+                            if (driverFirstNameGroup) driverFirstNameGroup.style.display = 'block';
+                            driverFirstNameField.required = true;
+                            driverFirstNameField.setAttribute('required', 'required');
+                        }
+                        if (driverLastNameField) {
+                            const driverLastNameGroup = driverLastNameField.closest('.form-group') as HTMLElement | null;
+                            if (driverLastNameGroup) driverLastNameGroup.style.display = 'block';
+                            driverLastNameField.required = true;
+                            driverLastNameField.setAttribute('required', 'required');
+                        }
+                    } else {
+                        // For One9 + EFS, hide EFS-specific fields
+                        const checkNumberField = document.getElementById('checkNumber') as HTMLInputElement | null;
+                        const checkNumberConfirmField = document.getElementById('checkNumberConfirm') as HTMLInputElement | null;
+                        const driverFirstNameField = document.getElementById('driverFirstName') as HTMLInputElement | null;
+                        const driverLastNameField = document.getElementById('driverLastName') as HTMLInputElement | null;
+                        
+                        const hideFieldGroup = (input: HTMLInputElement | null) => {
+                            if (!input) return;
+                            input.required = false;
+                            input.removeAttribute('required');
+                            const g = input.closest('.form-group') as HTMLElement | null;
+                            if (g) g.style.display = 'none';
+                        };
+                        
+                        hideFieldGroup(checkNumberField);
+                        hideFieldGroup(checkNumberConfirmField);
+                        hideFieldGroup(driverFirstNameField);
+                        hideFieldGroup(driverLastNameField);
                     }
                     
                     // Hide Vehicle ID in efsDetailsRow (we use the one in vehicleDetailsRow)
@@ -2425,7 +2850,252 @@ function toggleCardFields(): void {
             forceHideField(driverFirstNameFieldFinal);
             forceHideField(driverLastNameFieldFinal);
         }
+        
+        // ABSOLUTE FINAL ENFORCEMENT: For One9 + EFS, ensure check number and driver name fields are ALWAYS hidden
+        // This runs at the very end to override any other logic that might show them
+        const isOne9CompanyFinal = selectedCompanyFinal && (selectedCompanyFinal.name.toLowerCase().includes('one 9') || selectedCompanyFinal.name.toLowerCase().includes('one9'));
+        const isOne9EFSFinal = isOne9CompanyFinal && paymentMethod === 'EFS';
+        
+        if (isOne9EFSFinal) {
+            const checkNumberFieldFinal = document.getElementById('checkNumber') as HTMLInputElement | null;
+            const checkNumberConfirmFieldFinal = document.getElementById('checkNumberConfirm') as HTMLInputElement | null;
+            const driverFirstNameFieldFinal = document.getElementById('driverFirstName') as HTMLInputElement | null;
+            const driverLastNameFieldFinal = document.getElementById('driverLastName') as HTMLInputElement | null;
+            
+            const forceHideField = (field: HTMLInputElement | null) => {
+                if (field) {
+                    field.required = false;
+                    field.removeAttribute('required');
+                    field.disabled = false;
+                    const formGroup = field.closest('.form-group') as HTMLElement | null;
+                    if (formGroup) {
+                        formGroup.style.display = 'none';
+                        formGroup.style.visibility = 'hidden';
+                    }
+                }
+            };
+            
+            forceHideField(checkNumberFieldFinal);
+            forceHideField(checkNumberConfirmFieldFinal);
+            forceHideField(driverFirstNameFieldFinal);
+            forceHideField(driverLastNameFieldFinal);
+        }
+        
+        // ABSOLUTE FINAL ENFORCEMENT: For Pilot + EFS, ensure check number and driver name fields are ALWAYS hidden
+        // This runs at the very end to override any other logic that might show them
+        const isPilotCompanyFinal = selectedCompanyFinal && (selectedCompanyFinal.name.toLowerCase().includes('pilot'));
+        const isPilotEFSFinal = isPilotCompanyFinal && paymentMethod === 'EFS';
+        
+        if (isPilotEFSFinal) {
+            const checkNumberFieldFinal = document.getElementById('checkNumber') as HTMLInputElement | null;
+            const checkNumberConfirmFieldFinal = document.getElementById('checkNumberConfirm') as HTMLInputElement | null;
+            const driverFirstNameFieldFinal = document.getElementById('driverFirstName') as HTMLInputElement | null;
+            const driverLastNameFieldFinal = document.getElementById('driverLastName') as HTMLInputElement | null;
+            
+            const forceHideField = (field: HTMLInputElement | null) => {
+                if (field) {
+                    field.required = false;
+                    field.removeAttribute('required');
+                    field.disabled = false;
+                    const formGroup = field.closest('.form-group') as HTMLElement | null;
+                    if (formGroup) {
+                        formGroup.style.display = 'none';
+                        formGroup.style.visibility = 'hidden';
+                    }
+                }
+            };
+            
+            forceHideField(checkNumberFieldFinal);
+            forceHideField(checkNumberConfirmFieldFinal);
+            forceHideField(driverFirstNameFieldFinal);
+            forceHideField(driverLastNameFieldFinal);
+        }
+        
+        // ABSOLUTE FINAL ENFORCEMENT: For Love's + Visa, ensure signature checkbox and copy type are ALWAYS visible
+        // This runs at the very end to override any other logic that might hide them
+        const isLovesVisaFinal = isLovesCompanyFinal && paymentMethod === 'Visa';
+        
+        if (isLovesVisaFinal) {
+            const copyTypeRowFinal = document.getElementById('copyTypeRow') as HTMLElement | null;
+            const copyTypeGroupFinal = document.getElementById('copyTypeGroup') as HTMLElement | null;
+            const signatureCheckboxGroupFinal = document.getElementById('signatureCheckboxGroup') as HTMLElement | null;
+            
+            if (copyTypeRowFinal && copyTypeGroupFinal && signatureCheckboxGroupFinal) {
+                // Ensure copy type row is visible
+                copyTypeRowFinal.style.display = 'grid';
+                
+                // Ensure copy type group is visible and in copyTypeRow
+                copyTypeGroupFinal.style.display = 'block';
+                if (copyTypeGroupFinal.parentElement !== copyTypeRowFinal) {
+                    copyTypeRowFinal.appendChild(copyTypeGroupFinal);
+                }
+                
+                // Ensure signature checkbox is visible and in copyTypeRow (next to copy type)
+                signatureCheckboxGroupFinal.style.display = 'flex';
+                if (signatureCheckboxGroupFinal.parentElement !== copyTypeRowFinal) {
+                    copyTypeRowFinal.appendChild(signatureCheckboxGroupFinal);
+                }
+                
+                // Ensure copy type comes before signature checkbox
+                if (copyTypeGroupFinal.parentElement === copyTypeRowFinal && 
+                    signatureCheckboxGroupFinal.parentElement === copyTypeRowFinal) {
+                    let copyTypeBeforeSignature = false;
+                    let current = copyTypeGroupFinal.nextSibling;
+                    while (current) {
+                        if (current === signatureCheckboxGroupFinal) {
+                            copyTypeBeforeSignature = true;
+                            break;
+                        }
+                        current = current.nextSibling;
+                    }
+                    if (!copyTypeBeforeSignature) {
+                        copyTypeRowFinal.insertBefore(copyTypeGroupFinal, signatureCheckboxGroupFinal);
+                    }
+                }
+            }
+        }
+        
+        // ABSOLUTE FINAL ENFORCEMENT: For Pilot + Master, ensure signature checkbox is ALWAYS visible and Vehicle ID/Company Name are in same row
+        // This runs at the very end to override any other logic that might hide it
+        const isPilotCompanyForMaster = selectedCompanyFinal && selectedCompanyFinal.name.toLowerCase().includes('pilot');
+        const isPilotMasterFinal = isPilotCompanyForMaster && paymentMethod === 'Master';
+        
+        if (isPilotMasterFinal) {
+            const efsRowFinal = document.getElementById('efsDetailsRow') as HTMLElement | null;
+            const signatureCheckboxGroupFinal = document.getElementById('signatureCheckboxGroup') as HTMLElement | null;
+            const companyNameGroupFinal = document.getElementById('companyNameGroup') as HTMLElement | null;
+            const vehicleDetailsRowFinal = document.getElementById('vehicleDetailsRow') as HTMLElement | null;
+            
+            // Ensure vehicleDetailsRow is hidden (to avoid duplicate Vehicle ID)
+            if (vehicleDetailsRowFinal) {
+                vehicleDetailsRowFinal.style.display = 'none';
+                // Explicitly remove required attribute from Vehicle ID in vehicleDetailsRow
+                const vehicleIdFieldInVehicleDetailsRow = vehicleDetailsRowFinal.querySelector('#vehicleId') as HTMLInputElement | null;
+                if (vehicleIdFieldInVehicleDetailsRow) {
+                    vehicleIdFieldInVehicleDetailsRow.required = false;
+                    vehicleIdFieldInVehicleDetailsRow.removeAttribute('required');
+                    vehicleIdFieldInVehicleDetailsRow.disabled = true;
+                }
+            }
+            
+            // Ensure efsDetailsRow is visible
+            if (efsRowFinal) {
+                efsRowFinal.style.display = 'grid';
+                
+                // Get Vehicle ID from efsDetailsRow (not from vehicleDetailsRow)
+                const vehicleIdInEfsRowFinal = efsRowFinal.querySelector('#vehicleId') as HTMLInputElement | null;
+                const vehicleIdGroupInEfsRowFinal = vehicleIdInEfsRowFinal?.closest('.form-group') as HTMLElement | null;
+                
+                // Get Company Name field
+                const companyNameFieldFinal = document.getElementById('driverCompanyName') as HTMLInputElement | null;
+                
+                // Clear Vehicle ID and Company Name values for Pilot + Master
+                if (vehicleIdInEfsRowFinal) {
+                    vehicleIdInEfsRowFinal.value = '';
+                }
+                if (companyNameFieldFinal) {
+                    companyNameFieldFinal.value = '';
+                }
+                
+                
+                // Show Vehicle ID from efsDetailsRow
+                if (vehicleIdGroupInEfsRowFinal) {
+                    vehicleIdGroupInEfsRowFinal.style.display = 'block';
+                }
+                if (vehicleIdInEfsRowFinal) {
+                    vehicleIdInEfsRowFinal.required = true;
+                }
+                
+                // Ensure company name group is visible and in efsDetailsRow
+                if (companyNameGroupFinal) {
+                    companyNameGroupFinal.style.display = 'block';
+                    if (companyNameGroupFinal.parentElement !== efsRowFinal) {
+                        efsRowFinal.appendChild(companyNameGroupFinal);
+                    }
+                }
+                
+                // Ensure signature checkbox is visible and in efsDetailsRow
+                if (signatureCheckboxGroupFinal) {
+                    signatureCheckboxGroupFinal.style.display = 'flex';
+                    if (signatureCheckboxGroupFinal.parentElement !== efsRowFinal) {
+                        efsRowFinal.appendChild(signatureCheckboxGroupFinal);
+                    }
+                }
+                
+                // Ensure correct order: Vehicle ID -> Company Name (in same row), Signature Checkbox (on new line)
+                if (vehicleIdGroupInEfsRowFinal && companyNameGroupFinal && signatureCheckboxGroupFinal) {
+                    // Remove all from row first
+                    if (vehicleIdGroupInEfsRowFinal.parentElement === efsRowFinal) efsRowFinal.removeChild(vehicleIdGroupInEfsRowFinal);
+                    if (companyNameGroupFinal.parentElement === efsRowFinal) efsRowFinal.removeChild(companyNameGroupFinal);
+                    if (signatureCheckboxGroupFinal.parentElement === efsRowFinal) efsRowFinal.removeChild(signatureCheckboxGroupFinal);
+                    
+                    // Add Vehicle ID and Company Name in same row first
+                    efsRowFinal.appendChild(vehicleIdGroupInEfsRowFinal);
+                    efsRowFinal.appendChild(companyNameGroupFinal);
+                    
+                    // Ensure efsRow uses grid layout (same as other form-rows)
+                    // For Pilot + Master, use equal-width columns so Vehicle ID and Company Name take equal space
+                    efsRowFinal.style.display = 'grid';
+                    efsRowFinal.style.gridTemplateColumns = '1fr 1fr';
+                    efsRowFinal.style.gap = '20px';
+                    
+                    // Ensure Vehicle ID and Company Name form-groups take full width of their grid columns
+                    // Match the spacing and width of Card Last 4 Digits and Card Entry Method
+                    vehicleIdGroupInEfsRowFinal.style.width = '100%';
+                    vehicleIdGroupInEfsRowFinal.style.maxWidth = '100%';
+                    vehicleIdGroupInEfsRowFinal.style.minWidth = '0';
+                    vehicleIdGroupInEfsRowFinal.style.marginTop = '0';
+                    vehicleIdGroupInEfsRowFinal.style.marginLeft = '0';
+                    vehicleIdGroupInEfsRowFinal.style.marginRight = '0';
+                    // Keep default form-group margin-bottom for proper spacing (24px)
+                    vehicleIdGroupInEfsRowFinal.style.marginBottom = '24px';
+                    
+                    companyNameGroupFinal.style.width = '100%';
+                    companyNameGroupFinal.style.maxWidth = '100%';
+                    companyNameGroupFinal.style.minWidth = '0';
+                    companyNameGroupFinal.style.marginTop = '0';
+                    companyNameGroupFinal.style.marginLeft = '0';
+                    companyNameGroupFinal.style.marginRight = '0';
+                    // Keep default form-group margin-bottom for proper spacing (24px)
+                    companyNameGroupFinal.style.marginBottom = '24px';
+                    
+                    // Ensure the input fields inside also take full width
+                    const vehicleIdInputFinal = vehicleIdGroupInEfsRowFinal.querySelector('input') as HTMLInputElement | null;
+                    const companyNameInputFinal = companyNameGroupFinal.querySelector('input') as HTMLInputElement | null;
+                    if (vehicleIdInputFinal) {
+                        vehicleIdInputFinal.style.width = '100%';
+                        vehicleIdInputFinal.style.maxWidth = '100%';
+                        vehicleIdInputFinal.style.boxSizing = 'border-box';
+                    }
+                    if (companyNameInputFinal) {
+                        companyNameInputFinal.style.width = '100%';
+                        companyNameInputFinal.style.maxWidth = '100%';
+                        companyNameInputFinal.style.boxSizing = 'border-box';
+                    }
+                    
+                    // Add signature checkbox on new line (after Vehicle ID and Company Name)
+                    efsRowFinal.appendChild(signatureCheckboxGroupFinal);
+                    
+                    // Make signature checkbox take full width (new line) and minimize vertical gap
+                    signatureCheckboxGroupFinal.style.width = '100%';
+                    signatureCheckboxGroupFinal.style.gridColumn = '1 / -1';
+                    // Use negative margin to minimize gap (form-row has 20px gap, so we compensate)
+                    signatureCheckboxGroupFinal.style.marginTop = '-10px'; // Reduce gap from 20px to ~10px
+                    signatureCheckboxGroupFinal.style.marginBottom = '0';
+                    signatureCheckboxGroupFinal.style.marginLeft = '0';
+                    signatureCheckboxGroupFinal.style.marginRight = '0';
+                    signatureCheckboxGroupFinal.style.paddingTop = '0';
+                    signatureCheckboxGroupFinal.style.paddingBottom = '0';
+                    // Override any default form-group margin
+                    signatureCheckboxGroupFinal.style.setProperty('margin-top', '-10px', 'important');
+                    signatureCheckboxGroupFinal.style.setProperty('margin-bottom', '0', 'important');
+                }
+            }
+        }
     }
+    
+    // Always ensure all vehicleId fields are properly handled (remove required from hidden ones)
+    handleAllVehicleIdFields();
 }
 
 // Filter companies by selected country
@@ -3056,41 +3726,148 @@ function updateTotal(): void {
 // Generate receipt
 // Helper function to remove required attribute from hidden fields
 function removeRequiredFromHiddenFields(): void {
-    const efsFields = [
-        'checkNumber',
-        'checkNumberConfirm',
-        'driverFirstName',
-        'driverLastName'
-    ];
+    // Get the form element
+    const form = document.getElementById('receiptForm') as HTMLFormElement;
+    if (!form) return;
     
-    efsFields.forEach(fieldId => {
-        const field = document.getElementById(fieldId) as HTMLInputElement | null;
-        if (field) {
-            const formGroup = field.closest('.form-group') as HTMLElement | null;
-            const efsDetailsRow = document.getElementById('efsDetailsRow') as HTMLElement | null;
-            
-            // Check if field, form-group, or efsDetailsRow is hidden
-            const fieldStyle = window.getComputedStyle(field);
-            const formGroupStyle = formGroup ? window.getComputedStyle(formGroup) : null;
-            const efsDetailsRowStyle = efsDetailsRow ? window.getComputedStyle(efsDetailsRow) : null;
-            
-            const isHidden = fieldStyle.display === 'none' ||
-                           fieldStyle.visibility === 'hidden' ||
-                           (formGroup && (formGroup.style.display === 'none' || (formGroupStyle && formGroupStyle.display === 'none'))) ||
-                           (efsDetailsRow && (efsDetailsRow.style.display === 'none' || (efsDetailsRowStyle && efsDetailsRowStyle.display === 'none')));
-            
-            if (isHidden) {
-                field.required = false;
-                field.removeAttribute('required');
+    // Helper function to check if an element or any of its ancestors is hidden
+    function isElementOrAncestorHidden(element: HTMLElement): boolean {
+        // Check the element itself
+        const elementStyle = window.getComputedStyle(element);
+        if (elementStyle.display === 'none' || elementStyle.visibility === 'hidden') {
+            return true;
+        }
+        
+        // Check inline styles on the element
+        if (element.style.display === 'none' || element.style.visibility === 'hidden') {
+            return true;
+        }
+        
+        // Check all ancestors up to the form
+        let parent = element.parentElement;
+        while (parent && parent !== form && parent !== document.body) {
+            const parentStyle = window.getComputedStyle(parent);
+            if (parentStyle.display === 'none' || parentStyle.visibility === 'hidden') {
+                return true;
             }
+            if (parent.style.display === 'none' || parent.style.visibility === 'hidden') {
+                return true;
+            }
+            parent = parent.parentElement;
+        }
+        
+        return false;
+    }
+    
+    // Find all required fields (inputs, selects, textareas)
+    const allRequiredFields = form.querySelectorAll('input[required], select[required], textarea[required]');
+    
+    allRequiredFields.forEach(field => {
+        const element = field as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+        
+        // Check if field or any ancestor is hidden
+        if (isElementOrAncestorHidden(element)) {
+            element.required = false;
+            element.removeAttribute('required');
+        }
+    });
+    
+    // Also check for disabled fields (they can't be focused for validation)
+    const allDisabledFields = form.querySelectorAll('input[disabled], select[disabled], textarea[disabled]');
+    allDisabledFields.forEach(field => {
+        const element = field as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+        if (element.required) {
+            element.required = false;
+            element.removeAttribute('required');
+        }
+    });
+    
+    // Final safety check: Remove required from any field that can't be focused
+    // This handles edge cases where fields might be technically "visible" but not focusable
+    const allRequiredFieldsFinal = form.querySelectorAll('input[required], select[required], textarea[required]');
+    allRequiredFieldsFinal.forEach(field => {
+        const element = field as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+        
+        // If any ancestor is hidden, the field cannot be focused
+        if (isElementOrAncestorHidden(element)) {
+            element.required = false;
+            element.removeAttribute('required');
+            return;
+        }
+        
+        // Check if offsetParent is null (field is not in rendering tree - not focusable)
+        // This is the most reliable indicator that a field cannot be focused
+        if ((element as HTMLElement).offsetParent === null) {
+            element.required = false;
+            element.removeAttribute('required');
+            return;
+        }
+        
+        // Also check if the field has zero dimensions (effectively hidden)
+        const rect = element.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) {
+            element.required = false;
+            element.removeAttribute('required');
         }
     });
 }
 
 async function generateReceipt(e: Event): Promise<void> {
-    // Remove required attribute from hidden EFS fields before form validation
+    e.preventDefault(); // Prevent default form submission first
+    // Handle all vehicleId fields first (ensure hidden ones don't have required)
+    handleAllVehicleIdFields();
+    // Remove required attribute from hidden fields before form validation
     removeRequiredFromHiddenFields();
-    e.preventDefault();
+    
+    // Explicit check for driverCompanyName field - ensure it's not required if hidden or not focusable
+    const driverCompanyNameField = document.getElementById('driverCompanyName') as HTMLInputElement | null;
+    if (driverCompanyNameField && driverCompanyNameField.required) {
+        // Check if field or any parent is hidden
+        const fieldStyle = window.getComputedStyle(driverCompanyNameField);
+        const isFieldHidden = fieldStyle.display === 'none' || fieldStyle.visibility === 'hidden';
+        
+        // Check if field has zero dimensions (effectively hidden)
+        const rect = driverCompanyNameField.getBoundingClientRect();
+        const hasZeroDimensions = rect.width === 0 || rect.height === 0;
+        
+        // Check if offsetParent is null (field is not in rendering tree - not focusable)
+        const isNotInRenderingTree = driverCompanyNameField.offsetParent === null;
+        
+        // Check parent containers - specifically check efsDetailsRow and companyNameGroup
+        const companyNameGroup = document.getElementById('companyNameGroup') as HTMLElement | null;
+        const efsDetailsRow = document.getElementById('efsDetailsRow') as HTMLElement | null;
+        const isCompanyNameGroupHidden = companyNameGroup ? 
+            (window.getComputedStyle(companyNameGroup).display === 'none' || 
+             window.getComputedStyle(companyNameGroup).visibility === 'hidden' ||
+             companyNameGroup.style.display === 'none' ||
+             companyNameGroup.style.visibility === 'hidden') : false;
+        const isEfsRowHidden = efsDetailsRow ? 
+            (window.getComputedStyle(efsDetailsRow).display === 'none' || 
+             window.getComputedStyle(efsDetailsRow).visibility === 'hidden' ||
+             efsDetailsRow.style.display === 'none' ||
+             efsDetailsRow.style.visibility === 'hidden') : false;
+        
+        // Check all parent containers
+        let parent = driverCompanyNameField.parentElement;
+        let isParentHidden = false;
+        while (parent && parent !== document.body) {
+            const parentStyle = window.getComputedStyle(parent);
+            if (parentStyle.display === 'none' || parentStyle.visibility === 'hidden' || 
+                parent.style.display === 'none' || parent.style.visibility === 'hidden') {
+                isParentHidden = true;
+                break;
+            }
+            parent = parent.parentElement;
+        }
+        
+        // If field is hidden in any way OR not focusable, remove required
+        if (isFieldHidden || hasZeroDimensions || isNotInRenderingTree || isParentHidden || 
+            isCompanyNameGroupHidden || isEfsRowHidden) {
+            driverCompanyNameField.required = false;
+            driverCompanyNameField.removeAttribute('required');
+        }
+    }
+    
     console.log('Generate receipt function called');
     
     // Get current selections to check for Husky + Visa combination
