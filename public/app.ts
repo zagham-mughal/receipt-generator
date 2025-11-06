@@ -390,6 +390,22 @@ function restoreRequiredAttributes(): void {
         const driverFirstNameField = document.getElementById('driverFirstName') as HTMLInputElement | null;
         const driverLastNameField = document.getElementById('driverLastName') as HTMLInputElement | null;
         
+        const showField = (field: HTMLInputElement | null, required: boolean = true) => {
+            if (field) {
+                const formGroup = field.closest('.form-group') as HTMLElement | null;
+                if (formGroup) {
+                    formGroup.style.display = 'block';
+                }
+                if (required) {
+                    field.setAttribute('required', 'required');
+                    field.required = true;
+                } else {
+                    field.removeAttribute('required');
+                    field.required = false;
+                }
+            }
+        };
+        
         const hideField = (field: HTMLInputElement | null) => {
             if (field) {
                 field.required = false;
@@ -401,10 +417,12 @@ function restoreRequiredAttributes(): void {
             }
         };
         
-        hideField(checkNumberField);
+        // Show check number, driver first name, and driver last name for Loves + EFS
+        showField(checkNumberField, true);
+        showField(driverFirstNameField, true);
+        showField(driverLastNameField, true);
+        // Hide check number confirm field
         hideField(checkNumberConfirmField);
-        hideField(driverFirstNameField);
-        hideField(driverLastNameField);
     }
     
     // For One9 + Master, ensure Vehicle ID in vehicleDetailsRow is not required (since it's hidden)
@@ -418,6 +436,7 @@ function restoreRequiredAttributes(): void {
     }
     
     // For Pilot + Master, ensure Vehicle ID in vehicleDetailsRow is not required (since it's hidden)
+    // But enable Vehicle ID in efsDetailsRow
     const isPilotMaster = isPilotCompany && paymentMethod === 'Master';
     if (isPilotMaster) {
         const vehicleDetailsRow = document.getElementById('vehicleDetailsRow') as HTMLElement | null;
@@ -426,6 +445,19 @@ function restoreRequiredAttributes(): void {
             vehicleDetailsRowVehicleId.required = false;
             vehicleDetailsRowVehicleId.removeAttribute('required');
             vehicleDetailsRowVehicleId.disabled = true;
+        }
+        
+        // Enable Vehicle ID in efsDetailsRow for Pilot + Master
+        const efsDetailsRow = document.getElementById('efsDetailsRow') as HTMLElement | null;
+        const vehicleIdInEfsRow = efsDetailsRow?.querySelector('#vehicleId') as HTMLInputElement | null;
+        if (vehicleIdInEfsRow) {
+            vehicleIdInEfsRow.disabled = false;
+            vehicleIdInEfsRow.required = true;
+            vehicleIdInEfsRow.setAttribute('required', 'required');
+            const vehicleIdGroupInEfsRow = vehicleIdInEfsRow.closest('.form-group') as HTMLElement | null;
+            if (vehicleIdGroupInEfsRow) {
+                vehicleIdGroupInEfsRow.style.display = 'block';
+            }
         }
     }
     
@@ -1349,8 +1381,8 @@ function toggleCardFields(): void {
                 if (vehicleIdGroup) vehicleIdGroup.style.display = 'block';
             }
         } else if (paymentMethod === 'EFS' && isLovesCompany) {
-            // For Love's + EFS: Show Company Name, Signature checkbox, and Copy Type
-            // Hide vehicle specific fields, check numbers, and driver names
+            // For Love's + EFS: Show Company Name, Signature checkbox, Copy Type, Check Number, Driver First Name, and Driver Last Name
+            // Hide vehicle specific fields and check number confirm
             vehicleDetailsRow.style.display = 'none';
             const vehicleIdField = document.getElementById('vehicleId') as HTMLInputElement;
             const dlNumberField = document.getElementById('dlNumber') as HTMLInputElement;
@@ -1361,32 +1393,34 @@ function toggleCardFields(): void {
             const efsDetailsRow = document.getElementById('efsDetailsRow');
             if (efsDetailsRow) efsDetailsRow.style.display = 'grid';
             
-            // Hide check number fields (not needed for Love's EFS)
+            // Show check number field (required for Love's EFS)
             const checkNumberField = document.getElementById('checkNumber') as HTMLInputElement;
-            const checkNumberConfirmField = document.getElementById('checkNumberConfirm') as HTMLInputElement;
             if (checkNumberField) {
-                checkNumberField.required = false;
+                checkNumberField.required = true;
                 const g = checkNumberField.closest('.form-group') as HTMLElement;
-                if (g) g.style.display = 'none';
+                if (g) g.style.display = 'block';
             }
+            
+            // Hide check number confirm field
+            const checkNumberConfirmField = document.getElementById('checkNumberConfirm') as HTMLInputElement;
             if (checkNumberConfirmField) {
                 checkNumberConfirmField.required = false;
                 const g = checkNumberConfirmField.closest('.form-group') as HTMLElement;
                 if (g) g.style.display = 'none';
             }
             
-            // Hide driver first and last name fields
+            // Show driver first and last name fields (required for Love's EFS)
             const driverFirstNameField = document.getElementById('driverFirstName') as HTMLInputElement;
             const driverLastNameField = document.getElementById('driverLastName') as HTMLInputElement;
             if (driverFirstNameField) {
-                driverFirstNameField.required = false;
+                driverFirstNameField.required = true;
                 const g = driverFirstNameField.closest('.form-group') as HTMLElement;
-                if (g) g.style.display = 'none';
+                if (g) g.style.display = 'block';
             }
             if (driverLastNameField) {
-                driverLastNameField.required = false;
+                driverLastNameField.required = true;
                 const g = driverLastNameField.closest('.form-group') as HTMLElement;
-                if (g) g.style.display = 'none';
+                if (g) g.style.display = 'block';
             }
             
             // Hide Vehicle ID field in efsDetailsRow
@@ -1739,8 +1773,8 @@ function toggleCardFields(): void {
             const companyNameField = document.getElementById('driverCompanyName') as HTMLInputElement;
             if (companyNameField) companyNameField.required = true;
         } else if (paymentMethod === 'EFS' && isLovesCompany) {
-            // For Love's + EFS: Show Company Name, Signature checkbox, and Copy Type
-            // Hide vehicle fields, check numbers, and driver names
+            // For Love's + EFS: Show Company Name, Signature checkbox, Copy Type, Check Number, Driver First Name, and Driver Last Name
+            // Hide vehicle fields and check number confirm
             if (vehicleDetailsRow) vehicleDetailsRow.style.display = 'none';
             companyNameGroup.style.display = 'block';
             // Make Company Name required
@@ -1757,28 +1791,44 @@ function toggleCardFields(): void {
             const companyNameField = document.getElementById('driverCompanyName') as HTMLInputElement;
             if (companyNameField) companyNameField.required = true;
             
-            // Hide check numbers and driver names for Love's + EFS
+            // Ensure EFS details row is visible
+            const efsDetailsRow = document.getElementById('efsDetailsRow');
+            if (efsDetailsRow) efsDetailsRow.style.display = 'grid';
+            
+            // Show check number field (required for Love's EFS)
             const checkNumberField = document.getElementById('checkNumber') as HTMLInputElement | null;
+            if (checkNumberField) {
+                checkNumberField.required = true;
+                const g = checkNumberField.closest('.form-group') as HTMLElement | null;
+                if (g) g.style.display = 'block';
+            }
+            
+            // Hide check number confirm field
             const checkNumberConfirmField = document.getElementById('checkNumberConfirm') as HTMLInputElement | null;
+            if (checkNumberConfirmField) {
+                checkNumberConfirmField.required = false;
+                const g = checkNumberConfirmField.closest('.form-group') as HTMLElement | null;
+                if (g) g.style.display = 'none';
+            }
+            
+            // Show driver first and last name fields (required for Love's EFS)
             const driverFirstNameField = document.getElementById('driverFirstName') as HTMLInputElement | null;
             const driverLastNameField = document.getElementById('driverLastName') as HTMLInputElement | null;
-            
-            const hideFieldGroup = (input: HTMLInputElement | null) => {
-                if (!input) return;
-                input.required = false;
-                const g = input.closest('.form-group') as HTMLElement | null;
-                if (g) g.style.display = 'none';
-            };
-            
-            hideFieldGroup(checkNumberField);
-            hideFieldGroup(checkNumberConfirmField);
-            hideFieldGroup(driverFirstNameField);
-            hideFieldGroup(driverLastNameField);
+            if (driverFirstNameField) {
+                driverFirstNameField.required = true;
+                const g = driverFirstNameField.closest('.form-group') as HTMLElement | null;
+                if (g) g.style.display = 'block';
+            }
+            if (driverLastNameField) {
+                driverLastNameField.required = true;
+                const g = driverLastNameField.closest('.form-group') as HTMLElement | null;
+                if (g) g.style.display = 'block';
+            }
             
             // Ensure copy type is shown in efsDetailsRow (before signature checkbox)
-            const efsDetailsRow = document.getElementById('efsDetailsRow') as HTMLElement | null;
             const copyTypeGroup = document.getElementById('copyTypeGroup') as HTMLElement | null;
             const copyTypeRow = document.getElementById('copyTypeRow') as HTMLElement | null;
+            const signatureCheckboxGroup = document.getElementById('signatureCheckboxGroup') as HTMLElement | null;
             if (copyTypeGroup && efsDetailsRow && signatureCheckboxGroup) {
                 // Move copy type group into efsDetailsRow if not already there (before signature checkbox)
                 if (copyTypeGroup.parentElement !== efsDetailsRow) {
@@ -1993,6 +2043,8 @@ function toggleCardFields(): void {
                 }
                 if (vehicleIdInEfsRow) {
                     vehicleIdInEfsRow.required = true;
+                    vehicleIdInEfsRow.disabled = false; // Enable the field so it's clickable
+                    vehicleIdInEfsRow.setAttribute('required', 'required');
                 }
                 
                 // Ensure efsRow uses grid layout (same as other form-rows)
@@ -2180,24 +2232,26 @@ function toggleCardFields(): void {
         if (companyNameGroupEl) companyNameGroupEl.style.display = 'block';
         if (signatureGroupEl) signatureGroupEl.style.display = 'flex';
         
-        // Hide driver first and last name fields
+        // Show driver first and last name fields (required for Love's EFS)
         if (driverFirstNameField) {
-            driverFirstNameField.required = false;
+            driverFirstNameField.required = true;
             const g = driverFirstNameField.closest('.form-group') as HTMLElement | null;
-            if (g) g.style.display = 'none';
+            if (g) g.style.display = 'block';
         }
         if (driverLastNameField) {
-            driverLastNameField.required = false;
+            driverLastNameField.required = true;
             const g = driverLastNameField.closest('.form-group') as HTMLElement | null;
-            if (g) g.style.display = 'none';
+            if (g) g.style.display = 'block';
         }
         
-        // Hide check number fields
+        // Show check number field (required for Love's EFS)
         if (checkNumberField) {
-            checkNumberField.required = false;
+            checkNumberField.required = true;
             const g = checkNumberField.closest('.form-group') as HTMLElement | null;
-            if (g) g.style.display = 'none';
+            if (g) g.style.display = 'block';
         }
+        
+        // Hide check number confirm field
         if (checkNumberConfirmField) {
             checkNumberConfirmField.required = false;
             const g = checkNumberConfirmField.closest('.form-group') as HTMLElement | null;
@@ -2832,7 +2886,25 @@ function toggleCardFields(): void {
             const driverFirstNameFieldFinal = document.getElementById('driverFirstName') as HTMLInputElement | null;
             const driverLastNameFieldFinal = document.getElementById('driverLastName') as HTMLInputElement | null;
             
-            const forceHideField = (field: HTMLInputElement | null) => {
+            const showField = (field: HTMLInputElement | null, required: boolean = true) => {
+                if (field) {
+                    const formGroup = field.closest('.form-group') as HTMLElement | null;
+                    if (formGroup) {
+                        formGroup.style.display = 'block';
+                        formGroup.style.visibility = 'visible';
+                    }
+                    if (required) {
+                        field.required = true;
+                        field.setAttribute('required', 'required');
+                    } else {
+                        field.required = false;
+                        field.removeAttribute('required');
+                    }
+                    field.disabled = false;
+                }
+            };
+            
+            const hideField = (field: HTMLInputElement | null) => {
                 if (field) {
                     field.required = false;
                     field.removeAttribute('required');
@@ -2845,10 +2917,12 @@ function toggleCardFields(): void {
                 }
             };
             
-            forceHideField(checkNumberFieldFinal);
-            forceHideField(checkNumberConfirmFieldFinal);
-            forceHideField(driverFirstNameFieldFinal);
-            forceHideField(driverLastNameFieldFinal);
+            // Show check number, driver first name, and driver last name for Loves + EFS
+            showField(checkNumberFieldFinal, true);
+            showField(driverFirstNameFieldFinal, true);
+            showField(driverLastNameFieldFinal, true);
+            // Hide check number confirm
+            hideField(checkNumberConfirmFieldFinal);
         }
         
         // ABSOLUTE FINAL ENFORCEMENT: For One9 + EFS, ensure check number and driver name fields are ALWAYS hidden
@@ -3369,6 +3443,9 @@ function handleCompanySelection(event: Event): void {
     
     // Update field visibility based on company and payment method
     toggleCardFields();
+    
+    // Update quantity field visibility for all item rows when company changes
+    updateAllItemUnitLabels();
 }
 
 // Get current country for unit display
@@ -3403,9 +3480,10 @@ function updateAllItemUnitLabels(): void {
     const labels = getUnitLabels();
     const country = getCurrentCountry();
     
-    // Check if BVD Petroleum company is selected
+    // Check if BVD Petroleum or Loves company is selected
     const selectedCompany = getSelectedCompany();
     const isBVDPetroleum = selectedCompany && selectedCompany.name.toLowerCase().includes('bvd petroleum');
+    const isLovesCompany = selectedCompany && (selectedCompany.name.toLowerCase().includes('love') || selectedCompany.name.toLowerCase().includes("love's"));
     
     itemRows.forEach((row) => {
         // Update gallons/liters label
@@ -3447,6 +3525,16 @@ function updateAllItemUnitLabels(): void {
             // Update labels for BVD Petroleum
             if (volumeLabel) volumeLabel.textContent = 'Volume *';
             if (priceLabel) priceLabel.textContent = 'Unit Price *';
+        } else if (isLovesCompany) {
+            // Hide quantity field for Loves company
+            if (qtyGroup) qtyGroup.style.display = 'none';
+            if (qtyInput) {
+                qtyInput.removeAttribute('required');
+                qtyInput.value = '';
+            }
+            // Use standard labels for Loves
+            if (volumeLabel) volumeLabel.textContent = `${labels.volume} *`;
+            if (priceLabel) priceLabel.textContent = `${labels.pricePer} *`;
         } else {
             // Show quantity field for other companies
             if (qtyGroup) qtyGroup.style.display = 'block';
@@ -3481,6 +3569,7 @@ function addItem(): void {
     // Check if BVD Petroleum company is selected
     const selectedCompany = getSelectedCompany();
     const isBVDPetroleum = selectedCompany && selectedCompany.name.toLowerCase().includes('bvd petroleum');
+    const isLovesCompany = selectedCompany && (selectedCompany.name.toLowerCase().includes('love') || selectedCompany.name.toLowerCase().includes("love's"));
     
     // Build options HTML
     let optionsHTML = '<option value="">-- Select Item --</option>';
@@ -3495,9 +3584,9 @@ function addItem(): void {
                 ${optionsHTML}
             </select>
         </div>
-        <div class="form-group" ${isBVDPetroleum ? 'style="display: none;"' : ''}>
+        <div class="form-group" ${isBVDPetroleum || isLovesCompany ? 'style="display: none;"' : ''}>
             <label>Quantity *</label>
-            <input type="text" class="item-qty" placeholder="1" inputmode="numeric" ${isBVDPetroleum ? '' : 'required'}>
+            <input type="text" class="item-qty" placeholder="1" inputmode="numeric" ${isBVDPetroleum || isLovesCompany ? '' : 'required'}>
         </div>
            <div class="form-group" style="display: none;">
             <label>Pump *</label>
@@ -3533,6 +3622,7 @@ function addItem(): void {
             // Check selected company flags
             const selectedCompany = getSelectedCompany();
             const isBVDPetroleum = selectedCompany && selectedCompany.name.toLowerCase().includes('bvd petroleum');
+            const isLovesCompany = selectedCompany && (selectedCompany.name.toLowerCase().includes('love') || selectedCompany.name.toLowerCase().includes("love's"));
             const isFlyingJCanada = selectedCompany && selectedCompany.name.toLowerCase().includes('flying j') && getCurrentCountry() === 'Canada';
             
             // Get the form groups for quantity, pump, gallons, and price/gal
@@ -3589,6 +3679,24 @@ function addItem(): void {
                 if (priceGroup) priceGroup.style.display = 'block';
                 
                 // Clear quantity and pump values, keep volume and price
+                if (qtyInput) {
+                    qtyInput.value = '';
+                    qtyInput.removeAttribute('required');
+                }
+                if (pumpInput) {
+                    pumpInput.value = '';
+                    pumpInput.removeAttribute('required');
+                }
+                if (gallonsInput) gallonsInput.setAttribute('required', 'required');
+                if (priceInput) priceInput.setAttribute('required', 'required');
+            } else if (isLovesCompany) {
+                // For Loves, hide quantity field when item is selected, show volume and price
+                if (qtyGroup) qtyGroup.style.display = 'none';
+                if (pumpGroup) pumpGroup.style.display = 'none';
+                if (gallonsGroup) gallonsGroup.style.display = 'block';
+                if (priceGroup) priceGroup.style.display = 'block';
+                
+                // Clear quantity value
                 if (qtyInput) {
                     qtyInput.value = '';
                     qtyInput.removeAttribute('required');
@@ -3969,7 +4077,22 @@ async function generateReceipt(e: Event): Promise<void> {
         const selectedStore = selectedStoreId ? stores.find(s => s.id === selectedStoreId) : null;
         
         // Get vehicle details
-        const vehicleIdInput = document.getElementById('vehicleId') as HTMLInputElement;
+        // For Pilot + Master, Vehicle ID is in efsDetailsRow, so check both locations
+        let vehicleIdInput = document.getElementById('vehicleId') as HTMLInputElement;
+        const isPilotCompany = selectedCompany && selectedCompany.name.toLowerCase().includes('pilot');
+        const paymentMethod = paymentMethodInput?.value || 'Cash';
+        const isPilotMaster = isPilotCompany && paymentMethod === 'Master';
+        
+        // If Pilot + Master, get Vehicle ID from efsDetailsRow (the visible one)
+        if (isPilotMaster) {
+            const efsDetailsRow = document.getElementById('efsDetailsRow') as HTMLElement | null;
+            const vehicleIdInEfsRow = efsDetailsRow?.querySelector('#vehicleId') as HTMLInputElement | null;
+            if (vehicleIdInEfsRow && vehicleIdInEfsRow.offsetParent !== null) {
+                // Use the visible Vehicle ID from efsDetailsRow
+                vehicleIdInput = vehicleIdInEfsRow;
+            }
+        }
+        
         const dlNumberInput = document.getElementById('dlNumber') as HTMLInputElement;
         const driverCompanyNameInput = document.getElementById('driverCompanyName') as HTMLInputElement;
         

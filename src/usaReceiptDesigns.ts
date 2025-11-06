@@ -28,11 +28,11 @@ export class ONE9FuelReceiptGenerator {
       if (!chosenPath) throw new Error('ONE 9 logo image not found');
 
       const logoWidth = 140;
-      const logoHeight = 50;
+      const logoHeight = 70;
       const logoX = (doc.page.width - logoWidth) / 2;
       const currentY = doc.y;
       doc.image(chosenPath, logoX, currentY, { width: logoWidth, height: logoHeight, align: 'center' });
-      doc.y = currentY + logoHeight + 15;
+      doc.y = currentY + logoHeight + 5;
     } catch (error) {
       // Fallback to text if image can't be loaded
       console.error('Error loading ONE 9 logo:', error);
@@ -350,8 +350,8 @@ export class ONE9FuelReceiptGenerator {
     } else if (receipt.paymentMethod === 'Cash') {
       // Cash payment method - show Received section with amount
       doc.fontSize(9).font('OCR-B').text('Received', leftMargin);
-      doc.fontSize(9).font('OCR-B').text('Cash', leftMargin + 10, doc.y, { continued: true, width: 245 });
-      doc.fontSize(9).font('OCR-B').text(total.toFixed(2), { align: 'right', width: 245 });
+      doc.fontSize(9).font('OCR-B').text('Cash', leftMargin + 10, doc.y, { continued: true, width: 238 });
+      doc.fontSize(9).font('OCR-B').text(total.toFixed(2), { align: 'right', width: 238 });
       doc.moveDown(0.5);
       
       // Show vehicle and company details
@@ -509,8 +509,8 @@ export class PilotTravelCentersReceiptGenerator {
       const logoPath = path.resolve(process.cwd(), 'assets/logos/pilot-logo.jpeg');
       
       if (fs.existsSync(logoPath)) {
-        const logoWidth = 300;
-        const logoHeight = 50;
+        const logoWidth = 320;
+        const logoHeight = 80;
         const logoX = (doc.page.width - logoWidth) / 2;
         const currentY = doc.y;
         
@@ -520,7 +520,7 @@ export class PilotTravelCentersReceiptGenerator {
           align: 'center'
         });
         
-        doc.y = currentY + logoHeight + 5;
+        doc.y = currentY + logoHeight;
       } else {
         // Fallback to text if logo not found
         doc.fontSize(28).font('OCR-B').text('PILOT', { align: 'center' });
@@ -639,35 +639,114 @@ export class PilotTravelCentersReceiptGenerator {
     
     // Show card details for Visa and Master payments
     if (receipt.paymentMethod === 'Visa' && receipt.cardLast4) {
-      doc.fontSize(9).font('OCR-B').text('Received:', { align: 'left' });
-      
-      // Show Visa with total amount aligned to the right
-      doc.fontSize(9).font('OCR-B').text('Visa', leftMargin + 5, doc.y, { continued: true, width: 240 });
-      doc.text(total.toFixed(2), { align: 'right', width: 240 });
-      
-      // Card details on next line - card number on left, entry method on right
+      // Visa payment format matching screenshot
       const last4 = receipt.cardLast4;
       const entryMethod = receipt.cardEntryMethod === 'INSERT' ? 'INSERT' : 
                           receipt.cardEntryMethod === 'TAP' ? 'TAP' : 'SWIPED';
-      doc.fontSize(9).text(`XXXXXXXXXXXX${last4}    ${entryMethod}`, leftMargin + 5);
-      doc.fontSize(9).text('Approved', leftMargin + 5);
       
-      // Generate random authorization number (6 digits for Visa)
-      const authNum = Math.floor(Math.random() * 900000) + 100000;
-      doc.fontSize(9).text(`Auth #: ${authNum}`, leftMargin + 5);
-      // Show user-entered company and vehicle for Pilot + Visa
-      const companyNameVisa = receipt.driverCompanyName || '';
-      const vehicleIdVisa = receipt.vehicleId || '';
-      if (companyNameVisa || vehicleIdVisa) {
-        if (vehicleIdVisa) {
-          doc.fontSize(9).font('OCR-B').text(`VehicleID`, leftMargin + 5, doc.y, { continued: true });
-          doc.text(vehicleIdVisa, leftMargin + 40);
+      // Received section - show Visa with amount
+      doc.fontSize(9).font('OCR-B').text('Received', leftMargin);
+      
+      // Visa with amount on the right
+      doc.fontSize(9).font('OCR-B').text('Visa', leftMargin + 10, doc.y, { continued: true, width: 240 });
+      doc.fontSize(9).font('OCR-B').text(total.toFixed(2), { align: 'right', width: 240 });
+      
+      // Card number with INSERT on the right
+      doc.fontSize(9).font('OCR-B').text(`XXXXXXXXXXXX${last4}`, leftMargin + 10, doc.y, { continued: true, width: 150 });
+      doc.fontSize(9).font('OCR-B').text(entryMethod, { align: 'right', width: 150 });
+      
+      // Approved on new line
+      doc.fontSize(9).font('OCR-B').text('Approved', leftMargin + 10);
+      
+      // Generate authorization code (5 digits + letter, e.g., "06526F")
+      const authCodeDigits = Math.floor(Math.random() * 90000) + 10000; // 5-digit number
+      const authCodeLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26)); // Random letter A-Z
+      const authCode = `${authCodeDigits.toString().padStart(5, '0')}${authCodeLetter}`;
+      doc.fontSize(9).text(`Auth #: ${authCode}`, leftMargin + 10);
+      doc.moveDown(0.8);
+      
+      // Transaction Details
+      doc.fontSize(9).font('OCR-B').text('TYPE: COMPLETION', leftMargin);
+      doc.fontSize(9).font('OCR-B').text('VISA CREDIT (C)', leftMargin);
+      
+      // AID - randomly generate AID (Application Identifier) for Visa
+      const aidVisa = `A${Math.floor(Math.random() * 10000000000000).toString().padStart(13, '0')}`;
+      doc.fontSize(9).font('OCR-B').text(`AID: ${aidVisa}`, leftMargin);
+      
+      // TVR - randomly generate TVR (Terminal Verification Results)
+      const tvr = Math.floor(Math.random() * 10000000000).toString().padStart(10, '0');
+      doc.fontSize(9).font('OCR-B').text(`TVR: ${tvr}`, leftMargin);
+      
+      // IAD - randomly generate IAD (Issuer Application Data) as hex string
+      const iad = Array.from({ length: 14 }, () => {
+        const chars = '0123456789ABCDEF';
+        return chars[Math.floor(Math.random() * chars.length)];
+      }).join('');
+      doc.fontSize(9).font('OCR-B').text(`IAD: ${iad}`, leftMargin);
+      
+      // TSI - randomly generate TSI (Transaction Status Information) as hex
+      const tsi = Math.floor(Math.random() * 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
+      doc.fontSize(9).font('OCR-B').text(`TSI: ${tsi}`, leftMargin);
+      
+      // ARC - randomly generate ARC (Authorization Response Code)
+      const arcChars = ['Z3', 'A1', 'B2', 'C4', 'D5', 'E6', 'F7', 'G8', 'H9', 'I0', 'J1', 'K2', 'L3', 'M4', 'N5', 'O6', 'P7', 'Q8', 'R9', 'S0'];
+      const arc = arcChars[Math.floor(Math.random() * arcChars.length)];
+      doc.fontSize(9).font('OCR-B').text(`ARC: ${arc}`, leftMargin);
+      doc.moveDown(1.5);
+      
+      // Verified by PIN
+      doc.fontSize(9).font('OCR-B').text('Verified by PIN', leftMargin);
+      doc.moveDown(0.8);
+      // Important notice
+      doc.fontSize(9).font('OCR-B').text('IMPORTANT - Retain this copy for your records.', leftMargin);
+      doc.moveDown(1);
+      
+      // CUSTOMER COPY section
+      doc.fontSize(9).font('OCR-B').text('CUSTOMER COPY', leftMargin);
+      const companyName = receipt.driverCompanyName || '';
+      const vehicleId = receipt.vehicleId || '';
+
+      // Show Company Name and Vehicle ID - match screenshot format
+      doc.fontSize(9).font('OCR-B').text(`CompanyName:   ${companyName.toUpperCase()}`, leftMargin + 20);
+      doc.fontSize(9).font('OCR-B').text(`VehicleID:    ${vehicleId}`, leftMargin + 22);
+      doc.fontSize(9).font('OCR-B').text('Odometer:', leftMargin + 10);
+      doc.fontSize(9).font('OCR-B').text('TripNumber:', leftMargin + 10);
+      doc.moveDown(1.5);
+      
+      // Add signature image only if checkbox is checked
+      const includeSignature = receipt.includeSignature;
+      if (includeSignature) {
+        try {
+          const signaturePath = path.resolve(process.cwd(), 'assets/signatures/signature.jpeg');
+          if (fs.existsSync(signaturePath)) {
+            const signatureWidth = 80;
+            const signatureHeight = 20;
+            const signatureX = (doc.page.width - signatureWidth) / 2; // Center the signature
+            const signatureY = doc.y;
+            
+            try {
+              doc.image(signaturePath, signatureX, signatureY, {
+                width: signatureWidth,
+                height: signatureHeight
+              });
+              doc.y = signatureY + signatureHeight + 10;
+            } catch (imageError) {
+              doc.fontSize(9).font('OCR-B').text('Signature: _________________', { align: 'center' });
+              doc.y = signatureY + 15;
+            }
+          } else {
+            doc.fontSize(9).font('OCR-B').text('Signature: _________________', { align: 'center' });
+            doc.moveDown(1);
+          }
+        } catch (error) {
+          doc.fontSize(9).font('OCR-B').text('Signature: _________________', { align: 'center' });
+          doc.moveDown(1);
         }
-        if (companyNameVisa) {
-          doc.fontSize(9).font('OCR-B').text(`CompanyName`, leftMargin + 5, doc.y, { continued: true });
-          doc.text(companyNameVisa, leftMargin + 30);
-        }
+      } else {
+        doc.moveDown(0.5);
       }
+      
+      doc.fontSize(7).font('OCR-B').text('----------------------------------------------------------', leftMargin);
     } else if (receipt.paymentMethod === 'Master' && receipt.cardLast4) {
       // Master payment format matching screenshot
       const last4 = receipt.cardLast4;
@@ -793,15 +872,6 @@ export class PilotTravelCentersReceiptGenerator {
       }
       
       doc.fontSize(7).font('OCR-B').text('----------------------------------------------------------', leftMargin);
-      doc.moveDown(1);
-      // Add Pos and Clerk info (matching screenshot)
-      // Pos:2 left-aligned, Clerk:1209 right-aligned on same line
-      doc.fontSize(9).font('OCR-B').text('Pos:2', leftMargin, doc.y, { continued: true, width: 100 });
-      doc.text('Clerk:1209', { align: 'right', width: 100 });
-      
-      // COPY RECEIPT centered
-      doc.fontSize(9).font('OCR-B').text('COPY RECEIPT', { align: 'left' });
-      doc.moveDown(0.5);
       
       // Dashed horizontal line
     } else if (receipt.paymentMethod === 'TCH' && receipt.cardLast4) {
@@ -838,8 +908,8 @@ export class PilotTravelCentersReceiptGenerator {
       
       // Received section - show EFS LLC Checks with amount
       doc.fontSize(9).font('OCR-B').text('Received', leftMargin);
-      doc.fontSize(9).font('OCR-B').text('EFS LLC Checks', leftMargin + 10, doc.y, { continued: true, width: 240 });
-      doc.fontSize(9).font('OCR-B').text(total.toFixed(2), { align: 'right', width: 240 });
+      doc.fontSize(9).font('OCR-B').text('EFS LLC Checks', leftMargin + 10, doc.y, { continued: true, width: 235 });
+      doc.fontSize(9).font('OCR-B').text(total.toFixed(2), { align: 'right', width: 235 });
       
       // Transaction details - exactly as in screenshot
       doc.fontSize(9).font('OCR-B').text('Tran/Route #:', leftMargin);
@@ -939,14 +1009,14 @@ export class PilotTravelCentersReceiptGenerator {
     }
     
     // Vehicle and company details section - show for Visa, Master, EFS, Cash
-    if (receipt.paymentMethod === 'Visa' || receipt.paymentMethod === 'EFS') {
+    if (receipt.paymentMethod === 'EFS') {
       // Vehicle and company details for Visa, Master, and EFS - exactly as in screenshot
       const vehicleId = receipt.vehicleId || '122';
       const dlState = 'on'; // From screenshot
       const companyName = receipt.driverCompanyName || 'MCMPLOGISTICSINC';
       
       doc.fontSize(9).font('OCR-B').text(`VehicleID`, leftMargin, doc.y, { continued: true });
-      doc.text(vehicleId, leftMargin + 40);
+      doc.text(vehicleId, leftMargin + 37);
       doc.fontSize(9).font('OCR-B').text(`DLState`, leftMargin, doc.y, { continued: true });
       doc.text(dlState, leftMargin + 50);
       doc.fontSize(9).font('OCR-B').text(`CompanyName`, leftMargin, doc.y, { continued: true });
@@ -974,43 +1044,7 @@ export class PilotTravelCentersReceiptGenerator {
     }
     doc.moveDown(0.5);
 
-    // Transaction details - show for Visa and Master payments
-    if (receipt.paymentMethod === 'Visa') {
-      doc.fontSize(9).font('OCR-B').text('TYPE: PURCHASE', leftMargin);
-      doc.fontSize(9).text('SCOTIABANK VISA (C)', leftMargin);
-      // Generate random AID (Application Identifier)
-      const aid = `A${Math.floor(Math.random() * 10000000000000).toString().padStart(13, '0')}`;
-      doc.fontSize(9).text(`AID: ${aid}`, leftMargin);
-      
-      // Generate random TVR (Terminal Verification Results)
-      const tvr = Math.floor(Math.random() * 10000000000).toString().padStart(10, '0');
-      doc.fontSize(9).text(`TVR: ${tvr}`, leftMargin);
-      
-      // Generate random IAD (Issuer Application Data)
-      const iad = Math.floor(Math.random() * 1000000000000000).toString(16).toUpperCase().padStart(16, '0');
-      doc.fontSize(9).text(`IAD: ${iad}`, leftMargin);
-      
-      // Generate random TSI (Transaction Status Information)
-      const tsi = Math.floor(Math.random() * 10000).toString(16).toUpperCase().padStart(4, '0');
-      doc.fontSize(9).text(`TSI: ${tsi}`, leftMargin);
-      
-      // Generate random ARC (Authorization Response Code)
-      const arcCodes = ['23', 'A1', 'B2', 'C4', 'D5', 'E6', 'F7', 'G8', 'H9', 'I0'];
-      const arc = arcCodes[Math.floor(Math.random() * arcCodes.length)];
-      doc.fontSize(9).text(`ARC: ${arc}`, leftMargin);
-      doc.moveDown(0.8);
-
-      // Verification - exactly as in screenshot
-      doc.fontSize(9).font('OCR-B').text('Verified by PIN', leftMargin);
-      doc.moveDown(0.8);
-      
-      // Important notice
-      doc.fontSize(9).font('OCR-B').text('IMPORTANT - Retain this copy for your records.', leftMargin);
-      doc.moveDown(0.8);
-      
-      // Add CUSTOMER COPY text for Visa payments
-      doc.fontSize(9).text('CUSTOMER COPY', leftMargin);
-    }
+    // Transaction details section removed for Visa - now handled in the main Visa payment block above
     
     // Customer copy section is now handled within each payment method block
     // No separate section needed here
@@ -1023,7 +1057,7 @@ export class PilotTravelCentersReceiptGenerator {
   }
 }
 
-export class FlyingJTravelPlazaReceiptGenerator {
+export class FlyingJTravelPlazaReceiptGenerator { 
   async generate(receipt: Receipt, outputPath: string): Promise<void> {
     const doc = new PDFDocument({ size: [280, 800], margin: 15, autoFirstPage: false });
     const fontPath = path.join(__dirname, '../fonts/ocr_b_becker.ttf');
@@ -1039,8 +1073,9 @@ export class FlyingJTravelPlazaReceiptGenerator {
       const logoPath = path.resolve(process.cwd(), 'assets/logos/flying-logo.jpeg');
       
       if (fs.existsSync(logoPath)) {
-        const logoWidth = 170;
-        const logoHeight = 50;
+        const logoWidth = 300;
+        const logoHeight = 80;
+        // Center the logo horizontally
         const logoX = (doc.page.width - logoWidth) / 2;
         const currentY = doc.y;
         
@@ -1050,7 +1085,7 @@ export class FlyingJTravelPlazaReceiptGenerator {
           align: 'center'
         });
         
-        doc.y = currentY + logoHeight + 15;
+        doc.y = currentY + logoHeight;
       } else {
         // Fallback to text
         doc.fontSize(28).font('OCR-B').text('FLYING', { align: 'center' });
@@ -1086,7 +1121,7 @@ export class FlyingJTravelPlazaReceiptGenerator {
     // Transaction number
     const transactionNum = `${Math.floor(Math.random() * 9000000) + 1000000}`;
 
-      doc.fontSize(10).font('OCR-B').text(`Transaction #:  ${transactionNum}   ****PREPAY****`, leftMargin);
+      doc.fontSize(10).font('OCR-B').text(`Transaction #:  ${transactionNum} `, leftMargin);
  
     doc.fontSize(8).font('OCR-B').text('---------------------------------------------------', leftMargin);
     // Column headers - Petro-Canada style (QTY first, then NAME)
@@ -1286,7 +1321,8 @@ export class FlyingJTravelPlazaReceiptGenerator {
         doc.fontSize(10).font('OCR-B').text(`  ${paymentType}`, leftMargin, doc.y, { continued: true, width: 247 });
         doc.font('OCR-B').text(total.toFixed(2), { align: 'right', width: 247 });
 
-        // Date line: mm/dd/yyyy hh:mm:ss
+        // Date line: mm/dd/yyyy hh:mm:ss (only show for Cash, not EFS)
+        if (!isEfs) {
         const mm = String(receipt.date.getMonth() + 1).padStart(2, '0');
         const dd = String(receipt.date.getDate()).padStart(2, '0');
         const yyyy = String(receipt.date.getFullYear());
@@ -1294,6 +1330,7 @@ export class FlyingJTravelPlazaReceiptGenerator {
         const min = String(receipt.date.getMinutes()).padStart(2, '0');
         const ss = String(receipt.date.getSeconds()).padStart(2, '0');
         doc.fontSize(10).font('OCR-B').text(`Date:  ${mm}/${dd}/${yyyy} ${hh}:${min}:${ss}`, leftMargin + 30);
+        }
         
         // For Cash payment method, show Vehicle ID and Company Name after the second date
         if (!isEfs) {
@@ -1451,68 +1488,86 @@ export class FlyingJTravelPlazaReceiptGenerator {
           doc.fontSize(9).font('OCR-B').text('Special Promotional Offer', { align: 'center' });
         }
       } else {
-        // Add "Received" text for Visa payment
-        doc.fontSize(10).font('OCR-B').text('Received', leftMargin);
-        // Visa payment method
-        doc.fontSize(10).font('OCR-B').text(`  Visa`, leftMargin, doc.y, { continued: true, width: 247 });
-        doc.font('OCR-B').text(total.toFixed(2), { align: 'right', width: 247 });
-        
+        // Visa payment format matching screenshot
         const last4 = receipt.cardLast4 || '4444';
         const entryMethod = receipt.cardEntryMethod === 'INSERT' ? 'INSERT' : 
                             receipt.cardEntryMethod === 'TAP' ? 'TAP' : 'SWIPED';
-        doc.fontSize(10).font('OCR-B').text(`  XXXXXXXXXXXX${last4}    ${entryMethod}`, leftMargin);
-        doc.fontSize(10).font('OCR-B').text(`  Approved`, leftMargin);
         
-        // Generate random authorization number (5 alphanumeric characters)
-        const authNum = Math.random().toString(36).substring(2, 7).toUpperCase();
-        doc.fontSize(10).font('OCR-B').text(`  Auth #:  ${authNum}`, leftMargin);
-        doc.moveDown(0.5);
+        // Received section - show Visa with amount
+        doc.fontSize(9).font('OCR-B').text('Received', leftMargin);
+        
+        // Visa with amount on the right
+        doc.fontSize(9).font('OCR-B').text('Visa', leftMargin + 10, doc.y, { continued: true, width: 240 });
+        doc.fontSize(9).font('OCR-B').text(total.toFixed(2), { align: 'right', width: 240 });
+        
+        // Card number with INSERT on the right
+        doc.fontSize(9).font('OCR-B').text(`XXXXXXXXXXXX${last4}`, leftMargin + 10, doc.y, { continued: true, width: 150 });
+        doc.fontSize(9).font('OCR-B').text(entryMethod, { align: 'right', width: 150 });
+        
+        // Approved on new line
+        doc.fontSize(9).font('OCR-B').text('Approved', leftMargin + 10);
+        
+        // Generate authorization code (6 digits, e.g., "004950")
+        const authCode = Math.floor(Math.random() * 900000) + 100000;
+        doc.fontSize(9).text(`Auth #: ${authCode.toString().padStart(6, '0')}`, leftMargin + 10);
+        doc.moveDown(0.8);
+        
+        // Transaction Details
+        doc.fontSize(9).font('OCR-B').text('TYPE: COMPLETION', leftMargin);
+        doc.fontSize(9).font('OCR-B').text('Visa DEBIT (C)', leftMargin);
+        
+        // AID - randomly generate AID (Application Identifier) for Visa
+        const aidVisa = `A${Math.floor(Math.random() * 10000000000000).toString().padStart(13, '0')}`;
+        doc.fontSize(9).font('OCR-B').text(`AID: ${aidVisa}`, leftMargin);
+        
+        // TVR - randomly generate TVR (Terminal Verification Results)
+        const tvr = Math.floor(Math.random() * 10000000000).toString().padStart(10, '0');
+        doc.fontSize(9).font('OCR-B').text(`TVR: ${tvr}`, leftMargin);
+        
+        // IAD - randomly generate IAD (Issuer Application Data) as hex string
+        const iad = Array.from({ length: 14 }, () => {
+          const chars = '0123456789ABCDEF';
+          return chars[Math.floor(Math.random() * chars.length)];
+        }).join('');
+        doc.fontSize(9).font('OCR-B').text(`IAD: ${iad}`, leftMargin);
+        
+        // TSI - randomly generate TSI (Transaction Status Information) as hex
+        const tsi = Math.floor(Math.random() * 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
+        doc.fontSize(9).font('OCR-B').text(`TSI: ${tsi}`, leftMargin);
+        
+        // ARC - randomly generate ARC (Authorization Response Code)
+        const arcChars = ['Z3', 'A1', 'B2', 'C4', 'D5', 'E6', 'F7', 'G8', 'H9', 'I0', 'J1', 'K2', 'L3', 'M4', 'N5', 'O6', 'P7', 'Q8', 'R9', 'S0'];
+        const arc = arcChars[Math.floor(Math.random() * arcChars.length)];
+        doc.fontSize(9).font('OCR-B').text(`ARC: ${arc}`, leftMargin);
+        doc.moveDown(1.5);
+        
+        // Verified by PIN
+        doc.fontSize(9).font('OCR-B').text('Verified by PIN', leftMargin);
+        doc.moveDown(0.8);
+        
+        // Important notice
+        doc.fontSize(9).font('OCR-B').text('IMPORTANT - Retain this copy for your records.', leftMargin);
+        doc.moveDown(1);
+        
+        // CUSTOMER COPY section
+        doc.fontSize(9).font('OCR-B').text('CUSTOMER COPY', leftMargin);
+        const companyName = receipt.driverCompanyName || '';
+        const vehicleId = receipt.vehicleId || '';
+
+        // Show VehicleID with value on the right, then company name (shortened)
+        doc.fontSize(9).font('OCR-B').text('VehicleID', leftMargin + 10, doc.y, { continued: true, width: 205 });
+        doc.text(vehicleId, { align: 'right', width: 205 });
+        doc.fontSize(9).font('OCR-B').text('CompanyName', leftMargin + 10, doc.y, { continued: true, width: 205 });
+        doc.text(companyName, { align: 'right', width: 205 });
+
+        
+        doc.fontSize(7).font('OCR-B').text('----------------------------------------------------------', leftMargin);
       }
     }
 
     // Transaction record separator - only show for Visa
     if (receipt.paymentMethod === 'Visa') {
-      doc.fontSize(9).font('OCR-B').text('============ TRANSACTION RECORD ============', leftMargin + 10);
-      doc.moveDown(1);
 
-      // Pilot Flying J address - use dynamic data from selected store
-      doc.fontSize(10).font('OCR-B').text('Pilot Flying J', leftMargin);
-      doc.fontSize(10).font('OCR-B').text(address.toUpperCase(), leftMargin);
-      doc.fontSize(10).font('OCR-B').text(cityState.toUpperCase(), leftMargin);
-      doc.moveDown(1);
-
-      // Transaction type - only for Visa
-      doc.fontSize(10).font('OCR-B').text('TYPE: COMPLETION', leftMargin);
-      doc.fontSize(10).font('OCR-B').text('ACCT: VISA', leftMargin);
-      doc.fontSize(8).font('OCR-B').text('------------', leftMargin);
-      doc.fontSize(10).font('OCR-B').text(`$  ${total.toFixed(2)}`, leftMargin);
-      doc.fontSize(8).font('OCR-B').text('------------', leftMargin);
-      doc.moveDown(1);
-
-      // Card details
-      const last4 = receipt.cardLast4 || '4444';
-      doc.fontSize(10).font('OCR-B').text(`CARD NO  : xxxxxxxxxxxx${last4}`, leftMargin);
-      
-      // Date format: 24 10 2025 12:16:00 (DD MM YYYY HH:MM:SS)
-      const dayStr = String(receipt.date.getDate()).padStart(2, '0');
-      const monthStr = String(receipt.date.getMonth() + 1).padStart(2, '0');
-      const yearStr = receipt.date.getFullYear();
-      const hours = String(receipt.date.getHours()).padStart(2, '0');
-      const minutes = String(receipt.date.getMinutes()).padStart(2, '0');
-      const seconds = String(receipt.date.getSeconds()).padStart(2, '0');
-      const dateTimeStr = `${dayStr} ${monthStr} ${yearStr} ${hours}:${minutes}:${seconds}`;
-      
-      doc.fontSize(10).font('OCR-B').text(`DATE/TIME: ${dateTimeStr}`, leftMargin);
-      
-      // Use user-entered vehicle details or fallback to defaults
-      const vehicleId = receipt.vehicleId || '101';
-      const dlNumber = receipt.dlNumber || '0';
-      const companyName = receipt.driverCompanyName || 'mcmp';
-      
-      doc.fontSize(10).font('OCR-B').text(`    VehicleID         ${vehicleId}`, leftMargin + 5);
-      doc.fontSize(10).font('OCR-B').text(`    DLNumber          ${dlNumber}`, leftMargin + 5);
-      doc.fontSize(10).font('OCR-B').text(`    CompanyName       ${companyName}`, leftMargin + 5);
-      doc.fontSize(10).font('OCR-B').text('    Odometer', leftMargin + 5);
     } else if (receipt.paymentMethod === 'TCH') {
       // TCH payment method - show "TruckingCompanyNameTCI" + user company name
       const userCompanyName = receipt.driverCompanyName || 'ACG';
@@ -1543,7 +1598,7 @@ export class LovesTravelStopsReceiptGenerator {
       
       if (fs.existsSync(logoPath)) {
         // Add Love's logo
-        const logoWidth = 100;
+        const logoWidth = 200;
         const logoHeight = 50;
         const logoX = (doc.page.width - logoWidth) / 2;
         const currentY = doc.y;
@@ -1567,7 +1622,7 @@ export class LovesTravelStopsReceiptGenerator {
     const cityState = receipt.companyData?.city || 'Skippers, VA 23879';
     const phone = receipt.companyData?.phone || '(434) 336-0203';
     
-    doc.fontSize(9).font('OCR-B').text(`STORE ${storeNumber}`, { align: 'center' });
+    doc.fontSize(9).font('OCR-B').text(`STORE  #${storeNumber}`, { align: 'center' });
     doc.fontSize(9).text(address, { align: 'center' });
     doc.fontSize(9).text(cityState, { align: 'center' });
     doc.fontSize(9).text(phone, { align: 'center' });
@@ -1614,14 +1669,15 @@ export class LovesTravelStopsReceiptGenerator {
       // Calculate totals for all items
       const total = isCashAdvance ? item.price : (item.quantity * item.price);
       
+      // For Loves company, show empty Qty and Price values (as per screenshot)
+      // Exception: For CASH ADVANCE items, show Qty as "1"
       // Display item in Petro-Canada style format with proper alignment
-      const qtyDisplay = item.qty || 1;
-      const qtyStr = qtyDisplay.toString();
+      const qtyStr = isCashAdvance ? '1' : ''; // Show "1" for cash advance, empty for other items
       
       // Format item line: name (padded to 20) + qty (padded to 5) + price (padded to 7) + total
-      // For cash advance, show the price as the price; for regular items, show price per gallon
-      const priceToShow = isCashAdvance ? item.price : item.price;
-      const itemLine = qtyStr.padEnd(5) +  item.name.padEnd(20) + priceToShow.toFixed(2).padEnd(8) + total.toFixed(2);
+      // For Loves, show empty price; for cash advance, show the price as the price; for regular items, show price per gallon
+      const priceToShow = ''; // Empty for Loves - show blank Price
+      const itemLine = qtyStr.padEnd(5) +  item.name.padEnd(20) + priceToShow.padEnd(8) + total.toFixed(2);
       doc.fontSize(10).font('OCR-B').text(itemLine, leftMargin);
       
       // Fuel details - use US units (Gallons instead of Liters) - only for non-cash advance items
@@ -1699,31 +1755,72 @@ export class LovesTravelStopsReceiptGenerator {
                 width: signatureWidth,
                 height: signatureHeight
               });
-              doc.y = signatureY + signatureHeight + 10;
+              doc.y = signatureY + signatureHeight + 5;
             } catch (imageError) {
-              // Fallback: draw a signature line instead
-              doc.fontSize(9).font('OCR-B').text('Signature: ___________________________', { align: 'center' });
-              doc.y = signatureY + 15;
+              // Fallback: just move down
+              doc.moveDown(0.5);
             }
           } else {
-            // Fallback: draw a signature line
-            doc.fontSize(9).font('OCR-B').text('Signature: ___________________________', { align: 'center' });
-            doc.moveDown(1);
+            // No signature image, just move down
+            doc.moveDown(0.5);
           }
         } catch (error) {
-          // Fallback: draw a signature line
-          doc.fontSize(9).font('OCR-B').text('Signature: ___________________________', { align: 'center' });
-          doc.moveDown(1);
+          // Error loading signature, just move down
+          doc.moveDown(0.5);
         }
       } else {
-        // Show signature line when checkbox is not checked
-        doc.fontSize(9).font('OCR-B').text('Signature:', leftMargin);
-        doc.moveDown(1.5);
+        // No signature, just move down
+        doc.moveDown(0.5);
       }
 
-      // Add line at the bottom
-      doc.moveDown(1);
+      // Add horizontal line after signature
       doc.moveTo(leftMargin, doc.y).lineTo(doc.page.width - leftMargin, doc.y).stroke();
+      doc.moveDown(0.5);
+      
+      // Add "Signature:" text after the line (match screenshot 2)
+      doc.fontSize(9).font('OCR-B').text('Signature:', leftMargin);
+      doc.moveDown(0.5);
+      
+      // Driver and trucking information after signature - match screenshot format
+      const companyName = receipt.driverCompanyName || 'mcmp';
+      const checkNumber = receipt.checkNumber || '2082717306';
+      const driverFirstName = receipt.driverFirstName || 's';
+      const driverLastName = receipt.driverLastName || 'garcha';
+      const dlState = receipt.dlNumber ? receipt.dlNumber.substring(0, 2).toLowerCase() : 'on';
+      const vehicleId = receipt.vehicleId || '';
+      
+      // Display fields with labels on left, values on right (aligned) - proper spacing to prevent overlap
+      doc.fontSize(9).font('OCR-B').text('TruckingCompanyName', leftMargin, doc.y, { continued: true, width: 247 });
+      doc.text(companyName, { align: 'right', width: 247 });
+
+      
+      doc.fontSize(9).font('OCR-B').text('CheckNumber', leftMargin, doc.y, { continued: true, width: 247 });
+      doc.text(checkNumber, { align: 'right', width: 247 });
+
+      
+      doc.fontSize(9).font('OCR-B').text('DriverFName', leftMargin, doc.y, { continued: true, width: 247 });
+      doc.text(driverFirstName, { align: 'right', width: 247 });
+
+      
+      doc.fontSize(9).font('OCR-B').text('DriverLName', leftMargin, doc.y, { continued: true, width: 247 });
+      doc.text(driverLastName, { align: 'right', width: 247 });
+
+      
+      doc.fontSize(9).font('OCR-B').text('DLState', leftMargin, doc.y, { continued: true, width: 247 });
+      doc.text(dlState, { align: 'right', width: 247 });
+
+      
+      // VehicleID with value if provided
+      doc.fontSize(9).font('OCR-B').text('VehicleID', leftMargin, doc.y, { continued: true, width: 247 });
+      doc.text(vehicleId || '', { align: 'right', width: 247 });
+      
+      // Just field labels as single left-aligned lines, no blank value fields at all
+      doc.fontSize(9).font('OCR-B').text('Odometer', leftMargin);
+      doc.fontSize(9).font('OCR-B').text('HubOdometer', leftMargin);
+      doc.fontSize(9).font('OCR-B').text('TripNumber', leftMargin);
+      doc.fontSize(9).font('OCR-B').text('TrailerID', leftMargin);
+      doc.fontSize(9).font('OCR-B').text('TruckLicense', leftMargin);
+
       
     } else if (receipt.paymentMethod === 'TCH') {
       // TCH payment - match screenshot format
@@ -1761,8 +1858,8 @@ export class LovesTravelStopsReceiptGenerator {
       const last4 = receipt.cardLast4 || '5703';
       const entryMethod = receipt.cardEntryMethod === 'INSERT' ? 'INSERT' : 
                           receipt.cardEntryMethod === 'TAP' ? 'TAP' : 'SWIPED';
-      doc.fontSize(9).font('OCR-B').text(`XXXXXXXXXXXX${last4}`, leftMargin + 5, doc.y, { continued: true, width: 247 });
-      doc.text(entryMethod, { align: 'right', width: 247 });
+      doc.fontSize(9).font('OCR-B').text(`XXXXXXXXXXXX${last4}`, leftMargin + 5, doc.y, { continued: true, width: 150 });
+      doc.text(entryMethod, { align: 'right', width: 150 });
       
       // Generate random auth number and invoice number
       const authNum = Math.floor(Math.random() * 900000) + 100000; // 6-digit number
@@ -2003,7 +2100,9 @@ export class TravelCentersOfAmericaReceiptGenerator {
   async generate(receipt: Receipt, outputPath: string): Promise<void> {
     const doc = new PDFDocument({ size: [280, 800], margin: 15, autoFirstPage: false });
     const fontPath = path.join(__dirname, '../fonts/ocr_b_becker.ttf');
+    const fontPath2 = path.join(__dirname, '../fonts/ocr_b_becker_bold.ttf');
     doc.registerFont('OCR-B', fontPath);
+    doc.registerFont('OCR-B-Bold', fontPath2);
     doc.addPage({ size: [280, 800], margin: 15 });
     const writeStream = fs.createWriteStream(outputPath);
     doc.pipe(writeStream);
@@ -2050,7 +2149,16 @@ export class TravelCentersOfAmericaReceiptGenerator {
     // Receipt header - match screenshot 1 format
     doc.fontSize(9).font('OCR-B').text(`Receipt #    ${receipt.receiptNumber.replace('REC-', '')}`, leftMargin);
     doc.moveDown(0.3);
-    doc.fontSize(9).font('OCR-B').text(receipt.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }), leftMargin);
+    // Format "Wed Sep 6 2023" with *no* comma after weekday
+    (() => {
+      const d = receipt.date;
+      const weekday = d.toLocaleDateString('en-US', { weekday: 'short' });
+      const month = d.toLocaleDateString('en-US', { month: 'short' });
+      const day = d.getDate();
+      const year = d.getFullYear();
+      const displayStr = `${weekday} ${month} ${day} ${year}`;
+      doc.fontSize(9).font('OCR-B').text(displayStr, leftMargin);
+    })();
     doc.moveDown(0.3);
     doc.fontSize(9).font('OCR-B').text('Sherline Marshall', leftMargin);
     doc.moveDown(0.3);
@@ -2058,7 +2166,7 @@ export class TravelCentersOfAmericaReceiptGenerator {
     doc.moveDown(0.3);
     
     // Only show SUSPENDED for non-EFS payments
-    if (receipt.paymentMethod !== 'EFS' && receipt.paymentMethod !== 'Master') {
+    if (receipt.paymentMethod !== 'EFS' && receipt.paymentMethod !== 'Master' && receipt.paymentMethod !== 'Cash' && receipt.paymentMethod !== 'Visa') {
       doc.fontSize(9).font('OCR-B').text('**** SUSPENDED ****', { align: 'left' });
     doc.moveDown(0.3);
     }
@@ -2132,11 +2240,11 @@ export class TravelCentersOfAmericaReceiptGenerator {
     
     doc.fontSize(9).text('Sales Tax Total', leftMargin, doc.y, { continued: true, width: 245 });
     doc.text(salesTax.toFixed(2), { align: 'right', width: 245 });
+    doc.moveDown(0.3);
 
     
-    doc.fontSize(9).font('OCR-B').text('Total', leftMargin, doc.y, { continued: true, width: 245 });
+    doc.fontSize(9).font('Helvetica-Bold').text('Total', leftMargin, doc.y, { continued: true, width: 245 });
     doc.text(`$${total.toFixed(2)}`, { align: 'right', width: 245 });
-    doc.moveDown(0.3);
     doc.fontSize(7).font('OCR-B').text('----------------------------------------------------------', leftMargin);
     doc.moveDown(0.3);
 
@@ -2301,9 +2409,8 @@ export class TravelCentersOfAmericaReceiptGenerator {
       
       // Card details
       const cardLast4 = receipt.cardLast4 || '5106';
-      const entryMethod = receipt.cardEntryMethod || 'INSERT';
       
-      doc.fontSize(9).font('OCR-B').text(`XXXXXXXXXXXX${cardLast4}    ${entryMethod}`, leftMargin + 20);
+      doc.fontSize(9).font('OCR-B').text(`XXXXXXXXXXXX${cardLast4} `, leftMargin + 20);
       doc.moveDown(0.3);
       
       // Transaction status
@@ -2351,6 +2458,8 @@ export class TravelCentersOfAmericaReceiptGenerator {
       }
       if (vehicleId) {
         doc.fontSize(9).font('OCR-B').text(`VehicleID:               ${vehicleId}`, leftMargin + 20);
+        const entryMethod = receipt.cardEntryMethod ? receipt.cardEntryMethod.toUpperCase() : '';
+        doc.fontSize(9).font('OCR-B').text(`EntryMethod:             ${entryMethod}`, leftMargin + 20);
       }
     } else {
       // Cash payment format
