@@ -128,9 +128,10 @@ document.addEventListener('DOMContentLoaded', async (): Promise<void> => {
             const selectedCompany = selectedCompanyId ? companies.find(c => c.id === selectedCompanyId) : null;
             const isUSACompany = selectedCompany && selectedCompany.country === 'United States of America';
             const isFlyingJCanada = selectedCompany && selectedCompany.name.toLowerCase().includes('flying j') && selectedCompany.country === 'Canada';
+            const paymentMethod = (document.getElementById('paymentMethod') as HTMLSelectElement)?.value || '';
             
-            // Hide Vehicle ID for Flying J Canada
-            if (isFlyingJCanada) {
+            // Hide Vehicle ID for Flying J Canada (but not for Visa payment method)
+            if (isFlyingJCanada && paymentMethod !== 'Visa') {
                 const vehicleIdField = document.getElementById('vehicleId') as HTMLInputElement | null;
                 const vehicleIdGroup = vehicleIdField?.closest('.form-group') as HTMLElement | null;
                 if (vehicleIdGroup) vehicleIdGroup.style.display = 'none';
@@ -484,10 +485,12 @@ function restoreRequiredAttributes(): void {
                 companyNameField.disabled = true;
                 companyNameField.removeAttribute('required');
             }
+            // Enable card entry method for Canadian companies (Petro-Canada)
             if (cardEntryMethodField) {
-                cardEntryMethodField.required = false;
-                cardEntryMethodField.disabled = true;
-                cardEntryMethodField.removeAttribute('required');
+                cardEntryMethodField.disabled = false;
+                cardEntryMethodField.setAttribute('required', 'required');
+                const cardEntryMethodGroup = cardEntryMethodField.closest('.form-group') as HTMLElement;
+                if (cardEntryMethodGroup) cardEntryMethodGroup.style.display = 'block';
             }
             return;
     } else if (isBVDPetroleumAny) {
@@ -513,19 +516,29 @@ function restoreRequiredAttributes(): void {
             companyNameField.disabled = true;
             companyNameField.removeAttribute('required');
         }
+        // Enable card entry method for Canadian companies (BVD Petroleum if Canadian)
         if (cardEntryMethodField) {
-            cardEntryMethodField.required = false;
-            cardEntryMethodField.disabled = true;
-            cardEntryMethodField.removeAttribute('required');
+            const isBVDPetroleumCanadian = selectedCompany && selectedCompany.country === 'Canada';
+            if (isBVDPetroleumCanadian) {
+                cardEntryMethodField.disabled = false;
+                cardEntryMethodField.setAttribute('required', 'required');
+                const cardEntryMethodGroup = cardEntryMethodField.closest('.form-group') as HTMLElement;
+                if (cardEntryMethodGroup) cardEntryMethodGroup.style.display = 'block';
+            } else {
+                cardEntryMethodField.required = false;
+                cardEntryMethodField.disabled = true;
+                cardEntryMethodField.removeAttribute('required');
+            }
         }
         return;
     } else if (isAnyCanadaCompany) {
-        // For any Canadian company, keep card entry method disabled/hidden and not required
+        // Show card entry method for Canadian companies
         const cardEntryMethodField = document.getElementById('cardEntryMethod') as HTMLSelectElement;
         if (cardEntryMethodField) {
-            cardEntryMethodField.required = false;
-            cardEntryMethodField.disabled = true;
-            cardEntryMethodField.removeAttribute('required');
+            cardEntryMethodField.disabled = false;
+            cardEntryMethodField.setAttribute('required', 'required');
+            const cardEntryMethodGroup = cardEntryMethodField.closest('.form-group') as HTMLElement;
+            if (cardEntryMethodGroup) cardEntryMethodGroup.style.display = 'block';
         }
         // If vehicle details are currently hidden, ensure their fields are not required
         const vehicleDetailsRow = document.getElementById('vehicleDetailsRow') as HTMLElement;
@@ -743,16 +756,14 @@ function toggleCardFields(): void {
                 }
             }
         }
-        // Always hide card entry method for any Canadian company
+        // Show card entry method for Canadian companies
         if (isAnyCanadaCompany) {
             const cardEntryMethodField = document.getElementById('cardEntryMethod') as HTMLSelectElement;
             if (cardEntryMethodField) {
-                cardEntryMethodField.required = false;
-                cardEntryMethodField.value = 'INSERT';
-                cardEntryMethodField.disabled = true;
-                cardEntryMethodField.removeAttribute('required');
+                cardEntryMethodField.disabled = false;
+                cardEntryMethodField.setAttribute('required', 'required');
                 const cardEntryMethodGroup = cardEntryMethodField.closest('.form-group') as HTMLElement;
-                if (cardEntryMethodGroup) cardEntryMethodGroup.style.display = 'none';
+                if (cardEntryMethodGroup) cardEntryMethodGroup.style.display = 'block';
             }
         }
         // Husky + Interac → hide vehicle/company fields (but not for USA companies)
@@ -771,6 +782,77 @@ function toggleCardFields(): void {
             if (vidGroup) vidGroup.style.display = 'none';
             if (dlGroup) dlGroup.style.display = 'none';
             if (companyNameGroup) companyNameGroup.style.display = 'none';
+            return;
+        }
+        // Show Vehicle ID and Company Name for Canadian Flying J + Visa
+        if (selectedCompany && selectedCompany.name.toLowerCase().includes('flying j') && getCurrentCountry() === 'Canada' && paymentMethod === 'Visa') {
+            console.log('Showing Vehicle ID and Company Name for Canadian Flying J + Visa');
+            vehicleDetailsRow.style.display = 'grid';
+            const efsDetailsRow = document.getElementById('efsDetailsRow') as HTMLElement | null;
+            const vehicleIdField = document.getElementById('vehicleId') as HTMLInputElement;
+            const dlNumberField = document.getElementById('dlNumber') as HTMLInputElement;
+            const companyNameField = document.getElementById('driverCompanyName') as HTMLInputElement;
+            const vehicleIdGroup = vehicleIdField?.closest('.form-group') as HTMLElement | null;
+            const dlNumberGroup = dlNumberField?.closest('.form-group') as HTMLElement | null;
+            const companyNameGroup = document.getElementById('companyNameGroup') as HTMLElement | null;
+            
+            // Hide efsDetailsRow (we'll move Company Name to vehicleDetailsRow)
+            if (efsDetailsRow) {
+                efsDetailsRow.style.display = 'none';
+            }
+            
+            // Hide other EFS fields (Check Number, Driver Names, Vehicle ID in efsDetailsRow, etc.)
+            const checkNumberField = document.getElementById('checkNumber') as HTMLInputElement | null;
+            const checkNumberConfirmField = document.getElementById('checkNumberConfirm') as HTMLInputElement | null;
+            const driverFirstNameField = document.getElementById('driverFirstName') as HTMLInputElement | null;
+            const driverLastNameField = document.getElementById('driverLastName') as HTMLInputElement | null;
+            
+            const hideField = (field: HTMLInputElement | null) => {
+                if (field) {
+                    const fieldGroup = field.closest('.form-group') as HTMLElement | null;
+                    if (fieldGroup) fieldGroup.style.display = 'none';
+                    field.required = false;
+                    field.removeAttribute('required');
+                }
+            };
+            
+            hideField(checkNumberField);
+            hideField(checkNumberConfirmField);
+            hideField(driverFirstNameField);
+            hideField(driverLastNameField);
+            
+            // Show Vehicle ID in vehicleDetailsRow
+            if (vehicleIdGroup) vehicleIdGroup.style.display = 'block';
+            if (vehicleIdField) {
+                vehicleIdField.disabled = false;
+                vehicleIdField.required = true;
+                vehicleIdField.setAttribute('required', 'required');
+            }
+            
+            // Hide DL Number
+            if (dlNumberGroup) dlNumberGroup.style.display = 'none';
+            if (dlNumberField) {
+                dlNumberField.required = false;
+                dlNumberField.removeAttribute('required');
+            }
+            
+            // Move Company Name to vehicleDetailsRow so it appears in the same row as Vehicle ID
+            if (companyNameGroup && vehicleDetailsRow) {
+                const currentParent = companyNameGroup.parentElement;
+                // Only move if it's not already in vehicleDetailsRow
+                if (currentParent !== vehicleDetailsRow) {
+                    companyNameGroup.style.display = 'block';
+                    vehicleDetailsRow.appendChild(companyNameGroup);
+                } else {
+                    companyNameGroup.style.display = 'block';
+                }
+                
+                if (companyNameField) {
+                    companyNameField.disabled = false;
+                    companyNameField.required = true;
+                    companyNameField.setAttribute('required', 'required');
+                }
+            }
             return;
         }
         // Show vehicle/company fields for Canadian Flying J + Master (but hide Vehicle ID)
@@ -1034,13 +1116,11 @@ function toggleCardFields(): void {
                 companyNameField.removeAttribute('required');
             }
             if (cardEntryMethodField) {
-                cardEntryMethodField.required = false;
-                cardEntryMethodField.value = 'INSERT';
-                cardEntryMethodField.disabled = true;
-                cardEntryMethodField.removeAttribute('required');
-                // Hide the card entry method field visually
+                // Show card entry method for Canadian companies
+                cardEntryMethodField.disabled = false;
+                cardEntryMethodField.setAttribute('required', 'required');
                 const cardEntryMethodGroup = cardEntryMethodField.closest('.form-group') as HTMLElement;
-                if (cardEntryMethodGroup) cardEntryMethodGroup.style.display = 'none';
+                if (cardEntryMethodGroup) cardEntryMethodGroup.style.display = 'block';
             }
         } else if (isBVDPetroleumCompany && !isUSA) {
             // Hide all vehicle details for BVD Petroleum + any payment method (but not for USA companies)
@@ -1070,13 +1150,11 @@ function toggleCardFields(): void {
                 companyNameField.removeAttribute('required');
             }
             if (cardEntryMethodField) {
-                cardEntryMethodField.required = false;
-                cardEntryMethodField.value = 'INSERT';
-                cardEntryMethodField.disabled = true;
-                cardEntryMethodField.removeAttribute('required');
-                // Hide the card entry method field visually
+                // Show card entry method for Canadian companies
+                cardEntryMethodField.disabled = false;
+                cardEntryMethodField.setAttribute('required', 'required');
                 const cardEntryMethodGroup = cardEntryMethodField.closest('.form-group') as HTMLElement;
-                if (cardEntryMethodGroup) cardEntryMethodGroup.style.display = 'none';
+                if (cardEntryMethodGroup) cardEntryMethodGroup.style.display = 'block';
             }
         } else if (paymentMethod === 'TCH' && isOne9Company) {
             // Show Vehicle ID and DL Number for TCH payment with One9 company
@@ -2397,7 +2475,7 @@ function toggleCardFields(): void {
     }
     
     // Show/hide Copy Type dropdown only for companies that support it
-    // Companies that use copyType: One9, Travel Centers of America (TA), Husky, Love's
+    // Companies that use copyType: One9, Travel Centers of America (TA), Love's
     // Pilot with Master does NOT show copy type dropdown
     // One9 with Master does NOT show copy type dropdown
     // Only show for payment methods that display "Type: SALE"
@@ -2424,7 +2502,7 @@ function toggleCardFields(): void {
     const one9WithEFS = isOne9Company && paymentMethod === 'EFS';
     const one9WithTCH = isOne9Company && paymentMethod === 'TCH';
     const one9WithVisa = isOne9Company && paymentMethod === 'Visa';
-    const companySupportsCopyType = isOne9Company || isTravelCentersCompany || isHuskyCompany || isLovesCompany;
+    const companySupportsCopyType = isOne9Company || isTravelCentersCompany || isLovesCompany;
     
     // Only show copy type for supported companies and appropriate payment methods
     // For Love's, show for Cash payment method
@@ -2434,7 +2512,7 @@ function toggleCardFields(): void {
     const travelCentersCash = isTravelCentersCompany && paymentMethod === 'Cash';
     
     // Show copy type for:
-    // - One9, TA, Husky with Visa/Master/TCH/Interac (but not One9+Master, not One9+EFS, not One9+TCH, not One9+VISA)
+    // - One9, TA with Visa/Master/TCH/Interac (but not One9+Master, not One9+EFS, not One9+TCH, not One9+VISA)
     // - Love's with Cash
     // - Travel Centers with Cash
     // - Love's with EFS (shown in efsDetailsRow, not copyTypeRow)
@@ -3570,6 +3648,7 @@ function addItem(): void {
     const selectedCompany = getSelectedCompany();
     const isBVDPetroleum = selectedCompany && selectedCompany.name.toLowerCase().includes('bvd petroleum');
     const isLovesCompany = selectedCompany && (selectedCompany.name.toLowerCase().includes('love') || selectedCompany.name.toLowerCase().includes("love's"));
+    const isHuskyCompany = selectedCompany && selectedCompany.name.toLowerCase().includes('husky');
     
     // Build options HTML
     let optionsHTML = '<option value="">-- Select Item --</option>';
@@ -3623,6 +3702,7 @@ function addItem(): void {
             const selectedCompany = getSelectedCompany();
             const isBVDPetroleum = selectedCompany && selectedCompany.name.toLowerCase().includes('bvd petroleum');
             const isLovesCompany = selectedCompany && (selectedCompany.name.toLowerCase().includes('love') || selectedCompany.name.toLowerCase().includes("love's"));
+            const isHuskyCompany = selectedCompany && selectedCompany.name.toLowerCase().includes('husky');
             const isFlyingJCanada = selectedCompany && selectedCompany.name.toLowerCase().includes('flying j') && getCurrentCountry() === 'Canada';
             
             // Get the form groups for quantity, pump, gallons, and price/gal
