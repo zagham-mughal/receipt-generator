@@ -1686,9 +1686,9 @@ export class LovesTravelStopsReceiptGenerator {
         console.log('Love\'s Receipt - Item:', { pump: item.pump, qty: item.qty, pumpNumber });
         
         // Align the values by using consistent padding (same as Petro-Canada style)
-        doc.fontSize(10).font('OCR-B').text(` Pump:        ${pumpNumber}`, leftMargin + 35);
-        doc.fontSize(10).font('OCR-B').text(` Gallons:     ${gallons}`, leftMargin + 35);
-        doc.fontSize(10).font('OCR-B').text(` Price / Gal: ${pricePerGallon}`, leftMargin + 35);
+        doc.fontSize(10).font('OCR-B').text(` Pump:              ${pumpNumber}`, leftMargin + 35);
+        doc.fontSize(10).font('OCR-B').text(` Gallons:           ${gallons}`, leftMargin + 35);
+        doc.fontSize(10).font('OCR-B').text(` Price / Gal:       ${pricePerGallon}`, leftMargin + 35);
       }
       
       doc.moveDown(1);
@@ -2118,7 +2118,7 @@ export class TravelCentersOfAmericaReceiptGenerator {
       doc.image(logoPath, (doc.page.width - 100) / 2, doc.y, { width: 100 });
       
       // Move cursor down by proper logo height plus extra spacing
-      doc.y = doc.y + 70 + 15; // Proper logo height + 15pts spacing
+      doc.y = doc.y + 70 + 30; // Proper logo height + 15pts spacing
     } catch (error) {
       // Fallback to text if logo can't be loaded
       console.error('Error loading TA logo:', error);
@@ -2613,7 +2613,7 @@ export class HuskyReceiptGenerator {
         line =
           qtyStr.padEnd(4) + // always 3 spaces for qty
           nameStr.padEnd(18).slice(0, 18) + // force name to 18 chars
-          `$ ${item.price.toFixed(3)}`.padStart(8) + // price (3 decimals) with $ sign
+          `$ ${total.toFixed(2)}`.padStart(8) + // price (3 decimals) with $ sign
           `$ ${total.toFixed(2)}`.padStart(10); // total (2 decimals) with $ sign
       }
 
@@ -3034,7 +3034,7 @@ export class CanadianFlyingJReceiptGenerator {
       const qtyStr = qtyDisplay.toString().padStart(2, ' ');
       const nameStr = item.name;
       const lineTotal = isCashAdvance ? 0 : (item.quantity * item.price);
-      const pricePerUnit = item.price.toFixed(3);
+      const pricePerUnit = lineTotal.toFixed(2);
       const totalStr = lineTotal.toFixed(2);
 
       // [QTY] [NAME..............] [PRICE] [TOTAL]
@@ -3229,32 +3229,44 @@ export class PetroCanadaReceiptGenerator {
     const storePhone = receipt.companyData?.phone || '(905) 684-1079';
     
     // Parse city, province, and postal code
-    // Format: "NIAGRA, ONTARIO L0S 1J0" or similar
-    let city = 'NIAGRA';
+    // Format: "BRAMPTON, ONTARIO L6T5E7" or "MISSISSAUGA, ONTARIO L5T 1A6"
+    let city = 'BRAMPTON';
     let province = 'ONTARIO';
-    let postalCode = 'LOS1J0';
+    let postalCode = 'L6T5E7';
     
     if (storeCityState) {
-        // Try to parse the format
+        // Try to parse the format: "CITY, PROVINCE POSTALCODE"
         const parts = storeCityState.split(',');
         if (parts.length >= 2) {
             city = parts[0].trim().toUpperCase();
             const rest = parts[1].trim();
             // Extract province and postal code
-            const provinceMatch = rest.match(/^([A-Z\s]+)/);
-            if (provinceMatch) {
-                province = provinceMatch[1].trim();
-                const postalMatch = rest.match(/([A-Z0-9\s]+)$/);
-                if (postalMatch) {
-                    // Remove spaces from postal code: "L0S 1J0" -> "LOS1J0"
-                    postalCode = postalMatch[1].trim().replace(/\s+/g, '').toUpperCase();
-                    // Replace "0" with "O" in postal code if needed (L0S -> LOS)
-                    postalCode = postalCode.replace(/L0S/i, 'LOS');
+            // Match postal code pattern: L#A#A# or L#A #A#
+            const postalMatch = rest.match(/([A-Z]\d[A-Z]\s?\d[A-Z]\d)/i);
+            if (postalMatch) {
+                // Extract province (everything before postal code)
+                const postalIndex = rest.indexOf(postalMatch[0]);
+                province = rest.substring(0, postalIndex).trim().toUpperCase();
+                // Remove spaces from postal code: "L6T 5E7" -> "L6T5E7"
+                postalCode = postalMatch[1].trim().replace(/\s+/g, '').toUpperCase();
+            } else {
+                // Fallback: try to extract province and postal code separately
+                const provinceMatch = rest.match(/^([A-Z\s]+)/);
+                if (provinceMatch) {
+                    province = provinceMatch[1].trim().toUpperCase();
+                    const postalMatchFallback = rest.match(/([A-Z]\d[A-Z0-9\s]+)$/i);
+                    if (postalMatchFallback) {
+                        postalCode = postalMatchFallback[1].trim().replace(/\s+/g, '').toUpperCase();
+                    }
                 }
             }
         } else {
             // Fallback: try to extract from single string
             city = storeCityState.split(' ')[0].toUpperCase();
+            const postalMatch = storeCityState.match(/([A-Z]\d[A-Z]\s?\d[A-Z]\d)/i);
+            if (postalMatch) {
+                postalCode = postalMatch[1].trim().replace(/\s+/g, '').toUpperCase();
+            }
         }
     }
     
@@ -3264,6 +3276,7 @@ export class PetroCanadaReceiptGenerator {
         formattedPhone = formattedPhone.replace(') ', ')-');
     }
     
+    // Display address format as in screenshot: each on separate line, center-aligned
     doc.fontSize(10).font('OCR-B').text(storeAddress, { align: 'center' });
     doc.fontSize(10).font('OCR-B').text(city, { align: 'center' });
     doc.fontSize(10).font('OCR-B').text(province, { align: 'center' });
@@ -3284,37 +3297,21 @@ export class PetroCanadaReceiptGenerator {
     doc.font('OCR-B').text('818310427', { align: 'center', width: 100 });
     doc.fontSize(10).font('OCR-B').text('DATE:', leftMargin + 120, row1Y, { continued: true, width: 100 });
     doc.font('OCR-B').text(dateStr, { align: 'center', width: 100 });
-    
-    if ((receipt.paymentMethod || '').toLowerCase() === 'interac') {
       // For Interac: TIME section alone in one line
-      const row2Y = doc.y + 5;
+      const row2Y = doc.y;
       doc.fontSize(10).font('OCR-B').text('TIME:', leftMargin +10, row2Y, { continued: true, width: 100 });
       doc.font('OCR-B').text(timeStr, { align: 'center', width: 100 });
 
       // Next line: TERMINAL and TRANS# sections
       // For Petro-Canada with Interac: swap positions (TRANS# on right, TERMINAL on left)
-      const row3Y = doc.y + 5;
+      const row3Y = doc.y;
       doc.fontSize(10).font('OCR-B').text('TRANS#:', leftMargin + 120, row3Y, { continued: true, width: 100 });
       doc.font('OCR-B').text(transNum.toString(), { align: 'center', width: 100 });
       doc.fontSize(10).font('OCR-B').text('TERMINAL:', leftMargin, row3Y, { continued: true, width: 120 });
       doc.font('OCR-B').text('*****3301', { align: 'center', width: 100 });
-    } else {
-      // Original style for non-Interac
-      // Row 2: TIME and TERMINAL
-      const row2Y = doc.y + 5;
-      doc.fontSize(10).font('OCR-B').text('TIME:', leftMargin, row2Y, { continued: true, width: 100 });
-      doc.font('OCR-B').text(timeStr, { align: 'center', width: 10 });
-      doc.fontSize(10).font('OCR-B').text('TERMINAL:', leftMargin + 120, row2Y, { continued: true, width: 120 });
-      doc.font('OCR-B').text('*****3301', { align: 'center', width: 100 });
-      
-      // Row 3: TRANS#
-      const row3Y = doc.y + 5;
-      doc.fontSize(10).font('OCR-B').text('TRANS#:', leftMargin, row3Y, { continued: true, width: 100 });
-      doc.font('OCR-B').text(transNum.toString(), { align: 'center', width: 100 });
-    }
     
     // Row 4: INVOICE NO (on new line, label and value on same line)
-    const row4Y = doc.y + 5;
+    const row4Y = doc.y;
     doc.fontSize(10).font('OCR-B').text(`INVOICE NO: ${invoiceNum.toString()}`, leftMargin, row4Y);
     
     // Move to next section
@@ -3350,7 +3347,7 @@ export class PetroCanadaReceiptGenerator {
         (receipt.paymentMethod || '').toLowerCase() !== 'master' &&
         (receipt.paymentMethod || '').toLowerCase() !== 'interac'
       ) {
-        const itemLine = item.name.padEnd(20) + qtyStr.padEnd(5) + item.price.toFixed(2).padEnd(7) + total.toFixed(2);
+        const itemLine = item.name.padEnd(20) + qtyStr.padEnd(5) + total.toFixed(2).padEnd(7) + total.toFixed(2);
         doc.fontSize(10).font('OCR-B').text(itemLine, leftMargin);
       }
       
@@ -3506,6 +3503,12 @@ export class PetroCanadaReceiptGenerator {
       // No signature line for Interac per screenshot
     } else {
       // Visa/Master default layout
+      doc.fontSize(10).font('OCR-B').text(
+        'VISA',
+        leftMargin, doc.y,
+        { continued: true, width: 248 }
+      );
+      doc.font('OCR-B').text(`************${last4}`, { align: 'right', width: 248 });
       doc.fontSize(10).font('OCR-B').text('REFERENCE #:', leftMargin, doc.y, { continued: true, width: 248 });
       const refNum = Math.floor(Math.random() * 9000000000) + 1000000000;
       doc.font('OCR-B').text(`${refNum} H`, { align: 'right', width: 248 });

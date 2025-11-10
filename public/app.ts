@@ -90,7 +90,6 @@ document.addEventListener('DOMContentLoaded', async (): Promise<void> => {
     const addItemBtn = document.getElementById('addItemBtn');
     const receiptForm = document.getElementById('receiptForm') as HTMLFormElement;
     const newReceiptBtn = document.getElementById('newReceiptBtn');
-    const printBtn = document.getElementById('printBtn');
     const closeReceiptPreview = document.getElementById('closeReceiptPreview');
     const itemsList = document.getElementById('itemsList');
     const countrySelect = document.getElementById('country') as HTMLSelectElement;
@@ -110,7 +109,6 @@ document.addEventListener('DOMContentLoaded', async (): Promise<void> => {
         console.error('Receipt form not found');
     }
     if (newReceiptBtn) newReceiptBtn.addEventListener('click', resetForm);
-    if (printBtn) printBtn.addEventListener('click', printReceipt);
     if (closeReceiptPreview) closeReceiptPreview.addEventListener('click', closeReceiptPreviewHandler);
     if (itemsList) itemsList.addEventListener('input', updateTotal);
     if (countrySelect) countrySelect.addEventListener('change', filterCompaniesByCountry);
@@ -130,8 +128,8 @@ document.addEventListener('DOMContentLoaded', async (): Promise<void> => {
             const isFlyingJCanada = selectedCompany && selectedCompany.name.toLowerCase().includes('flying j') && selectedCompany.country === 'Canada';
             const paymentMethod = (document.getElementById('paymentMethod') as HTMLSelectElement)?.value || '';
             
-            // Hide Vehicle ID for Flying J Canada (but not for Visa payment method)
-            if (isFlyingJCanada && paymentMethod !== 'Visa') {
+            // Hide Vehicle ID for Flying J Canada (but not for Visa or Master payment method)
+            if (isFlyingJCanada && paymentMethod !== 'Visa' && paymentMethod !== 'Master') {
                 const vehicleIdField = document.getElementById('vehicleId') as HTMLInputElement | null;
                 const vehicleIdGroup = vehicleIdField?.closest('.form-group') as HTMLElement | null;
                 if (vehicleIdGroup) vehicleIdGroup.style.display = 'none';
@@ -855,9 +853,9 @@ function toggleCardFields(): void {
             }
             return;
         }
-        // Show vehicle/company fields for Canadian Flying J + Master (but hide Vehicle ID)
+        // Show Vehicle ID and Company Name for Canadian Flying J + Master
         if (selectedCompany && selectedCompany.name.toLowerCase().includes('flying j') && getCurrentCountry() === 'Canada' && paymentMethod === 'Master') {
-            console.log('Showing vehicle details for Canadian Flying J + Master');
+            console.log('Showing Vehicle ID and Company Name for Canadian Flying J + Master');
             vehicleDetailsRow.style.display = 'grid';
             const efsDetailsRow = document.getElementById('efsDetailsRow') as HTMLElement | null;
             const vehicleIdField = document.getElementById('vehicleId') as HTMLInputElement;
@@ -866,35 +864,42 @@ function toggleCardFields(): void {
             const vehicleIdGroup = vehicleIdField?.closest('.form-group') as HTMLElement | null;
             const dlNumberGroup = dlNumberField?.closest('.form-group') as HTMLElement | null;
             const companyNameGroup = document.getElementById('companyNameGroup') as HTMLElement | null;
-            // Hide Vehicle ID for Flying J Canada
-            if (vehicleIdGroup) vehicleIdGroup.style.display = 'none';
-            if (vehicleIdField) { vehicleIdField.required = false; vehicleIdField.removeAttribute('required'); }
-            // Show DL Number
-            if (dlNumberGroup) dlNumberGroup.style.display = 'block';
-            if (dlNumberField) { dlNumberField.disabled = false; dlNumberField.required = true; dlNumberField.setAttribute('required', 'required'); }
-            // For Company Name: only set as required if it's actually focusable
-            // Check if companyNameGroup is inside efsDetailsRow and if efsDetailsRow is hidden
-            if (companyNameGroup) {
-                companyNameGroup.style.display = 'block';
-                // Check if parent efsDetailsRow is hidden
-                const isEfsRowHidden = efsDetailsRow ? 
-                    (window.getComputedStyle(efsDetailsRow).display === 'none' || 
-                     window.getComputedStyle(efsDetailsRow).visibility === 'hidden' ||
-                     efsDetailsRow.style.display === 'none' ||
-                     efsDetailsRow.style.visibility === 'hidden') : false;
+            
+            // Hide efsDetailsRow (we'll move Company Name to vehicleDetailsRow)
+            if (efsDetailsRow) {
+                efsDetailsRow.style.display = 'none';
+            }
+            
+            // Show Vehicle ID in vehicleDetailsRow
+            if (vehicleIdGroup) vehicleIdGroup.style.display = 'block';
+            if (vehicleIdField) {
+                vehicleIdField.disabled = false;
+                vehicleIdField.required = true;
+                vehicleIdField.setAttribute('required', 'required');
+            }
+            
+            // Hide DL Number
+            if (dlNumberGroup) dlNumberGroup.style.display = 'none';
+            if (dlNumberField) {
+                dlNumberField.required = false;
+                dlNumberField.removeAttribute('required');
+            }
+            
+            // Move Company Name to vehicleDetailsRow so it appears in the same row as Vehicle ID
+            if (companyNameGroup && vehicleDetailsRow) {
+                const currentParent = companyNameGroup.parentElement;
+                // Only move if it's not already in vehicleDetailsRow
+                if (currentParent !== vehicleDetailsRow) {
+                    companyNameGroup.style.display = 'block';
+                    vehicleDetailsRow.appendChild(companyNameGroup);
+                } else {
+                    companyNameGroup.style.display = 'block';
+                }
                 
-                // Only set as required if field is actually focusable (not inside hidden container)
-                if (companyNameField && !isEfsRowHidden && companyNameField.offsetParent !== null) {
+                if (companyNameField) {
                     companyNameField.disabled = false;
                     companyNameField.required = true;
                     companyNameField.setAttribute('required', 'required');
-                } else {
-                    // Field is not focusable, don't set as required
-                    if (companyNameField) {
-                        companyNameField.disabled = false;
-                        companyNameField.required = false;
-                        companyNameField.removeAttribute('required');
-                    }
                 }
             }
             return;

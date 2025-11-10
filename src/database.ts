@@ -455,36 +455,39 @@ export function seedTravelcentersStores(): void {
   }
 
   const travelcentersStores = [
-    { storeCode: 'TA Ashland #1', address: '100 North Carter Rd', cityState: 'Ashland Virginia 23005', phone: '804-798-6011', items: 'DEF, Reefer, Diesel' },
-    { storeCode: 'TA Whitsett #2', address: '1101 NC Highway 61', cityState: 'Whitsett North Carolina 27377', phone: '336-449-6060', items: 'DEF, Reefer, Diesel' },
-    { storeCode: 'TA Brookville #3', address: '245 Allegheny Blvd.', cityState: 'Brookville Pennsylvania 15825', phone: '814-849-3051', items: 'DEF, Reefer, Diesel' },
-    { storeCode: 'TA Columbia #6', address: '2 Simpson Road', cityState: 'Columbia New Jersey 7832', phone: '908-496-4124', items: 'DEF, Reefer, Diesel' },
-    { storeCode: 'TA Eloy #7', address: '2949 North Toltec Road', cityState: 'Eloy Arizona 85131', phone: '520-466-7363', items: 'DEF, Reefer, Diesel' },
-    { storeCode: 'TA Gallup #8', address: '3404 W Historical Highway 66', cityState: 'Gallup New Mexico 87301', phone: '505-863-6801', items: 'DEF, Reefer, Diesel' },
-    { storeCode: 'TA Gary #10', address: '2510 Burr St.', cityState: 'Gary Indiana 46406', phone: '219-845-3721', items: 'DEF, Reefer, Diesel' },
-    { storeCode: 'TA Eaton #11', address: '6762 US Rte 127', cityState: 'Eaton Ohio 45320', phone: '937-456-5522', items: 'DEF, Reefer, Diesel' },
-    { storeCode: 'TA Harrisburg #12', address: '7848 Linglestown Road', cityState: 'Harrisburg Pennsylvania 17112', phone: '717-652-4556', items: 'DEF, Reefer, Diesel' },
-    { storeCode: 'TA Las Cruces #14', address: '202 N. Motel Blvd', cityState: 'Las Cruces New Mexico 88007', phone: '575-527-7400', items: 'DEF, Reefer, Diesel' },
-    { storeCode: 'TA Seville #15', address: '8834 Lake Road', cityState: 'Seville Ohio 44273', phone: '330-769-2053', items: 'DEF, Reefer, Diesel' },
-    { storeCode: 'TA Tuscaloosa #16', address: '3501 Buttermilk Road', cityState: 'Tuscaloosa Alabama 35453', phone: '205-554-0215', items: 'DEF, Reefer, Diesel' },
-    { storeCode: 'TA Baytown #17', address: '6800 Thompson Road', cityState: 'Baytown Texas 77521', phone: '281-424-7772', items: 'DEF, Reefer, Diesel' },
-    { storeCode: 'TA Concordia #18', address: '102 N W 4th Street', cityState: 'Concordia Missouri 64020', phone: '660-463-2001', items: 'DEF, Reefer, Diesel' },
-    { storeCode: 'TA Elkton #19', address: '1400 Elkton Road', cityState: 'Elkton Maryland 21921', phone: '410-398-7000', items: 'DEF, Reefer, Diesel' },
-    { storeCode: 'TA Willington #22', address: '327 Ruby Road', cityState: 'Willington Connecticut 6279', phone: '860-684-0499', items: 'DEF, Reefer, Diesel' },
-    { storeCode: 'TA Santa Rosa #23', address: '2634 Historic Route 66', cityState: 'Santa Rosa New Mexico 88435', phone: '575-935-9939', items: 'DEF, Reefer, Diesel' },
-    { storeCode: 'TA London #24', address: '940 US RT 42 NE', cityState: 'London Ohio 43140', phone: '740-852-3810', items: 'DEF, Reefer, Diesel' },
-    { storeCode: 'TA Duncan #25', address: '1402 East Main St.', cityState: 'Duncan South Carolina 29334', phone: '864-433-0711', items: 'DEF, Reefer, Diesel' },
-    { storeCode: 'TA Walton #28', address: '145 Richwood Road', cityState: 'Walton Kentucky 41094', phone: '859-485-4111', items: 'DEF, Reefer, Diesel' },
-    { storeCode: 'TA Kingsville #29', address: '5551 St Rt 193', cityState: 'Kingsville Ohio 44048', phone: '440-224-2035', items: 'DEF, Reefer, Diesel' },
-    { storeCode: 'TA Zion #30', address: '16650 W. Russell Road', cityState: 'Zion Illinois 60099', phone: '847-395-5580', items: 'DEF, Reefer, Diesel' },
-    { storeCode: 'TA Valley Grove #32', address: '270 W. Alexander Road', cityState: 'Valley Grove West Virginia 26060', phone: '304-547-1521', items: 'DEF, Reefer, Diesel' },
-    { storeCode: 'TA Earle #33', address: '408 Highway 149 North', cityState: 'Earle Arkansas 72331', phone: '870-657-2105', items: 'DEF, Reefer, Diesel' },
-    { storeCode: 'TA Effingham #35', address: '1702 West Evergreen Ave', cityState: 'Effingham Illinois 62401', phone: '217-347-7183', items: 'DEF, Reefer, Diesel' },
-    { storeCode: 'TA Oklahoma City #36', address: '801 South Council Road', cityState: 'Oklahoma City Oklahoma 73128', phone: '405-787-7411', items: 'DEF, Reefer, Diesel' },
-    { storeCode: 'TA Hebron #39', address: '10679 Lancaster Road, SE', cityState: 'Hebron Ohio 43025', phone: '740-467-2900', items: 'DEF, Reefer, Diesel' },
-    { storeCode: 'TA Coachella #41', address: '46155 Dillon Road', cityState: 'Coachella California 92236', phone: '760-342-6200', items: 'DEF, Reefer, Diesel' },
-    { storeCode: 'TA Mt. Vernon #43', address: '4510 Broadway St', cityState: 'Mt. Vernon Illinois 62864', phone: '618-244-4242', items: 'DEF, Reefer, Diesel' }
+    { storeCode: 'TA Ashland #1', address: '100 North Carter Rd', cityState: 'Ashland VA 23005', phone: '804-798-6011', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Whitsett #2', address: '1101 NC Highway 61', cityState: 'Whitsett NC 27377', phone: '336-449-6060', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Brookville #3', address: '245 Allegheny Blvd.', cityState: 'Brookville PA 15825', phone: '814-849-3051', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Columbia #6', address: '2 Simpson Road', cityState: 'Columbia NJ 7832', phone: '908-496-4124', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Eloy #7', address: '2949 North Toltec Road', cityState: 'Eloy AZ 85131', phone: '520-466-7363', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Gallup #8', address: '3404 W Historical Highway 66', cityState: 'Gallup NM 87301', phone: '505-863-6801', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Gary #10', address: '2510 Burr St.', cityState: 'Gary IN 46406', phone: '219-845-3721', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Eaton #11', address: '6762 US Rte 127', cityState: 'Eaton OH 45320', phone: '937-456-5522', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Harrisburg #12', address: '7848 Linglestown Road', cityState: 'Harrisburg PA 17112', phone: '717-652-4556', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Las Cruces #14', address: '202 N. Motel Blvd', cityState: 'Las Cruces NM 88007', phone: '575-527-7400', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Seville #15', address: '8834 Lake Road', cityState: 'Seville OH 44273', phone: '330-769-2053', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Tuscaloosa #16', address: '3501 Buttermilk Road', cityState: 'Tuscaloosa AL 35453', phone: '205-554-0215', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Baytown #17', address: '6800 Thompson Road', cityState: 'Baytown TX 77521', phone: '281-424-7772', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Concordia #18', address: '102 N W 4th Street', cityState: 'Concordia MS 64020', phone: '660-463-2001', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Elkton #19', address: '1400 Elkton Road', cityState: 'Elkton MD 21921', phone: '410-398-7000', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Willington #22', address: '327 Ruby Road', cityState: 'Willington CT 6279', phone: '860-684-0499', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Santa Rosa #23', address: '2634 Historic Route 66', cityState: 'Santa Rosa NM 88435', phone: '575-935-9939', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA London #24', address: '940 US RT 42 NE', cityState: 'London OH 43140', phone: '740-852-3810', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Duncan #25', address: '1402 East Main St.', cityState: 'Duncan SC 29334', phone: '864-433-0711', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Walton #28', address: '145 Richwood Road', cityState: 'Walton KY 41094', phone: '859-485-4111', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Kingsville #29', address: '5551 St Rt 193', cityState: 'Kingsville OH 44048', phone: '440-224-2035', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Zion #30', address: '16650 W. Russell Road', cityState: 'Zion IL 60099', phone: '847-395-5580', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Valley Grove #32', address: '270 W. Alexander Road', cityState: 'Valley Grove WV 26060', phone: '304-547-1521', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Earle #33', address: '408 Highway 149 North', cityState: 'Earle AR 72331', phone: '870-657-2105', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Effingham #35', address: '1702 West Evergreen Ave', cityState: 'Effingham IL 62401', phone: '217-347-7183', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Oklahoma City #36', address: '801 South Council Road', cityState: 'Oklahoma City OK 73128', phone: '405-787-7411', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Hebron #39', address: '10679 Lancaster Road, SE', cityState: 'Hebron OH 43025', phone: '740-467-2900', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Coachella #41', address: '46155 Dillon Road', cityState: 'Coachella CA 92236', phone: '760-342-6200', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Mt. Vernon #43', address: '4510 Broadway St', cityState: 'Mt. Vernon IL 62864', phone: '618-244-4242', items: 'DEF, Reefer, Diesel' }
   ];
+
+  // Delete existing stores for this company first to avoid duplicates
+  db.prepare('DELETE FROM stores WHERE companyId = ?').run(travelcentersCompany.id);
 
   const insert = db.prepare(`
     INSERT INTO stores (companyId, storeCode, address, cityState, phone, items)
