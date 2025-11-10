@@ -89,8 +89,7 @@ export class ONE9FuelReceiptGenerator {
       
       // Format item line: name (padded to 20) + qty (padded to 5) + price (padded to 7) + total
       // For cash advance, show the price as the price; for regular items, show price per gallon
-      const priceToShow = isCashAdvance ? item.price : item.price;
-      const itemLine = qtyStr.padEnd(5) + item.name.padEnd(20) + priceToShow.toFixed(2).padEnd(8) + total.toFixed(2);
+      const itemLine = qtyStr.padEnd(5) + item.name.padEnd(20) + total.toFixed(2).padEnd(8) + total.toFixed(2);
       doc.fontSize(10).font('OCR-B').text(itemLine, leftMargin);
       
       // Fuel details - use US units (Gallons instead of Liters) - only for non-cash advance items
@@ -98,9 +97,9 @@ export class ONE9FuelReceiptGenerator {
         const pumpNumber = item.pump !== undefined && item.pump !== null ? item.pump : Math.floor(Math.random() * 15) + 1;
         const gallons = item.quantity.toFixed(3);  // quantity is gallons
         const pricePerGallon = item.price.toFixed(3);  // price is price per gallon
-        
+
         console.log('Receipt - Item:', { pump: item.pump, qty: item.qty, pumpNumber });
-        
+
         // Align the values by using consistent padding (same as Petro-Canada style)
         doc.fontSize(10).font('OCR-B').text(` Pump:        ${pumpNumber}`, leftMargin + 35);
         doc.fontSize(10).font('OCR-B').text(` Gallons:     ${gallons}`, leftMargin + 35);
@@ -582,8 +581,7 @@ export class PilotTravelCentersReceiptGenerator {
       
       // Format item line: name (padded to 20) + qty (padded to 5) + price (padded to 7) + total
       // For cash advance, show the price as the price; for regular items, show price per gallon
-      const priceToShow = isCashAdvance ? item.price : item.price;
-      const itemLine = qtyStr.padEnd(5) + item.name.padEnd(20) + priceToShow.toFixed(2).padEnd(8) + total.toFixed(2);
+      const itemLine = qtyStr.padEnd(5) + item.name.padEnd(20) + total.toFixed(2).padEnd(8) + total.toFixed(2);
       doc.fontSize(10).font('OCR-B').text(itemLine, leftMargin);
       
       // Fuel details - use US units (Gallons instead of Liters) - only for non-cash advance items
@@ -1151,8 +1149,7 @@ export class FlyingJTravelPlazaReceiptGenerator {
       
       // Format item line: name (padded to 20) + qty (padded to 5) + price (padded to 7) + total
       // For cash advance, show the price as the price; for regular items, show price per gallon
-      const priceToShow = isCashAdvance ? item.price : item.price;
-      const itemLine = qtyStr.padEnd(5) + item.name.padEnd(20) + priceToShow.toFixed(2).padEnd(8) + total.toFixed(2);
+      const itemLine = qtyStr.padEnd(5) + item.name.padEnd(20) + total.toFixed(2).padEnd(8) + total.toFixed(2);
       doc.fontSize(10).font('OCR-B').text(itemLine, leftMargin);
       
       // Fuel details - use US units (Gallons instead of Liters) - only for non-cash advance items
@@ -2206,8 +2203,7 @@ export class TravelCentersOfAmericaReceiptGenerator {
       
       // Format item line: name (padded to 20) + qty (padded to 5) + price (padded to 7) + total
       // For cash advance, show the price as the price; for regular items, show price per gallon
-      const priceToShow = isCashAdvance ? item.price : item.price;
-      const itemLine = qtyStr.padEnd(5) + item.name.padEnd(20) +  priceToShow.toFixed(2).padEnd(8) + total.toFixed(2);
+      const itemLine = qtyStr.padEnd(5) + item.name.padEnd(20) +  total.toFixed(2).padEnd(8) + total.toFixed(2);
       doc.fontSize(10).font('OCR-B').text(itemLine, leftMargin);
       
       // Fuel details - use US units (Gallons instead of Liters) - only for non-cash advance items
@@ -2525,8 +2521,8 @@ export class HuskyReceiptGenerator {
 
       
       if (fs.existsSync(logoPath)) {
-        const logoWidth = 140;
-        const logoHeight = 50;
+        const logoWidth = 70;
+        const logoHeight = 25;
         const logoX = (doc.page.width - logoWidth) / 2;
         const currentY = doc.y;
         
@@ -3844,4 +3840,3 @@ export function getUSACompanyReceiptGenerator(companyName: string): any {
   
   return null;
 }
-
