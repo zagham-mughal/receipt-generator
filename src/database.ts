@@ -530,14 +530,14 @@ export function seedCanadianStores(): void {
   // Flying J stores (Canada) - Updated with real store data
   if (flyingJCompany) {
     const flyingJStores = [
-      { companyId: flyingJCompany.id, storeCode: 'Store 865', address: '2000 Clements Road', cityState: 'Pickering, ON L1W 4A1', phone: '(905) 428-9700', items: 'Truck Diesel, DEF Fuel Item' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 807', address: '1400 Britannia Rd E', cityState: 'Mississauga, ON L4W 1C7', phone: '(905) 564-6216', items: 'Truck Diesel, DEF Fuel Item' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 805', address: '1765 Albion Rd', cityState: 'Etobicoke, ON M9W 5S7', phone: '(416) 674-8665', items: 'Truck Diesel, DEF Fuel Item' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 862', address: '2492 Cedar Creek Road', cityState: 'Ayr, ON N0B 1E0', phone: '(519) 624-9578', items: 'Truck Diesel, DEF Fuel Item' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 825', address: '11 Sinclair Blvd.', cityState: 'Brantford, ON N3S 7X6', phone: '(865) 474-3937', items: 'Truck Diesel, DEF Fuel Item' }
+      { companyId: flyingJCompany.id, storeCode: 'Store 865', address: '2000 Clements Road', cityState: 'Pickering, ON L1W 4A1', phone: '(905) 428-9700', items: 'Truck Diesel, DEF Fuel Item, Reefer Fuel' },
+      { companyId: flyingJCompany.id, storeCode: 'Store 807', address: '1400 Britannia Rd E', cityState: 'Mississauga, ON L4W 1C7', phone: '(905) 564-6216', items: 'Truck Diesel, DEF Fuel Item, Reefer Fuel' },
+      { companyId: flyingJCompany.id, storeCode: 'Store 805', address: '1765 Albion Rd', cityState: 'Etobicoke, ON M9W 5S7', phone: '(416) 674-8665', items: 'Truck Diesel, DEF Fuel Item, Reefer Fuel' },
+      { companyId: flyingJCompany.id, storeCode: 'Store 862', address: '2492 Cedar Creek Road', cityState: 'Ayr, ON N0B 1E0', phone: '(519) 624-9578', items: 'Truck Diesel, DEF Fuel Item, Reefer Fuel' },
+      { companyId: flyingJCompany.id, storeCode: 'Store 825', address: '11 Sinclair Blvd.', cityState: 'Brantford, ON N3S 7X6', phone: '(865) 474-3937', items: 'Truck Diesel, DEF Fuel Item, Reefer Fuel' }
     ];
     // Force only two items available for Flying J Canada across all stores
-    const normalizedFjStores = flyingJStores.map(s => ({ ...s, items: 'Truck Diesel, DEF Fuel Item' }));
+    const normalizedFjStores = flyingJStores.map(s => ({ ...s, items: 'Truck Diesel, DEF Fuel Item, Reefer Fuel' }));
     canadianStores.push(...normalizedFjStores);
   }
 
@@ -592,11 +592,11 @@ export function seedCanadianStores(): void {
   // BVD Petroleum stores
   if (bvdPetroleumCompany) {
     const bvdPetroleumStores = [
-      { companyId: bvdPetroleumCompany.id, storeCode: 'BVD PETROLEUM', address: '130 Delta Park Blvd', cityState: 'Brampton, ON L6T 5M8', phone: '(905) 792-8828', items: 'Diesel' },
-      { companyId: bvdPetroleumCompany.id, storeCode: 'BVD PETROLEUM', address: '495 York Road', cityState: 'Niagara, ON L0S 1J0', phone: '(905) 684-1079', items: 'Diesel' },
-      { companyId: bvdPetroleumCompany.id, storeCode: 'BVD PETROLEUM', address: '6215 Boundary Rd', cityState: 'Cornwall, ON K6H 5R5', phone: '(613) 933-1234', items: 'Diesel' },
-      { companyId: bvdPetroleumCompany.id, storeCode: 'BVD PETROLEUM', address: '6125 Ordan Dr', cityState: 'Mississauga, ON L5T 2M7', phone: '(905) 670-1234', items: 'Diesel' },
-      { companyId: bvdPetroleumCompany.id, storeCode: 'BVD PETROLEUM', address: '7026 Industrial Dr', cityState: 'Comber, ON N0P 1J0', phone: '(519) 687-1234', items: 'Diesel' }
+      { companyId: bvdPetroleumCompany.id, storeCode: 'BVD PETROLEUM', address: '130 Delta Park Blvd', cityState: 'Brampton, ON L6T 5M8', phone: '(905) 792-8828', items: 'DIESEL' },
+      { companyId: bvdPetroleumCompany.id, storeCode: 'BVD PETROLEUM', address: '495 York Road', cityState: 'Niagara, ON L0S 1J0', phone: '(905) 684-1079', items: 'DIESEL' },
+      { companyId: bvdPetroleumCompany.id, storeCode: 'BVD PETROLEUM', address: '6215 Boundary Rd', cityState: 'Cornwall, ON K6H 5R5', phone: '(613) 933-1234', items: 'DIESEL' },
+      { companyId: bvdPetroleumCompany.id, storeCode: 'BVD PETROLEUM', address: '6125 Ordan Dr', cityState: 'Mississauga, ON L5T 2M7', phone: '(905) 670-1234', items: 'DIESEL' },
+      { companyId: bvdPetroleumCompany.id, storeCode: 'BVD PETROLEUM', address: '7026 Industrial Dr', cityState: 'Comber, ON N0P 1J0', phone: '(519) 687-1234', items: 'DIESEL' }
     ];
     canadianStores.push(...bvdPetroleumStores);
   }
@@ -605,7 +605,7 @@ export function seedCanadianStores(): void {
     insertMany(canadianStores);
     // Ensure items are restricted for Flying J Canada even if upstream data changes
     if (flyingJCompany) {
-      db.prepare('UPDATE stores SET items = ? WHERE companyId = ?').run('Truck Diesel, DEF Fuel Item', flyingJCompany.id);
+      db.prepare('UPDATE stores SET items = ? WHERE companyId = ?').run('Truck Diesel, DEF Fuel Item, Reefer Fuel', flyingJCompany.id);
     }
     console.log(`✅ Seeded ${canadianStores.length} Canadian company stores`);
   } else {

@@ -4675,14 +4675,13 @@ function updatePaymentMethodOptions(): void {
         `;
         paymentMethodSelect.value = 'Master';
     } else if (isPetroCanada) {
-        // For Petro-Canada, show Visa, Master, and Interac payment methods
+        // For Petro-Canada, show Master and Interac payment methods (Visa hidden)
         paymentMethodSelect.innerHTML = `
-            <option value="Visa">💳 Visa</option>
             <option value="Master">💳 Master</option>
             <option value="Interac">💳 Interac</option>
         `;
-        // Set Visa as default
-        paymentMethodSelect.value = 'Visa';
+        // Set Master as default
+        paymentMethodSelect.value = 'Master';
     } else {
         // For other companies, show all payment methods
         paymentMethodSelect.innerHTML = `

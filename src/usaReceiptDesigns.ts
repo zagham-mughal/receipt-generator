@@ -508,7 +508,7 @@ export class PilotTravelCentersReceiptGenerator {
       const logoPath = path.resolve(process.cwd(), 'assets/logos/pilot-logo.jpeg');
       
       if (fs.existsSync(logoPath)) {
-        const logoWidth = 320;
+        const logoWidth = 430;
         const logoHeight = 80;
         const logoX = (doc.page.width - logoWidth) / 2;
         const currentY = doc.y;
@@ -1071,8 +1071,8 @@ export class FlyingJTravelPlazaReceiptGenerator {
       const logoPath = path.resolve(process.cwd(), 'assets/logos/flying-logo.jpeg');
       
       if (fs.existsSync(logoPath)) {
-        const logoWidth = 300;
-        const logoHeight = 80;
+        const logoWidth = 150;
+        const logoHeight = 70;
         // Center the logo horizontally
         const logoX = (doc.page.width - logoWidth) / 2;
         const currentY = doc.y;
@@ -1183,7 +1183,7 @@ export class FlyingJTravelPlazaReceiptGenerator {
     
     doc.fontSize(8).font('OCR-B').text('---------------------------------------------------', leftMargin);
     
-    doc.fontSize(10).font('OCR-B').text('Total $', leftMargin, doc.y, { continued: true, width: 247 });
+    doc.fontSize(10).font('OCR-B').text('Total', leftMargin, doc.y, { continued: true, width: 247 });
     doc.font('OCR-B').text(total.toFixed(2), { align: 'right', width: 247 });
     
     doc.fontSize(8).font('OCR-B').text('---------------------------------------------------', leftMargin);
@@ -2203,7 +2203,8 @@ export class TravelCentersOfAmericaReceiptGenerator {
       
       // Format item line: name (padded to 20) + qty (padded to 5) + price (padded to 7) + total
       // For cash advance, show the price as the price; for regular items, show price per gallon
-      const itemLine = qtyStr.padEnd(5) + item.name.padEnd(20) +  total.toFixed(2).padEnd(8) + total.toFixed(2);
+      const priceToShow = isCashAdvance ? item.price : item.price;
+      const itemLine = qtyStr.padEnd(5) + item.name.padEnd(20) +  priceToShow.toFixed(2).padEnd(8) + total.toFixed(2);
       doc.fontSize(10).font('OCR-B').text(itemLine, leftMargin);
       
       // Fuel details - use US units (Gallons instead of Liters) - only for non-cash advance items
@@ -2625,22 +2626,19 @@ export class HuskyReceiptGenerator {
 
       doc.fontSize(10).font('OCR-B').text(`   Pump:   ${pumpNumber}`, leftMargin + 16);
       doc.fontSize(10).font('OCR-B').text(`   Liters: ${liters}`, leftMargin + 16);
+      doc.fontSize(10).font('OCR-B').text(`   Price/Liter: ${liters}`, leftMargin + 16);
 
       // Show price per liter only for non-TCH payment methods
       if (!isTCHPayment) {
-        // Show label "Price/Liter" if payment method is 'Master', otherwise use '$/L:'
-        const pricePerLiterLabel = (receipt.paymentMethod && receipt.paymentMethod.toLowerCase() === 'master') ? 'Price/Liter:' : '$/L:';
-        const pricePerLiter = `$ ${item.price.toFixed(3)}`;
-        doc.fontSize(10).font('OCR-B').text(`   ${pricePerLiterLabel.padEnd(8)}${pricePerLiter}`, leftMargin + 16);
+        doc.fontSize(8).font('OCR-B').text('---------------------------------------------------', leftMargin);
       }
-      doc.fontSize(8).font('OCR-B').text('---------------------------------------------------', leftMargin);
       doc.moveDown(0.3);
     });
-    
+
     // Calculate total for payment sections
     const salesTax = 0.00;
     const total = subtotal + salesTax;
-    
+
     // Totals - skip for TCH payment method
     if (receipt.paymentMethod !== 'TCH') {
       doc.fontSize(10).font('OCR-B').text('Subtotal', leftMargin, doc.y, { continued: true, width: 248 });
@@ -2661,9 +2659,9 @@ export class HuskyReceiptGenerator {
       doc.fontSize(10).font('OCR-B').text('ODOM:', leftMargin, doc.y, { continued: true, width: 248 });
       doc.font('OCR-B').text('1234', { align: 'right', width: 248 });
       doc.moveDown(1.5);
-      
+
       doc.fontSize(10).font('OCR-B').text('PreAuth Completion', leftMargin);
-      
+
       const last4 = receipt.cardLast4 || '4577';
       // Masked card and Exp on the same line
       doc.fontSize(10).font('OCR-B').text(`#***************${last4}`, leftMargin, doc.y, { continued: true, width: 248 });
