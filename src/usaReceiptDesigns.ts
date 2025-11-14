@@ -358,9 +358,9 @@ export class ONE9FuelReceiptGenerator {
       const companyName = receipt.driverCompanyName || 'mcmp';
       
       doc.fontSize(9).font('OCR-B').text(`VehicleID`, leftMargin, doc.y, { continued: true });
-      doc.text(vehicleId, leftMargin + 5);
+      doc.text(vehicleId, leftMargin + 40);
       doc.fontSize(9).font('OCR-B').text(`CompanyName`, leftMargin, doc.y, { continued: true });
-      doc.text(companyName, leftMargin + 25);
+      doc.text(companyName, leftMargin + 30);
       doc.fontSize(9).font('OCR-B').text(`Odometer`, leftMargin);
       doc.fontSize(9).font('OCR-B').text(`TripNumber`, leftMargin);
       doc.fontSize(9).font('OCR-B').text(`TrailerID`, leftMargin);
@@ -1646,7 +1646,7 @@ export class LovesTravelStopsReceiptGenerator {
     doc.fontSize(7).font('OCR-B').text('----------------------------------------------------------', leftMargin);
     
     // Table header - Petro-Canada style (QTY first, then NAME)
-    const headerLine = 'Qty'.padEnd(5) + 'Name'.padEnd(20) + 'Price'.padEnd(8) + 'Total';
+    const headerLine = 'Qty'.padEnd(5) + 'Name'.padEnd(20) + 'Price'.padEnd(10) + 'Total';
     doc.fontSize(10).font('OCR-B').text(headerLine, leftMargin);
     doc.fontSize(7).font('OCR-B').text('----------------------------------------------------------', leftMargin);
 
@@ -1674,7 +1674,9 @@ export class LovesTravelStopsReceiptGenerator {
       // Format item line: name (padded to 20) + qty (padded to 5) + price (padded to 7) + total
       // For Loves, show empty price; for cash advance, show the price as the price; for regular items, show price per gallon
       const priceToShow = ''; // Empty for Loves - show blank Price
-      const itemLine = qtyStr.padEnd(5) +  item.name.padEnd(20) + priceToShow.padEnd(8) + total.toFixed(2);
+      // For CASH ADVANCE, show price in the Price column; otherwise, keep blank
+      const priceField = isCashAdvance ? item.price.toFixed(2) : '';
+      const itemLine = qtyStr.padEnd(5) +  item.name.padEnd(20) + priceField.padEnd(10) + total.toFixed(2);
       doc.fontSize(10).font('OCR-B').text(itemLine, leftMargin);
       
       // Fuel details - use US units (Gallons instead of Liters) - only for non-cash advance items
@@ -1724,8 +1726,8 @@ export class LovesTravelStopsReceiptGenerator {
       doc.fontSize(9).font('OCR-B').text('Received:', { align: 'left' });
       
       // Show EFS LLC Check with total amount aligned to the right
-      doc.fontSize(9).font('OCR-B').text('EFS LLC Check', leftMargin + 5, doc.y, { continued: true, width: 247 });
-      doc.text(total.toFixed(2), { align: 'right', width: 247 });
+      doc.fontSize(9).font('OCR-B').text('EFS LLC Check', leftMargin + 5, doc.y, { continued: true, width: 245 });
+      doc.text(total.toFixed(2), { align: 'right', width: 245 });
       
       // Generate random auth number (6 digits with leading zeros) and invoice number (5 digits)
       const authNum = Math.floor(Math.random() * 999999); // 0-999999
@@ -1971,7 +1973,12 @@ export class LovesTravelStopsReceiptGenerator {
       // Verified by PIN
       doc.fontSize(9).font('OCR-B').text('Verified by PIN', leftMargin);
       doc.moveDown(1);
-      
+      // Show signature line and label at bottom if no signature image
+      doc.moveDown(1.5);
+      doc.fontSize(9).font('OCR-B').text('______________________________________________', leftMargin);
+      doc.moveDown(0.1);
+      doc.fontSize(9).font('OCR-B').text('Signature:', leftMargin);
+      doc.moveDown(1);
       // Add signature image only if checkbox is checked
       const includeSignature = receipt.includeSignature;
       if (includeSignature) {
@@ -2624,9 +2631,9 @@ export class HuskyReceiptGenerator {
       const pumpNumber = item.pump !== undefined && item.pump !== null ? item.pump : Math.floor(Math.random() * 20) + 1;
       const liters = item.quantity.toFixed(3);
 
-      doc.fontSize(10).font('OCR-B').text(`   Pump:   ${pumpNumber}`, leftMargin + 16);
-      doc.fontSize(10).font('OCR-B').text(`   Liters: ${liters}`, leftMargin + 16);
-      doc.fontSize(10).font('OCR-B').text(`   Price/Liter: ${liters}`, leftMargin + 16);
+      doc.fontSize(10).font('OCR-B').text(`   Pump:        ${pumpNumber}`, leftMargin + 16);
+      doc.fontSize(10).font('OCR-B').text(`   Liters:      ${liters}`, leftMargin + 16);
+      doc.fontSize(10).font('OCR-B').text(`   Price/Liter: $${liters}`, leftMargin + 16);
 
       // Show price per liter only for non-TCH payment methods
       if (!isTCHPayment) {
