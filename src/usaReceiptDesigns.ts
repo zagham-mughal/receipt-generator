@@ -555,7 +555,7 @@ export class PilotTravelCentersReceiptGenerator {
     doc.fontSize(7).font('OCR-B').text('----------------------------------------------------------', leftMargin);
     
     // Table header - Petro-Canada style (QTY first, then NAME)
-    const headerLine = 'Qty'.padEnd(5) + 'Name'.padEnd(20) + 'Price'.padEnd(8) + 'Total';
+    const headerLine = 'Qty'.padEnd(5) + 'Name'.padEnd(20) + 'Price'.padEnd(9) + 'Total';
     doc.fontSize(10).font('OCR-B').text(headerLine, leftMargin);
     doc.fontSize(7).font('OCR-B').text('----------------------------------------------------------', leftMargin);
 
@@ -581,7 +581,7 @@ export class PilotTravelCentersReceiptGenerator {
       
       // Format item line: name (padded to 20) + qty (padded to 5) + price (padded to 7) + total
       // For cash advance, show the price as the price; for regular items, show price per gallon
-      const itemLine = qtyStr.padEnd(5) + item.name.padEnd(20) + total.toFixed(2).padEnd(8) + total.toFixed(2);
+      const itemLine = qtyStr.padEnd(5) + item.name.padEnd(20) + total.toFixed(2).padEnd(9) + total.toFixed(2);
       doc.fontSize(10).font('OCR-B').text(itemLine, leftMargin);
       
       // Fuel details - use US units (Gallons instead of Liters) - only for non-cash advance items
@@ -1123,7 +1123,7 @@ export class FlyingJTravelPlazaReceiptGenerator {
  
     doc.fontSize(8).font('OCR-B').text('---------------------------------------------------', leftMargin);
     // Column headers - Petro-Canada style (QTY first, then NAME)
-    const headerLine = 'Qty'.padEnd(5) + 'Name'.padEnd(20) + 'Price'.padEnd(9) + 'Total';
+    const headerLine = 'Qty'.padEnd(5) + 'Name'.padEnd(20) + 'Price'.padEnd(10) + 'Total';
     doc.fontSize(10).font('OCR-B').text(headerLine, leftMargin);
     doc.fontSize(8).font('OCR-B').text('---------------------------------------------------', leftMargin);
 
@@ -1149,7 +1149,7 @@ export class FlyingJTravelPlazaReceiptGenerator {
       
       // Format item line: name (padded to 20) + qty (padded to 5) + price (padded to 7) + total
       // For cash advance, show the price as the price; for regular items, show price per gallon
-      const itemLine = qtyStr.padEnd(5) + item.name.padEnd(20) + total.toFixed(2).padEnd(8) + total.toFixed(2);
+      const itemLine = qtyStr.padEnd(5) + item.name.padEnd(20) + total.toFixed(2).padEnd(10) + total.toFixed(2);
       doc.fontSize(10).font('OCR-B').text(itemLine, leftMargin);
       
       // Fuel details - use US units (Gallons instead of Liters) - only for non-cash advance items
@@ -1175,16 +1175,16 @@ export class FlyingJTravelPlazaReceiptGenerator {
     const salesTax = 0.00;
     const total = subtotal + salesTax;
 
-    doc.fontSize(10).font('OCR-B').text('Subtotal', leftMargin, doc.y, { continued: true, width: 247 });
-    doc.font('OCR-B').text(subtotal.toFixed(2), { align: 'right', width: 247 });
+    doc.fontSize(10).font('OCR-B').text('Subtotal', leftMargin, doc.y, { continued: true, width: 245 });
+    doc.font('OCR-B').text(subtotal.toFixed(2), { align: 'right', width: 245 });
     
-    doc.fontSize(10).font('OCR-B').text('Sales Tax', leftMargin, doc.y, { continued: true, width: 247 });
-    doc.font('OCR-B').text(salesTax.toFixed(2), { align: 'right', width: 247 });
+    doc.fontSize(10).font('OCR-B').text('Sales Tax', leftMargin, doc.y, { continued: true, width: 245 });
+    doc.font('OCR-B').text(salesTax.toFixed(2), { align: 'right', width: 245 });
     
     doc.fontSize(8).font('OCR-B').text('---------------------------------------------------', leftMargin);
     
-    doc.fontSize(10).font('OCR-B').text('Total', leftMargin, doc.y, { continued: true, width: 247 });
-    doc.font('OCR-B').text(total.toFixed(2), { align: 'right', width: 247 });
+    doc.fontSize(10).font('OCR-B').text('Total', leftMargin, doc.y, { continued: true, width: 245 });
+    doc.font('OCR-B').text(total.toFixed(2), { align: 'right', width: 245 });
     
     doc.fontSize(8).font('OCR-B').text('---------------------------------------------------', leftMargin);
     doc.moveDown(0.3);
@@ -1194,8 +1194,8 @@ export class FlyingJTravelPlazaReceiptGenerator {
       if (receipt.paymentMethod === 'TCH') {
         // Add "Received" text for TCH payment
         doc.fontSize(10).font('OCR-B').text('Received', leftMargin);
-        doc.fontSize(10).font('OCR-B').text(`  TCH Card`, leftMargin, doc.y, { continued: true, width: 247 });
-        doc.font('OCR-B').text(total.toFixed(2), { align: 'right', width: 247 });
+        doc.fontSize(10).font('OCR-B').text(`  TCH Card`, leftMargin, doc.y, { continued: true, width: 245 });
+        doc.font('OCR-B').text(total.toFixed(2), { align: 'right', width: 245 });
         
         const last4 = receipt.cardLast4 || '4551';
         const entryMethod = receipt.cardEntryMethod === 'INSERT' ? 'INSERT' : 
@@ -1261,14 +1261,14 @@ export class FlyingJTravelPlazaReceiptGenerator {
         const vehicleId = receipt.vehicleId || 'm101';
         const companyName = receipt.driverCompanyName || 'mcmp';
         
-        doc.fontSize(10).font('OCR-B').text('VehicleID', leftMargin, doc.y, { continued: true, width: 247 });
-        doc.text(vehicleId, { align: 'right', width: 247 });
+        doc.fontSize(10).font('OCR-B').text('VehicleID', leftMargin, doc.y, { continued: true, width: 245 });
+        doc.text(vehicleId, { align: 'right', width: 245 });
 
-        doc.fontSize(10).font('OCR-B').text('CompanyName', leftMargin, doc.y, { continued: true, width: 247 });
-        doc.text(companyName, { align: 'right', width: 247 });
+        doc.fontSize(10).font('OCR-B').text('CompanyName', leftMargin, doc.y, { continued: true, width: 245 });
+        doc.text(companyName, { align: 'right', width: 245 });
 
-        doc.fontSize(10).font('OCR-B').text('Odometer', leftMargin, doc.y, { continued: true, width: 247 });
-        doc.text('', { align: 'right', width: 247 });
+        doc.fontSize(10).font('OCR-B').text('Odometer', leftMargin, doc.y, { continued: true, width: 245 });
+        doc.text('', { align: 'right', width: 245 });
         doc.moveDown(2);
         
         // Add signature image if checkbox is checked
@@ -1315,8 +1315,8 @@ export class FlyingJTravelPlazaReceiptGenerator {
 
         // Top line: Received + payment type + amount right aligned
         doc.fontSize(10).font('OCR-B').text('Received', leftMargin);
-        doc.fontSize(10).font('OCR-B').text(`  ${paymentType}`, leftMargin, doc.y, { continued: true, width: 247 });
-        doc.font('OCR-B').text(total.toFixed(2), { align: 'right', width: 247 });
+        doc.fontSize(10).font('OCR-B').text(`  ${paymentType}`, leftMargin, doc.y, { continued: true, width: 245 });
+        doc.font('OCR-B').text(total.toFixed(2), { align: 'right', width: 245 });
 
         // Date line: mm/dd/yyyy hh:mm:ss (only show for Cash, not EFS)
         if (!isEfs) {
@@ -1336,13 +1336,13 @@ export class FlyingJTravelPlazaReceiptGenerator {
           
           // Display Vehicle ID and Company Name in the same format as other receipts
           if (vehicleId) {
-            doc.fontSize(10).font('OCR-B').text('VehicleID', leftMargin, doc.y, { continued: true, width: 247 });
-            doc.text(vehicleId, { align: 'right', width: 247 });
+            doc.fontSize(10).font('OCR-B').text('VehicleID', leftMargin, doc.y, { continued: true, width: 245 });
+            doc.text(vehicleId, { align: 'right', width: 2475 });
           }
           
           if (companyName) {
-            doc.fontSize(10).font('OCR-B').text('CompanyName', leftMargin, doc.y, { continued: true, width: 247 });
-            doc.text(companyName, { align: 'right', width: 247 });
+            doc.fontSize(10).font('OCR-B').text('CompanyName', leftMargin, doc.y, { continued: true, width: 245 });
+            doc.text(companyName, { align: 'right', width: 245 });
           }
         }
 
@@ -1702,14 +1702,14 @@ export class LovesTravelStopsReceiptGenerator {
     const salesTax = 0.00;
     const total = subtotal + salesTax;
 
-    doc.fontSize(9).font('OCR-B').text('Subtotal', leftMargin, doc.y, { continued: true, width: 247 });
-    doc.text(subtotal.toFixed(2), { align: 'right', width: 247 });
+    doc.fontSize(9).font('OCR-B').text('Subtotal', leftMargin, doc.y, { continued: true, width: 245 });
+    doc.text(subtotal.toFixed(2), { align: 'right', width: 245 });
     
-    doc.fontSize(9).text('Sales Tax', leftMargin, doc.y, { continued: true, width: 247 });
-    doc.text(salesTax.toFixed(2), { align: 'right', width: 247 });
+    doc.fontSize(9).text('Sales Tax', leftMargin, doc.y, { continued: true, width: 245 });
+    doc.text(salesTax.toFixed(2), { align: 'right', width: 245 });
     
-    doc.fontSize(9).font('OCR-B').text('Total', leftMargin, doc.y, { continued: true, width: 247 });
-    doc.text(total.toFixed(2), { align: 'right', width: 247 });
+    doc.fontSize(9).font('OCR-B').text('Total', leftMargin, doc.y, { continued: true, width: 245 });
+    doc.text(total.toFixed(2), { align: 'right', width: 245 });
     
     doc.fontSize(7).font('OCR-B').text('-----------------------------------------------------------', leftMargin);
     doc.moveDown(0.3);
@@ -1718,8 +1718,8 @@ export class LovesTravelStopsReceiptGenerator {
     if (receipt.paymentMethod === 'Cash') {
       // Cash payment - show amount in front of Cash (right-aligned)
       doc.fontSize(9).font('OCR-B').text('Received:', { align: 'left' });
-      doc.fontSize(9).font('OCR-B').text('Cash', leftMargin + 5, doc.y, { continued: true, width: 247 });
-      doc.text(total.toFixed(2), { align: 'right', width: 247 });
+      doc.fontSize(9).font('OCR-B').text('Cash', leftMargin + 5, doc.y, { continued: true, width: 245 });
+      doc.text(total.toFixed(2), { align: 'right', width: 245 });
       doc.moveDown(1);
     } else if (receipt.paymentMethod === 'EFS') {
       // EFS payment - match screenshot format exactly
@@ -1826,8 +1826,8 @@ export class LovesTravelStopsReceiptGenerator {
       doc.fontSize(9).font('OCR-B').text('Received:', { align: 'left' });
       
       // Show TCH Fleet with total amount aligned to the right
-      doc.fontSize(9).font('OCR-B').text('TCH Fleet', leftMargin + 5, doc.y, { continued: true, width: 247 });
-      doc.text(total.toFixed(2), { align: 'right', width: 247 });
+      doc.fontSize(9).font('OCR-B').text('TCH Fleet', leftMargin + 5, doc.y, { continued: true, width: 245 });
+      doc.text(total.toFixed(2), { align: 'right', width: 245 });
       
       // Card details
       const last4 = receipt.cardLast4 || '4544';
@@ -1849,8 +1849,8 @@ export class LovesTravelStopsReceiptGenerator {
       doc.fontSize(9).font('OCR-B').text('Received:', { align: 'left' });
       
       // Show Visa with total amount aligned to the right
-      doc.fontSize(9).font('OCR-B').text('Visa', leftMargin + 5, doc.y, { continued: true, width: 247 });
-      doc.text(total.toFixed(2), { align: 'right', width: 247 });
+      doc.fontSize(9).font('OCR-B').text('Visa', leftMargin + 5, doc.y, { continued: true, width: 245 });
+      doc.text(total.toFixed(2), { align: 'right', width: 245 });
       doc.moveDown(0.5);
       
       // Card details on next line - card number on left, entry method on right
@@ -1946,8 +1946,8 @@ export class LovesTravelStopsReceiptGenerator {
       doc.fontSize(9).font('OCR-B').text('Received:', leftMargin);
       
       // MASTERCARD with amount on the right
-      doc.fontSize(9).font('OCR-B').text('MASTERCARD', leftMargin + 5, doc.y, { continued: true, width: 247 });
-      doc.text(total.toFixed(2), { align: 'right', width: 247 });
+      doc.fontSize(9).font('OCR-B').text('MASTERCARD', leftMargin + 5, doc.y, { continued: true, width: 245 });
+      doc.text(total.toFixed(2), { align: 'right', width: 245 });
       doc.moveDown(0.3);
       
       // Card number with INSERT
@@ -2184,7 +2184,7 @@ export class TravelCentersOfAmericaReceiptGenerator {
     doc.moveDown(0.3);
 
     // Table header - Petro-Canada style (QTY first, then NAME)
-    const headerLine = 'Qty'.padEnd(5) + 'Name'.padEnd(20) + 'Price'.padEnd(8) + 'Total';
+    const headerLine = 'Qty'.padEnd(5) + 'Name'.padEnd(20) + 'Price'.padEnd(9) + 'Total';
     doc.fontSize(10).font('OCR-B').text(headerLine, leftMargin);
     doc.fontSize(7).font('OCR-B').text('----------------------------------------------------------', leftMargin);
 
@@ -2211,7 +2211,7 @@ export class TravelCentersOfAmericaReceiptGenerator {
       // Format item line: name (padded to 20) + qty (padded to 5) + price (padded to 7) + total
       // For cash advance, show the price as the price; for regular items, show price per gallon
       const priceToShow = isCashAdvance ? item.price : item.price;
-      const itemLine = qtyStr.padEnd(5) + item.name.padEnd(20) +  priceToShow.toFixed(2).padEnd(8) + total.toFixed(2);
+      const itemLine = qtyStr.padEnd(5) + item.name.padEnd(20) +  priceToShow.toFixed(2).padEnd(9) + total.toFixed(2);
       doc.fontSize(10).font('OCR-B').text(itemLine, leftMargin);
       
       // Fuel details - use US units (Gallons instead of Liters) - only for non-cash advance items
@@ -2590,7 +2590,7 @@ export class HuskyReceiptGenerator {
     doc.moveDown(0.3);
     
     // Column headers - match USA format exactly
-    doc.fontSize(10).font('OCR-B').text('Qty Name                Price     Total', leftMargin);
+    doc.fontSize(10).font('OCR-B').text('Qty Name               Price       Total', leftMargin);
     doc.fontSize(8).font('OCR-B').text('---------------------------------------------------', leftMargin);
 
     // Calculate subtotal (do not include "cash advance" items)
@@ -2622,7 +2622,7 @@ export class HuskyReceiptGenerator {
           qtyStr.padEnd(4) + // always 3 spaces for qty
           nameStr.padEnd(18).slice(0, 18) + // force name to 18 chars
           `$ ${total.toFixed(2)}`.padStart(8) + // price (3 decimals) with $ sign
-          `$ ${total.toFixed(2)}`.padStart(10); // total (2 decimals) with $ sign
+          `$ ${total.toFixed(2)}`.padStart(11); // total (2 decimals) with $ sign
       }
 
       doc.fontSize(10).font('OCR-B').text(line, leftMargin);
@@ -3020,10 +3020,10 @@ export class CanadianFlyingJReceiptGenerator {
     // Transaction number - match USA format exactly
     const transactionNum = `${Math.floor(Math.random() * 9000000) + 1000000}`;
     doc.fontSize(10).font('OCR-B').text(`Transaction #:  ${transactionNum}`, leftMargin, doc.y, { continued: true, width: 220 })
-    doc.fontSize(8).font('OCR-B').text('--------------------------------------------------', leftMargin);
+    doc.fontSize(8).font('OCR-B').text('---------------------------------------------------', leftMargin);
     
     // Column headers - match USA format exactly
-    doc.fontSize(10).font('OCR-B').text('Qty Name                Price     Total', leftMargin);
+    doc.fontSize(10).font('OCR-B').text('Qty Name                Price      Total', leftMargin);
     doc.fontSize(8).font('OCR-B').text('---------------------------------------------------', leftMargin);
 
     // Calculate subtotal
@@ -3047,7 +3047,7 @@ export class CanadianFlyingJReceiptGenerator {
         qtyStr.padEnd(4) +
         nameStr.padEnd(18).slice(0, 18) +
         pricePerUnit.padStart(8) +
-        totalStr.padStart(10);
+        totalStr.padStart(11);
       doc.fontSize(10).font('OCR-B').text(line, leftMargin);
 
       // Fuel details: Pump / Liters / $/L underneath (same indent as Petro-Canada/Husky style)
@@ -3062,24 +3062,24 @@ export class CanadianFlyingJReceiptGenerator {
     });
 
     // Separator - match USA format exactly
-    doc.fontSize(8).font('OCR-B').text('---------------------------------------------------', leftMargin);
+    doc.fontSize(8).font('OCR-B').text('----------------------------------------------------', leftMargin);
     
     // Totals - match USA format exactly
     const salesTax = 0.00;
     const total = subtotal + salesTax;
 
-    doc.fontSize(10).font('OCR-B').text('Subtotal', leftMargin, doc.y, { continued: true, width: 248 });
-    doc.font('OCR-B').text(subtotal.toFixed(2), { align: 'right', width: 248 });
+    doc.fontSize(10).font('OCR-B').text('Subtotal', leftMargin, doc.y, { continued: true, width: 247 });
+    doc.font('OCR-B').text(subtotal.toFixed(2), { align: 'right', width: 247 });
     
-    doc.fontSize(10).font('OCR-B').text('Sales Tax', leftMargin, doc.y, { continued: true, width: 248 });
-    doc.font('OCR-B').text(salesTax.toFixed(2), { align: 'right', width: 248 });
+    doc.fontSize(10).font('OCR-B').text('Sales Tax', leftMargin, doc.y, { continued: true, width: 247 });
+    doc.font('OCR-B').text(salesTax.toFixed(2), { align: 'right', width: 247 });
     
-    doc.fontSize(8).font('OCR-B').text('---------------------------------------------------', leftMargin);
+    doc.fontSize(8).font('OCR-B').text('----------------------------------------------------', leftMargin);
     
-    doc.fontSize(10).font('OCR-B').text('Total $', leftMargin, doc.y, { continued: true, width: 248 });
-    doc.font('OCR-B').text(total.toFixed(2), { align: 'right', width: 248 });
+    doc.fontSize(10).font('OCR-B').text('Total $', leftMargin, doc.y, { continued: true, width: 247 });
+    doc.font('OCR-B').text(total.toFixed(2), { align: 'right', width: 247 });
     
-    doc.fontSize(8).font('OCR-B').text('---------------------------------------------------', leftMargin);
+    doc.fontSize(8).font('OCR-B').text('----------------------------------------------------', leftMargin);
     doc.moveDown(0.3);
 
     // Payment section - match USA format exactly
