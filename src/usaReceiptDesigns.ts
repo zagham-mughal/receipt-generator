@@ -2555,6 +2555,7 @@ export class HuskyReceiptGenerator {
     // Text after logo - match screenshot
     // Show city/state prominently, as requested
     // Display dynamic city/state prominently (centered)
+    doc.moveDown(1);
     const prominentCity = (receipt.companyData?.city || 'MISSISSAUGA ON L5S 1E1').split(' ')[0] + ' ' + (receipt.companyData?.city || 'MISSISSAUGA ON L5S 1E1').split(' ')[1];
     doc.fontSize(16).font('OCR-B').text(`${prominentCity} HUSKY`, { align: 'center' });
     doc.fontSize(16).font('OCR-B').text('TC/ESSO', leftMargin + 10, doc.y, { align: 'left' });
@@ -2571,7 +2572,7 @@ export class HuskyReceiptGenerator {
     doc.moveDown(1);
 
     // Transaction details - match screenshot exactly
-    doc.fontSize(10).font('OCR-B').text('GST# 104885132   Merchant ID:4102536704', leftMargin);
+    doc.fontSize(10).font('OCR-B').text('GST# 104885132   Merchant ID:4102536', leftMargin + 10);
     
     // Optional suspended line (hidden for Master and TCH)
     if ((receipt.paymentMethod || '').toLowerCase() !== 'master' && (receipt.paymentMethod || '').toLowerCase() !== 'tch' && (receipt.paymentMethod || '').toLowerCase() !== 'interac') {
@@ -2664,7 +2665,7 @@ export class HuskyReceiptGenerator {
     if (receipt.paymentMethod === 'TCH') {
       // PreAuth Completion format - match screenshot exactly
       doc.fontSize(10).font('OCR-B').text('ODOM:', leftMargin, doc.y, { continued: true, width: 248 });
-      doc.font('OCR-B').text('1234', { align: 'right', width: 248 });
+      doc.font('OCR-B').text('1234', 170);
       doc.moveDown(1.5);
 
       doc.fontSize(10).font('OCR-B').text('PreAuth Completion', leftMargin);
@@ -2672,7 +2673,7 @@ export class HuskyReceiptGenerator {
       const last4 = receipt.cardLast4 || '4577';
       // Masked card and Exp on the same line
       doc.fontSize(10).font('OCR-B').text(`#***************${last4}`, leftMargin, doc.y, { continued: true, width: 248 });
-      doc.font('OCR-B').text('Exp */* S', { align: 'right', width: 248 });
+      doc.font('OCR-B').text('Exp */* S', 30);
 
       const now = new Date();
 
@@ -2689,7 +2690,7 @@ export class HuskyReceiptGenerator {
       // REG# left and AUTH # right
       const authTch = Math.floor(Math.random() * 900000) + 100000; // 6 digits
       doc.fontSize(10).font('OCR-B').text('REG#: 71', leftMargin, doc.y, { continued: true, width: 248 });
-      doc.font('OCR-B').text(`AUTH #: ${authTch}`, { align: 'right', width: 248 });
+      doc.font('OCR-B').text(`AUTH #: ${authTch}`, 60);
       doc.moveDown(1);
 
       // Separator line
@@ -3054,15 +3055,15 @@ export class CanadianFlyingJReceiptGenerator {
       const pumpNumber = item.pump !== undefined && item.pump !== null ? item.pump : Math.floor(Math.random() * 20) + 1;
       const liters = item.quantity.toFixed(3);
       const pricePerLiter = item.price.toFixed(3);
-      doc.fontSize(10).font('OCR-B').text(`   Pump:   ${pumpNumber}`, leftMargin + 16);
-      doc.fontSize(10).font('OCR-B').text(`   Liters: ${liters}`, leftMargin + 16);
-      doc.fontSize(10).font('OCR-B').text(`   $/L:    ${pricePerLiter}`, leftMargin + 16);
+      doc.fontSize(10).font('OCR-B').text(`   Pump:        ${pumpNumber}`, leftMargin + 24);
+      doc.fontSize(10).font('OCR-B').text(`   Liters:      ${liters}`, leftMargin + 22);
+      doc.fontSize(10).font('OCR-B').text(`   $/L:         ${pricePerLiter}`, leftMargin + 26);
 
       doc.moveDown(0.3);
     });
 
     // Separator - match USA format exactly
-    doc.fontSize(8).font('OCR-B').text('----------------------------------------------------', leftMargin);
+    doc.fontSize(8).font('OCR-B').text('---------------------------------------------------', leftMargin);
     
     // Totals - match USA format exactly
     const salesTax = 0.00;
@@ -3074,12 +3075,12 @@ export class CanadianFlyingJReceiptGenerator {
     doc.fontSize(10).font('OCR-B').text('Sales Tax', leftMargin, doc.y, { continued: true, width: 247 });
     doc.font('OCR-B').text(salesTax.toFixed(2), { align: 'right', width: 247 });
     
-    doc.fontSize(8).font('OCR-B').text('----------------------------------------------------', leftMargin);
+    doc.fontSize(8).font('OCR-B').text('---------------------------------------------------', leftMargin);
     
     doc.fontSize(10).font('OCR-B').text('Total $', leftMargin, doc.y, { continued: true, width: 247 });
     doc.font('OCR-B').text(total.toFixed(2), { align: 'right', width: 247 });
     
-    doc.fontSize(8).font('OCR-B').text('----------------------------------------------------', leftMargin);
+    doc.fontSize(8).font('OCR-B').text('---------------------------------------------------', leftMargin);
     doc.moveDown(0.3);
 
     // Payment section - match USA format exactly
@@ -3425,9 +3426,6 @@ export class PetroCanadaReceiptGenerator {
       doc.fontSize(12).font('OCR-B').text(purchaseLine, leftMargin);
       doc.fontSize(12).font('OCR-B').text('$ ' + subtotal.toFixed(2), { align: 'right', width: 248 });
 
-    
-    doc.moveDown(1);
-
     // Payment Details Section - match screenshot exactly
     const last4 = receipt.cardLast4 || '9211';
     
@@ -3438,19 +3436,19 @@ export class PetroCanadaReceiptGenerator {
         leftMargin, doc.y,
         { continued: true, width: 248 }
       );
-      doc.font('OCR-B').text(`************${last4}`, { align: 'right', width: 248 });
+      doc.font('OCR-B').text(`************${last4}`, 80);
       
       // REFERENCE # with " C" suffix
       doc.fontSize(10).font('OCR-B').text('REFERENCE #:', leftMargin, doc.y, { continued: true, width: 248 });
       const refNum = Math.floor(Math.random() * 9000000000) + 1000000000;
-      doc.font('OCR-B').text(`${refNum} C`, { align: 'right', width: 248 });
+      doc.font('OCR-B').text(`${refNum} C`, { align: 'center', width: 248 });
       
       // AUTH # alphanumeric (6 chars, e.g., 05388Z)
       doc.fontSize(10).font('OCR-B').text('AUTH #:', leftMargin, doc.y, { continued: true, width: 248 });
       const authDigits = Math.floor(Math.random() * 90000) + 10000; // 5 digits
       const authLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26)); // Random letter A-Z
       const authCode = `${authDigits.toString().padStart(5, '0')}${authLetter}`;
-      doc.font('OCR-B').text(authCode, { align: 'right', width: 248 });
+      doc.font('OCR-B').text(authCode, { align: 'center', width: 248 });
       
       doc.moveDown(0.5);
       
@@ -3542,9 +3540,9 @@ export class PetroCanadaReceiptGenerator {
     // Bottom section varies by payment method (screenshot-specific for Interac)
     if (paymentMethod === 'Interac') {
       // Interac-specific bottom section per screenshot
-      doc.fontSize(12).font('OCR-B').text('FINAL SALE', { align: 'center' });
-      doc.fontSize(12).font('OCR-B').text('NO REFUND', { align: 'center' });
-      doc.fontSize(12).font('OCR-B').text('NO RETURNS', { align: 'center' });
+      doc.fontSize(15).font('OCR-B').text('FINAL SALE', { align: 'center' });
+      doc.fontSize(15).font('OCR-B').text('NO REFUND', { align: 'center' });
+      doc.fontSize(15).font('OCR-B').text('NO RETURNS', { align: 'center' });
       
       doc.moveDown(0.8);
       doc.fontSize(10).font('OCR-B').text('Earn, redeem, repeat', { align: 'center' });
@@ -3557,10 +3555,10 @@ export class PetroCanadaReceiptGenerator {
       doc.fontSize(10).font('OCR-B').text("--- Customer's Copy ---", { align: 'center' });
     } else {
       // Promotional/Feedback Section - match screenshot
-      doc.fontSize(10).font('OCR-B').text('Give us your feedback.', { align: 'center' });
-      doc.fontSize(10).font('OCR-B').text('Chance to WIN', { align: 'center' });
-      doc.fontSize(10).font('OCR-B').text('FREE gas for a year!', { align: 'center' });
-      doc.fontSize(10).font('OCR-B').text('Petro-Canada.ca/hero', { align: 'center' });
+      doc.fontSize(15).font('OCR-B').text('Give us your feedback.', { align: 'center' });
+      doc.fontSize(15).font('OCR-B').text('Chance to WIN', { align: 'center' });
+      doc.fontSize(15).font('OCR-B').text('FREE gas for a year!', { align: 'center' });
+      doc.fontSize(15).font('OCR-B').text('Petro-Canada.ca/hero', { align: 'center' });
       
       doc.moveDown(1);
       
