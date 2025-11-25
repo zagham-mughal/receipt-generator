@@ -2971,8 +2971,8 @@ export class CanadianFlyingJReceiptGenerator {
       const logoPath = path.resolve(process.cwd(), 'assets/logos/flying-logo.jpeg');
       
       if (fs.existsSync(logoPath)) {
-        const logoWidth = 300;
-        const logoHeight = 80;
+        const logoWidth = 150;
+        const logoHeight = 70;
         const logoX = (doc.page.width - logoWidth) / 2;
         const currentY = doc.y;
         
