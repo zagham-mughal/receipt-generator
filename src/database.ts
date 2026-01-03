@@ -455,36 +455,39 @@ export function seedTravelcentersStores(): void {
   }
 
   const travelcentersStores = [
-    { storeCode: 'TA Ashland #1', address: '100 North Carter Rd', cityState: 'Ashland Virginia 23005', phone: '804-798-6011', items: 'Fuel, Diesel' },
-    { storeCode: 'TA Whitsett #2', address: '1101 NC Highway 61', cityState: 'Whitsett North Carolina 27377', phone: '336-449-6060', items: 'Fuel, Diesel' },
-    { storeCode: 'TA Brookville #3', address: '245 Allegheny Blvd.', cityState: 'Brookville Pennsylvania 15825', phone: '814-849-3051', items: 'Fuel, Diesel' },
-    { storeCode: 'TA Columbia #6', address: '2 Simpson Road', cityState: 'Columbia New Jersey 7832', phone: '908-496-4124', items: 'Fuel, Diesel' },
-    { storeCode: 'TA Eloy #7', address: '2949 North Toltec Road', cityState: 'Eloy Arizona 85131', phone: '520-466-7363', items: 'Fuel, Diesel' },
-    { storeCode: 'TA Gallup #8', address: '3404 W Historical Highway 66', cityState: 'Gallup New Mexico 87301', phone: '505-863-6801', items: 'Fuel, Diesel' },
-    { storeCode: 'TA Gary #10', address: '2510 Burr St.', cityState: 'Gary Indiana 46406', phone: '219-845-3721', items: 'Fuel, Diesel' },
-    { storeCode: 'TA Eaton #11', address: '6762 US Rte 127', cityState: 'Eaton Ohio 45320', phone: '937-456-5522', items: 'Fuel, Diesel' },
-    { storeCode: 'TA Harrisburg #12', address: '7848 Linglestown Road', cityState: 'Harrisburg Pennsylvania 17112', phone: '717-652-4556', items: 'Fuel, Diesel' },
-    { storeCode: 'TA Las Cruces #14', address: '202 N. Motel Blvd', cityState: 'Las Cruces New Mexico 88007', phone: '575-527-7400', items: 'Fuel, Diesel' },
-    { storeCode: 'TA Seville #15', address: '8834 Lake Road', cityState: 'Seville Ohio 44273', phone: '330-769-2053', items: 'Fuel, Diesel' },
-    { storeCode: 'TA Tuscaloosa #16', address: '3501 Buttermilk Road', cityState: 'Tuscaloosa Alabama 35453', phone: '205-554-0215', items: 'Fuel, Diesel' },
-    { storeCode: 'TA Baytown #17', address: '6800 Thompson Road', cityState: 'Baytown Texas 77521', phone: '281-424-7772', items: 'Fuel, Diesel' },
-    { storeCode: 'TA Concordia #18', address: '102 N W 4th Street', cityState: 'Concordia Missouri 64020', phone: '660-463-2001', items: 'Fuel, Diesel' },
-    { storeCode: 'TA Elkton #19', address: '1400 Elkton Road', cityState: 'Elkton Maryland 21921', phone: '410-398-7000', items: 'Fuel, Diesel' },
-    { storeCode: 'TA Willington #22', address: '327 Ruby Road', cityState: 'Willington Connecticut 6279', phone: '860-684-0499', items: 'Fuel, Diesel' },
-    { storeCode: 'TA Santa Rosa #23', address: '2634 Historic Route 66', cityState: 'Santa Rosa New Mexico 88435', phone: '575-935-9939', items: 'Fuel, Diesel' },
-    { storeCode: 'TA London #24', address: '940 US RT 42 NE', cityState: 'London Ohio 43140', phone: '740-852-3810', items: 'Fuel, Diesel' },
-    { storeCode: 'TA Duncan #25', address: '1402 East Main St.', cityState: 'Duncan South Carolina 29334', phone: '864-433-0711', items: 'Fuel, Diesel' },
-    { storeCode: 'TA Walton #28', address: '145 Richwood Road', cityState: 'Walton Kentucky 41094', phone: '859-485-4111', items: 'Fuel, Diesel' },
-    { storeCode: 'TA Kingsville #29', address: '5551 St Rt 193', cityState: 'Kingsville Ohio 44048', phone: '440-224-2035', items: 'Fuel, Diesel' },
-    { storeCode: 'TA Zion #30', address: '16650 W. Russell Road', cityState: 'Zion Illinois 60099', phone: '847-395-5580', items: 'Fuel, Diesel' },
-    { storeCode: 'TA Valley Grove #32', address: '270 W. Alexander Road', cityState: 'Valley Grove West Virginia 26060', phone: '304-547-1521', items: 'Fuel, Diesel' },
-    { storeCode: 'TA Earle #33', address: '408 Highway 149 North', cityState: 'Earle Arkansas 72331', phone: '870-657-2105', items: 'Fuel, Diesel' },
-    { storeCode: 'TA Effingham #35', address: '1702 West Evergreen Ave', cityState: 'Effingham Illinois 62401', phone: '217-347-7183', items: 'Fuel, Diesel' },
-    { storeCode: 'TA Oklahoma City #36', address: '801 South Council Road', cityState: 'Oklahoma City Oklahoma 73128', phone: '405-787-7411', items: 'Fuel, Diesel' },
-    { storeCode: 'TA Hebron #39', address: '10679 Lancaster Road, SE', cityState: 'Hebron Ohio 43025', phone: '740-467-2900', items: 'Fuel, Diesel' },
-    { storeCode: 'TA Coachella #41', address: '46155 Dillon Road', cityState: 'Coachella California 92236', phone: '760-342-6200', items: 'Fuel, Diesel' },
-    { storeCode: 'TA Mt. Vernon #43', address: '4510 Broadway St', cityState: 'Mt. Vernon Illinois 62864', phone: '618-244-4242', items: 'Fuel, Diesel' }
+    { storeCode: 'TA Ashland #1', address: '100 North Carter Rd', cityState: 'Ashland VA 23005', phone: '804-798-6011', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Whitsett #2', address: '1101 NC Highway 61', cityState: 'Whitsett NC 27377', phone: '336-449-6060', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Brookville #3', address: '245 Allegheny Blvd.', cityState: 'Brookville PA 15825', phone: '814-849-3051', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Columbia #6', address: '2 Simpson Road', cityState: 'Columbia NJ 7832', phone: '908-496-4124', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Eloy #7', address: '2949 North Toltec Road', cityState: 'Eloy AZ 85131', phone: '520-466-7363', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Gallup #8', address: '3404 W Historical Highway 66', cityState: 'Gallup NM 87301', phone: '505-863-6801', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Gary #10', address: '2510 Burr St.', cityState: 'Gary IN 46406', phone: '219-845-3721', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Eaton #11', address: '6762 US Rte 127', cityState: 'Eaton OH 45320', phone: '937-456-5522', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Harrisburg #12', address: '7848 Linglestown Road', cityState: 'Harrisburg PA 17112', phone: '717-652-4556', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Las Cruces #14', address: '202 N. Motel Blvd', cityState: 'Las Cruces NM 88007', phone: '575-527-7400', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Seville #15', address: '8834 Lake Road', cityState: 'Seville OH 44273', phone: '330-769-2053', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Tuscaloosa #16', address: '3501 Buttermilk Road', cityState: 'Tuscaloosa AL 35453', phone: '205-554-0215', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Baytown #17', address: '6800 Thompson Road', cityState: 'Baytown TX 77521', phone: '281-424-7772', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Concordia #18', address: '102 N W 4th Street', cityState: 'Concordia MS 64020', phone: '660-463-2001', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Elkton #19', address: '1400 Elkton Road', cityState: 'Elkton MD 21921', phone: '410-398-7000', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Willington #22', address: '327 Ruby Road', cityState: 'Willington CT 6279', phone: '860-684-0499', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Santa Rosa #23', address: '2634 Historic Route 66', cityState: 'Santa Rosa NM 88435', phone: '575-935-9939', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA London #24', address: '940 US RT 42 NE', cityState: 'London OH 43140', phone: '740-852-3810', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Duncan #25', address: '1402 East Main St.', cityState: 'Duncan SC 29334', phone: '864-433-0711', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Walton #28', address: '145 Richwood Road', cityState: 'Walton KY 41094', phone: '859-485-4111', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Kingsville #29', address: '5551 St Rt 193', cityState: 'Kingsville OH 44048', phone: '440-224-2035', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Zion #30', address: '16650 W. Russell Road', cityState: 'Zion IL 60099', phone: '847-395-5580', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Valley Grove #32', address: '270 W. Alexander Road', cityState: 'Valley Grove WV 26060', phone: '304-547-1521', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Earle #33', address: '408 Highway 149 North', cityState: 'Earle AR 72331', phone: '870-657-2105', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Effingham #35', address: '1702 West Evergreen Ave', cityState: 'Effingham IL 62401', phone: '217-347-7183', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Oklahoma City #36', address: '801 South Council Road', cityState: 'Oklahoma City OK 73128', phone: '405-787-7411', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Hebron #39', address: '10679 Lancaster Road, SE', cityState: 'Hebron OH 43025', phone: '740-467-2900', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Coachella #41', address: '46155 Dillon Road', cityState: 'Coachella CA 92236', phone: '760-342-6200', items: 'DEF, Reefer, Diesel' },
+    { storeCode: 'TA Mt. Vernon #43', address: '4510 Broadway St', cityState: 'Mt. Vernon IL 62864', phone: '618-244-4242', items: 'DEF, Reefer, Diesel' }
   ];
+
+  // Delete existing stores for this company first to avoid duplicates
+  db.prepare('DELETE FROM stores WHERE companyId = ?').run(travelcentersCompany.id);
 
   const insert = db.prepare(`
     INSERT INTO stores (companyId, storeCode, address, cityState, phone, items)
@@ -527,71 +530,25 @@ export function seedCanadianStores(): void {
   // Flying J stores (Canada) - Updated with real store data
   if (flyingJCompany) {
     const flyingJStores = [
-      { companyId: flyingJCompany.id, storeCode: 'Store 693', address: '8484 Alleghany Road', cityState: 'Corfu, NY 14036', phone: '(585) 599-4430', items: 'Truck Diesel' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 380', address: '107 Seventh North Street', cityState: 'Liverpool, NY 13088', phone: '(315) 424-0124', items: 'DEF Fuel Item' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 1317', address: '164 Riverside Drive', cityState: 'Fultonville, NY 12072', phone: '(518) 414-0591', items: 'Reefer Fuel' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 494', address: '1128 Duanesburg Road', cityState: 'Schenectady, NY 12306', phone: '(518) 356-5616', items: 'Cash Advance Item' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 394', address: '239 Route 17K', cityState: 'Newburgh, NY 12550', phone: '(845) 567-1722', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 707', address: '246 Allegheny Blvd', cityState: 'Brookville, PA 15825', phone: '(814) 849-2992', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 4563', address: '7833 Linglestown Road', cityState: 'Harrisburg, PA 17112', phone: '(717) 901-6186', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 370', address: '417 Route 315', cityState: 'Pittston, PA 18640', phone: '(570) 655-4116', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 311', address: '8035 Perry Hwy', cityState: 'Erie, PA 16509', phone: '(814) 864-8536', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 708', address: '1501 Harrisburg Pike', cityState: 'Carlisle, PA 17015', phone: '(717) 243-6659', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 348', address: '205 Wilson Road', cityState: 'Bentleyville, PA 15314', phone: '(724) 774-0811', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 752', address: '1530 Rest Church Road', cityState: 'Clear Brook, VA 22624', phone: '(540) 678-3641', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 754', address: '3249 Chapman Road', cityState: 'Wytheville, VA 24382', phone: '(276) 228-7110', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 876', address: '23866 Rogers Clark Blvd.', cityState: 'Ruther Glen, VA 22546', phone: '(804) 448-3077', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 749', address: '24279 Rogers Clark Boulevard', cityState: 'Ruther Glen, VA 22546', phone: '(804) 448-9047', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 683', address: '1800 Princeton Kenly Rd', cityState: 'Kenly, NC 27542', phone: '(919) 284-4548', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 711', address: '1011 North Mountain St', cityState: 'Blacksburg, SC 29702', phone: '(864) 839-5934', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 712', address: '5901 Fairfield Road', cityState: 'Columbia, SC 29203', phone: '(803) 735-9006', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 1068', address: '799 Jedburg Road', cityState: 'Summerville, SC 29483', phone: '(843) 851-2023', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 714', address: '2435 Mount Holly Road', cityState: 'Rock Hill, SC 29730', phone: '(803) 328-5700', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 623', address: '32670 Blue Star Hwy', cityState: 'Midway, FL 32343', phone: '(850) 574-9779', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 1096', address: '1101 Friday Road', cityState: 'Cocoa, FL 32926', phone: '(321) 433-3150', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 622', address: '100 North Kings Hwy', cityState: 'Fort Pierce, FL 34945', phone: '(772) 461-0091', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 895', address: '21055 West Road', cityState: 'Woodhaven, MI 48183', phone: '(313) 524-9985', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 668', address: '3475 E Washington Rd', cityState: 'Saginaw, MI 48601', phone: '(989) 752-6350', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 694', address: '2349 Center Road', cityState: 'Austinburg, OH 44010', phone: '(440) 275-1515', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 552', address: '3140 OH-350', cityState: 'Lebanon, OH 45036', phone: '(513) 933-0312', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 696', address: '7735 E State Rt 37', cityState: 'Sunbury, OH 43074', phone: '(740) 965-9835', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 768', address: '1300 N. Corrington Avenue', cityState: 'Kansas City, MO 64120', phone: '(816) 483-7600', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 1061', address: '4939 West Chestnut Expressway', cityState: 'Springfield, MO 65802', phone: '(417) 864-4175', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 671', address: '703 State Hwy 80', cityState: 'Matthews, MO 63867', phone: '(573) 472-3336', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 605', address: '42 Bradley Cove Road', cityState: 'Russellville, AR 72801', phone: '(479) 890-6161', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 606', address: '8300 State Highway 108', cityState: 'Texarkana, AR 71854', phone: '(870) 774-3595', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 737', address: '1815 N Foster Road', cityState: 'San Antonio, TX 78244', phone: '(210) 666-2266', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 726', address: '7425 Bonnie View Road', cityState: 'Dallas, TX 75241', phone: '(972) 225-3566', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 730', address: '1011 Beltway Parkway', cityState: 'Laredo, TX 78045', phone: '(956) 712-3265', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 727', address: '1305 E Monte Cristo Rd', cityState: 'Edinburg, TX 78542', phone: '(956) 316-0149', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 729', address: '15919 North Freeway', cityState: 'Houston, TX 77090', phone: '(281) 893-0423', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 665', address: '9510 Greenwood Road', cityState: 'Greenwood, LA 71033', phone: '(318) 938-7744', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 660', address: '15236 State Route 180', cityState: 'Catlettsburg, KY 41129', phone: '(606) 928-8383', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 662', address: '18750 Herndon Oak Grove Rd.', cityState: 'Oak Grove, KY 42262', phone: '(270) 640-7000', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 661', address: '4380 Nashville Road', cityState: 'Franklin, KY 42134', phone: '(270) 586-3343', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 664', address: '13019 Walton Verona Rd', cityState: 'Walton, KY 41094', phone: '(859) 485-4400', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 636', address: '8200 N.W. Blvd.', cityState: 'Davenport, IA 52806', phone: '(563) 386-7710', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 572', address: '3040 220th St', cityState: 'Williams, IA 50271', phone: '(515) 516-0821', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 1080', address: '2275 Sperry Avenue', cityState: 'Patterson, CA 95363', phone: '(209) 892-9225', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 1177', address: '14320 Slover Ave.', cityState: 'Fontana, CA 92337', phone: '(909) 574-4866', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 627', address: '2990 US Hwy 17 South', cityState: 'Brunswick, GA 31523', phone: '(912) 280-0006', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 631', address: '7001 Bellville Rd', cityState: 'Lake Park, GA 31636', phone: '(229) 559-6500', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 633', address: '3600 Highway 77 South', cityState: 'Greensboro, GA 30642', phone: '(706) 486-4835', items: '' },
-      { companyId: flyingJCompany.id, storeCode: 'Store 632', address: '288 Resaca Beach Blvd NW', cityState: 'Resaca, GA 30735', phone: '(706) 629-1541', items: '' }
+      { companyId: flyingJCompany.id, storeCode: 'Store 865', address: '2000 Clements Road', cityState: 'Pickering, ON L1W 4A1', phone: '(905) 428-9700', items: 'Truck Diesel, DEF Fuel Item, Reefer Fuel' },
+      { companyId: flyingJCompany.id, storeCode: 'Store 807', address: '1400 Britannia Rd E', cityState: 'Mississauga, ON L4W 1C7', phone: '(905) 564-6216', items: 'Truck Diesel, DEF Fuel Item, Reefer Fuel' },
+      { companyId: flyingJCompany.id, storeCode: 'Store 805', address: '1765 Albion Rd', cityState: 'Etobicoke, ON M9W 5S7', phone: '(416) 674-8665', items: 'Truck Diesel, DEF Fuel Item, Reefer Fuel' },
+      { companyId: flyingJCompany.id, storeCode: 'Store 862', address: '2492 Cedar Creek Road', cityState: 'Ayr, ON N0B 1E0', phone: '(519) 624-9578', items: 'Truck Diesel, DEF Fuel Item, Reefer Fuel' },
+      { companyId: flyingJCompany.id, storeCode: 'Store 825', address: '11 Sinclair Blvd.', cityState: 'Brantford, ON N3S 7X6', phone: '(865) 474-3937', items: 'Truck Diesel, DEF Fuel Item, Reefer Fuel' }
     ];
     // Force only two items available for Flying J Canada across all stores
-    const normalizedFjStores = flyingJStores.map(s => ({ ...s, items: 'Truck Diesel, DEF Fuel Item' }));
+    const normalizedFjStores = flyingJStores.map(s => ({ ...s, items: 'Truck Diesel, DEF Fuel Item, Reefer Fuel' }));
     canadianStores.push(...normalizedFjStores);
   }
 
   // Husky stores
   if (huskyCompany) {
     const huskyStores = [
-      { companyId: huskyCompany.id, storeCode: 'DIXIE MART (MISSISSAUGA)', address: '7280 DIXIE RD', cityState: 'MISSISSAUGA, ON L5S 1E1', phone: '(905) 565-1476', items: 'Truck Diesel' },
-      { companyId: huskyCompany.id, storeCode: 'ST. CATHARINES HUSKY TC/ESSO', address: '615 York Rd', cityState: 'St. Catharines, ON L0S 1J0', phone: '(905) 684-1128', items: 'DEF Fuel Item' },
-      { companyId: huskyCompany.id, storeCode: 'KENNEDY RD HUSKY TC/ESSO', address: '6625 Kennedy Road', cityState: 'Mississauga, ON L5T 2W1', phone: '(905) 565-9548', items: 'Reefer Fuel' },
-      { companyId: huskyCompany.id, storeCode: 'Dixie Rd Husky Tc/Esso', address: '1553 Shawson Drive', cityState: 'Mississauga, ON L4W 1T7', phone: '(905) 565-9090', items: 'Cash Advance Item' },
-      { companyId: huskyCompany.id, storeCode: 'Stouffville Rd Husky Tc/Esso', address: '2210 Stouffville Rd', cityState: 'Gormley, ON L0H 1G0', phone: '(905) 887-0040', items: '' }
+      { companyId: huskyCompany.id, storeCode: 'DIXIE MART (MISSISSAUGA)', address: '7280 DIXIE RD', cityState: 'MISSISSAUGA ON L5S 1E1', phone: '(905) 565-1476', items: 'Truck Diesel' },
+      { companyId: huskyCompany.id, storeCode: 'ST. CATHARINES HUSKY TC/ESSO', address: '615 York Rd', cityState: 'St. Catharines ON L0S 1J0', phone: '(905) 684-1128', items: 'DEF Fuel Item' },
+      { companyId: huskyCompany.id, storeCode: 'KENNEDY RD HUSKY TC/ESSO', address: '6625 Kennedy Road', cityState: 'Mississauga ON L5T 2W1', phone: '(905) 565-9548', items: 'Reefer Fuel' },
+      { companyId: huskyCompany.id, storeCode: 'Dixie Rd Husky Tc/Esso', address: '1553 Shawson Drive', cityState: 'Mississauga ON L4W 1T7', phone: '(905) 565-9090', items: 'Cash Advance Item' },
+      { companyId: huskyCompany.id, storeCode: 'Stouffville Rd Husky Tc/Esso', address: '2210 Stouffville Rd', cityState: 'Gormley ON L0H 1G0', phone: '(905) 887-0040', items: '' }
     ];
     canadianStores.push(...huskyStores);
   }
@@ -599,11 +556,11 @@ export function seedCanadianStores(): void {
   // Petro-Canada stores
   if (petroCanadaCompany) {
     const petroCanadaStores = [
-      { companyId: petroCanadaCompany.id, storeCode: 'PETRO-CANADA', address: '495 YORD RD', cityState: 'NIAGARA, ONTARIO L0S 1J0', phone: '(905) 684-1079', items: 'Fuel' },
-      { companyId: petroCanadaCompany.id, storeCode: 'PETRO-CANADA', address: '18423 HURONTARIOS', cityState: 'CALEDON, ONTARIO L7K 0A8', phone: '(519) 927-9877', items: 'Pump' },
       { companyId: petroCanadaCompany.id, storeCode: 'PETRO-CANADA', address: '6070 DIXIE RD', cityState: 'MISSISSAUGA, ONTARIO L5T 1A6', phone: '(605) 564-2295', items: 'Diesel' },
       { companyId: petroCanadaCompany.id, storeCode: 'PETRO-CANADA', address: '81 UBE DRIVE', cityState: 'SARNIA, ONTARIO N7W 1B6', phone: '(519) 542-2014', items: 'DEF' },
-      { companyId: petroCanadaCompany.id, storeCode: 'PETRO-CANADA', address: '130 DELTA PARK BLV', cityState: 'BRAMPTON, ONTARIO L6T 5E7', phone: '(905) 792-8828', items: 'Fuel, Pump' }
+      { companyId: petroCanadaCompany.id, storeCode: 'PETRO-CANADA', address: '495 YORD RD', cityState: 'NIAGARA, ONTARIO L0S 1J0', phone: '(905) 684-1079', items: '' },
+      { companyId: petroCanadaCompany.id, storeCode: 'PETRO-CANADA', address: '18423 HURONTARIOS', cityState: 'CALEDON, ONTARIO L7K 0A8', phone: '(519) 927-9877', items: '' },
+      { companyId: petroCanadaCompany.id, storeCode: 'PETRO-CANADA', address: '130 DELTA PARK BLV', cityState: 'BRAMPTON, ONTARIO L6T 5E7', phone: '(905) 792-8828', items: '' },
     ];
     canadianStores.push(...petroCanadaStores);
   }
@@ -635,11 +592,11 @@ export function seedCanadianStores(): void {
   // BVD Petroleum stores
   if (bvdPetroleumCompany) {
     const bvdPetroleumStores = [
-      { companyId: bvdPetroleumCompany.id, storeCode: 'BVD PETROLEUM', address: '130 Delta Park Blvd', cityState: 'Brampton, ON L6T 5M8', phone: '(905) 792-8828', items: 'Diesel' },
-      { companyId: bvdPetroleumCompany.id, storeCode: 'BVD PETROLEUM', address: '495 York Road', cityState: 'Niagara, ON L0S 1J0', phone: '(905) 684-1079', items: 'Diesel' },
-      { companyId: bvdPetroleumCompany.id, storeCode: 'BVD PETROLEUM', address: '6215 Boundary Rd', cityState: 'Cornwall, ON K6H 5R5', phone: '(613) 933-1234', items: 'Diesel' },
-      { companyId: bvdPetroleumCompany.id, storeCode: 'BVD PETROLEUM', address: '6125 Ordan Dr', cityState: 'Mississauga, ON L5T 2M7', phone: '(905) 670-1234', items: 'Diesel' },
-      { companyId: bvdPetroleumCompany.id, storeCode: 'BVD PETROLEUM', address: '7026 Industrial Dr', cityState: 'Comber, ON N0P 1J0', phone: '(519) 687-1234', items: 'Diesel' }
+      { companyId: bvdPetroleumCompany.id, storeCode: 'BVD PETROLEUM', address: '130 Delta Park Blvd', cityState: 'Brampton, ON L6T 5M8', phone: '(905) 792-8828', items: 'DIESEL' },
+      { companyId: bvdPetroleumCompany.id, storeCode: 'BVD PETROLEUM', address: '495 York Road', cityState: 'Niagara, ON L0S 1J0', phone: '(905) 684-1079', items: 'DIESEL' },
+      { companyId: bvdPetroleumCompany.id, storeCode: 'BVD PETROLEUM', address: '6215 Boundary Rd', cityState: 'Cornwall, ON K6H 5R5', phone: '(613) 933-1234', items: 'DIESEL' },
+      { companyId: bvdPetroleumCompany.id, storeCode: 'BVD PETROLEUM', address: '6125 Ordan Dr', cityState: 'Mississauga, ON L5T 2M7', phone: '(905) 670-1234', items: 'DIESEL' },
+      { companyId: bvdPetroleumCompany.id, storeCode: 'BVD PETROLEUM', address: '7026 Industrial Dr', cityState: 'Comber, ON N0P 1J0', phone: '(519) 687-1234', items: 'DIESEL' }
     ];
     canadianStores.push(...bvdPetroleumStores);
   }
@@ -648,7 +605,7 @@ export function seedCanadianStores(): void {
     insertMany(canadianStores);
     // Ensure items are restricted for Flying J Canada even if upstream data changes
     if (flyingJCompany) {
-      db.prepare('UPDATE stores SET items = ? WHERE companyId = ?').run('Truck Diesel, DEF Fuel Item', flyingJCompany.id);
+      db.prepare('UPDATE stores SET items = ? WHERE companyId = ?').run('Truck Diesel, DEF Fuel Item, Reefer Fuel', flyingJCompany.id);
     }
     console.log(`✅ Seeded ${canadianStores.length} Canadian company stores`);
   } else {
