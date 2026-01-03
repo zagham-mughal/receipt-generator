@@ -4662,7 +4662,6 @@ function updatePaymentMethodOptions(): void {
         paymentMethodSelect.innerHTML = `
             <option value="Master">💳 Master</option>
             <option value="TCH">💳 TCH</option>
-            <option value="Visa">💳 Visa</option>
             <option value="Interac">💳 Interac</option>
         `;
         paymentMethodSelect.value = 'Master';
