@@ -2654,7 +2654,10 @@ export class HuskyReceiptGenerator {
       
       doc.fontSize(10).font('OCR-B').text('GST/HST Fuel', leftMargin, doc.y, { continued: true, width: 248 });
       // Calculate sales tax as 13% of subtotal (Petro Canada style)
-      const computedSalesTax = subtotal * 0.13;
+      const hstRate = 1.13;
+      const withoutHstAmount = subtotal / hstRate;
+      const hstAmount = subtotal - withoutHstAmount;
+      const computedSalesTax = hstAmount;
       doc.font('OCR-B').text(`$ ${computedSalesTax.toFixed(2)}`, { align: 'right', width: 248 });
       
       doc.fontSize(8).font('OCR-B').text('---------------------------------------------------', leftMargin);
@@ -3709,8 +3712,9 @@ export class BVDPetroleumReceiptGenerator {
     doc.fontSize(10).font('OCR-B').text(taxesIncludedLine, leftMargin);
     doc.moveDown(0.3);
     
-    const hstRate = 0.13;
-    const hstAmount = total * hstRate;
+    const hstRate = 1.13;
+    const withoutHstAmount = total / hstRate;
+    const hstAmount = total - withoutHstAmount;
     const hstLine = `HST(13%):`.padEnd(31) + `$${hstAmount.toFixed(2)}`.padStart(10);
     doc.fontSize(10).font('OCR-B').text(hstLine, leftMargin);
     doc.moveDown(1);
