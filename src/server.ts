@@ -1,8 +1,10 @@
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import path from 'path';
 import fs from 'fs';
+import session from 'express-session';
+import bcrypt from 'bcrypt';
 import { ReceiptGenerator } from './receiptGenerator';
 import { Receipt, ReceiptItem } from './types';
 import { getDesignForCompany, DESIGNS } from './designs';
@@ -24,6 +26,9 @@ import {
   getItemsByCompanyId,
   updateCompany,
   deleteCompany,
+  getUserByUsername,
+  createUser,
+  seedDefaultUser,
   Company 
 } from './database';
 
@@ -44,8 +49,28 @@ seedOne9Stores();
 seedTravelcentersStores();
 seedCanadianStores();
 
+// Seed default user (password: admin123)
+const defaultPassword = 'ysxT(mK-_T(+4ufLx+Pw1;Yg"75Q{*745t';
+const hashedPassword = bcrypt.hashSync(defaultPassword, 10);
+seedDefaultUser(hashedPassword);
+
+// Session configuration
+app.use(session({
+  secret: 'receipt-generator-secret-key-change-in-production',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: false, // Set to true if using HTTPS
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+}));
+
 // Middleware
-app.use(cors());
+app.use(cors({
+  credentials: true,
+  origin: true
+}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
@@ -59,10 +84,76 @@ if (!fs.existsSync(receiptsDir)) {
   fs.mkdirSync(receiptsDir, { recursive: true });
 }
 
-// API Routes
+// Authentication middleware
+interface AuthenticatedRequest extends Request {
+  session: session.Session & {
+    userId?: number;
+    username?: string;
+  };
+}
+
+function requireAuth(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
+  if (req.session && req.session.userId) {
+    return next();
+  }
+  res.status(401).json({ error: 'Authentication required' });
+}
+
+// Public routes - login page and login endpoint
+app.get('/login', (req: Request, res: Response) => {
+  res.sendFile(path.join(__dirname, '../public/login.html'));
+});
+
+app.post('/api/login', async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { username, password } = req.body;
+    
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username and password are required' });
+    }
+    
+    const user = getUserByUsername(username);
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid username or password' });
+    }
+    
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+      return res.status(401).json({ error: 'Invalid username or password' });
+    }
+    
+    req.session.userId = user.id;
+    req.session.username = user.username;
+    
+    res.json({ success: true, username: user.username });
+  } catch (error) {
+    console.error('Error during login:', error);
+    res.status(500).json({ error: 'Login failed' });
+  }
+});
+
+app.post('/api/logout', (req: AuthenticatedRequest, res: Response) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Error destroying session:', err);
+      return res.status(500).json({ error: 'Logout failed' });
+    }
+    res.json({ success: true });
+  });
+});
+
+app.get('/api/auth/check', (req: AuthenticatedRequest, res: Response) => {
+  if (req.session && req.session.userId) {
+    res.json({ authenticated: true, username: req.session.username });
+  } else {
+    res.json({ authenticated: false });
+  }
+});
+
+// API Routes (protected)
 
 // Get all companies (replaces designs endpoint)
-app.get('/api/companies', (req: Request, res: Response) => {
+app.get('/api/companies', requireAuth, (req: Request, res: Response) => {
   try {
     const companies = getAllCompanies();
     const companiesWithDesigns = companies.map(company => ({
@@ -85,7 +176,7 @@ app.get('/api/companies', (req: Request, res: Response) => {
 });
 
 // Get company by ID
-app.get('/api/companies/:id', (req: Request, res: Response) => {
+app.get('/api/companies/:id', requireAuth, (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     const company = getCompanyById(id);
@@ -102,7 +193,7 @@ app.get('/api/companies/:id', (req: Request, res: Response) => {
 });
 
 // Get stores by company ID
-app.get('/api/companies/:companyId/stores', (req: Request, res: Response) => {
+app.get('/api/companies/:companyId/stores', requireAuth, (req: Request, res: Response) => {
   try {
     const companyId = parseInt(req.params.companyId);
     const stores = getStoresByCompanyId(companyId);
@@ -114,7 +205,7 @@ app.get('/api/companies/:companyId/stores', (req: Request, res: Response) => {
 });
 
 // Get items by company ID
-app.get('/api/companies/:companyId/items', (req: Request, res: Response) => {
+app.get('/api/companies/:companyId/items', requireAuth, (req: Request, res: Response) => {
   try {
     const companyId = parseInt(req.params.companyId);
     const items = getItemsByCompanyId(companyId);
@@ -126,7 +217,7 @@ app.get('/api/companies/:companyId/items', (req: Request, res: Response) => {
 });
 
 // Add new company
-app.post('/api/companies', (req: Request, res: Response) => {
+app.post('/api/companies', requireAuth, (req: Request, res: Response) => {
   try {
     const { name, address, email, phone, country, designId } = req.body;
     
@@ -151,7 +242,7 @@ app.post('/api/companies', (req: Request, res: Response) => {
 });
 
 // Update company
-app.put('/api/companies/:id', (req: Request, res: Response) => {
+app.put('/api/companies/:id', requireAuth, (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     const updates = req.body;
@@ -170,7 +261,7 @@ app.put('/api/companies/:id', (req: Request, res: Response) => {
 });
 
 // Delete company
-app.delete('/api/companies/:id', (req: Request, res: Response) => {
+app.delete('/api/companies/:id', requireAuth, (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     const deleted = deleteCompany(id);
@@ -187,7 +278,7 @@ app.delete('/api/companies/:id', (req: Request, res: Response) => {
 });
 
 // Get all available designs (for reference)
-app.get('/api/designs', (req: Request, res: Response) => {
+app.get('/api/designs', requireAuth, (req: Request, res: Response) => {
   const designList = DESIGNS.map((design, index) => ({
     id: index,
     name: design.name,
@@ -203,7 +294,7 @@ app.get('/api/designs', (req: Request, res: Response) => {
 });
 
 // Generate receipt endpoint
-app.post('/api/generate-receipt', async (req: Request, res: Response) => {
+app.post('/api/generate-receipt', requireAuth, async (req: Request, res: Response) => {
   try {
     const {
       companyId,
@@ -405,8 +496,8 @@ app.get('/api/health', (req: Request, res: Response) => {
   res.json({ status: 'ok', message: 'Receipt Generator API is running' });
 });
 
-// Serve main page
-app.get('/', (req: Request, res: Response) => {
+// Serve main page (protected)
+app.get('/', requireAuth, (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 

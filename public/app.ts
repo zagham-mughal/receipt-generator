@@ -74,6 +74,41 @@ let currentReceiptData: ReceiptData | null = null;
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async (): Promise<void> => {
+    // Check authentication
+    try {
+        const authResponse = await fetch('/api/auth/check', {
+            credentials: 'include'
+        });
+        const authData = await authResponse.json();
+        
+        if (!authData.authenticated) {
+            // Redirect to login page
+            window.location.href = '/login';
+            return;
+        }
+    } catch (error) {
+        console.error('Error checking authentication:', error);
+        window.location.href = '/login';
+        return;
+    }
+    
+    // Set up logout button
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async (): Promise<void> => {
+            try {
+                await fetch('/api/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('Error logging out:', error);
+                window.location.href = '/login';
+            }
+        });
+    }
+    
     // Set current date/time
     const now = new Date();
     const dateTimeLocal = now.toISOString().slice(0, 16);
@@ -282,7 +317,9 @@ function setupInputValidation(): void {
 // Load companies from database
 async function loadCompanies(): Promise<void> {
     try {
-        const response = await fetch('/api/companies');
+        const response = await fetch('/api/companies', {
+            credentials: 'include'
+        });
         const data = await response.json();
         companies = data.companies;
         
@@ -3357,7 +3394,9 @@ async function loadStoresForSelectedCompany(): Promise<void> {
     
     try {
         // Fetch stores for this company
-        const response = await fetch(`/api/companies/${companyId}/stores`);
+        const response = await fetch(`/api/companies/${companyId}/stores`, {
+            credentials: 'include'
+        });
         const data = await response.json();
         
         if (data.stores && data.stores.length > 0) {
@@ -3453,7 +3492,9 @@ async function loadItemsForSelectedCompany(): Promise<void> {
     
     try {
         // Fetch items for this company
-        const response = await fetch(`/api/companies/${companyId}/items`);
+        const response = await fetch(`/api/companies/${companyId}/items`, {
+            credentials: 'include'
+        });
         const data = await response.json();
         
         console.log('Loaded items for company:', selectedCompany.name, data.items);
@@ -4311,6 +4352,7 @@ async function generateReceipt(e: Event): Promise<void> {
             headers: {
                 'Content-Type': 'application/json'
             },
+            credentials: 'include',
             body: JSON.stringify(formData)
         });
         

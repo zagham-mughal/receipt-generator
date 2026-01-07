@@ -25,6 +25,13 @@ export interface Store {
   createdAt: string;
 }
 
+export interface User {
+  id: number;
+  username: string;
+  password: string;
+  createdAt: string;
+}
+
 // Initialize database
 const dbPath = path.join(__dirname, '../data/companies.db');
 const dbDir = path.dirname(dbPath);
@@ -45,7 +52,18 @@ export function initializeDatabase(): void {
   // Drop existing tables to recreate
   db.exec(`DROP TABLE IF EXISTS stores`);
   db.exec(`DROP TABLE IF EXISTS companies`);
+  db.exec(`DROP TABLE IF EXISTS users`);
   
+  // Create users table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT NOT NULL UNIQUE,
+      password TEXT NOT NULL,
+      createdAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
   // Create companies table with country field
   db.exec(`
     CREATE TABLE IF NOT EXISTS companies (
@@ -687,6 +705,34 @@ export function getItemsByCompanyId(companyId: number): string[] {
   });
   
   return Array.from(uniqueItems).sort();
+}
+
+// User management functions
+export function getUserByUsername(username: string): User | undefined {
+  return db.prepare('SELECT * FROM users WHERE username = ?').get(username) as User | undefined;
+}
+
+export function createUser(username: string, password: string): User {
+  const insert = db.prepare(`
+    INSERT INTO users (username, password)
+    VALUES (?, ?)
+  `);
+  
+  const result = insert.run(username, password);
+  return db.prepare('SELECT * FROM users WHERE id = ?').get(result.lastInsertRowid) as User;
+}
+
+export function seedDefaultUser(passwordHash: string): void {
+  const count = db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number };
+  
+  if (count.count > 0) {
+    console.log('📊 Database already has users');
+    return;
+  }
+
+  // Create default user (username: admin, password will be hashed)
+  createUser('admin', passwordHash);
+  console.log('✅ Seeded default user (username: admin)');
 }
 
 export default db;

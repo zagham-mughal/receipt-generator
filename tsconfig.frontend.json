@@ -14,7 +14,7 @@
     "noEmit": false,
     "sourceMap": true
   },
-  "include": ["public/app.ts"],
+  "include": ["public/app.ts", "public/login.ts"],
   "exclude": ["node_modules", "dist", "src"]
 }
 
