@@ -82,12 +82,22 @@ document.addEventListener('DOMContentLoaded', async (): Promise<void> => {
         const authData = await authResponse.json();
         
         if (!authData.authenticated) {
+            // Hide loading overlay before redirect
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            if (loadingOverlay) {
+                loadingOverlay.classList.add('hidden');
+            }
             // Redirect to login page
             window.location.href = '/login';
             return;
         }
     } catch (error) {
         console.error('Error checking authentication:', error);
+        // Hide loading overlay before redirect
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        if (loadingOverlay) {
+            loadingOverlay.classList.add('hidden');
+        }
         window.location.href = '/login';
         return;
     }
@@ -311,6 +321,18 @@ function setupInputValidation(): void {
             // Remove any non-digit characters
             target.value = target.value.replace(/[^0-9]/g, '');
         });
+    }
+    
+    // Hide loading overlay and show main content
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const mainContainer = document.getElementById('mainContainer');
+    
+    if (loadingOverlay && mainContainer) {
+        // Add a small delay for smooth transition
+        setTimeout(() => {
+            loadingOverlay.classList.add('hidden');
+            mainContainer.style.display = 'block';
+        }, 300);
     }
 });
 
