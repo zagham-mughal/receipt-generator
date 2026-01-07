@@ -8,11 +8,19 @@
     <link rel="stylesheet" href="print.css">
 </head>
 <body>
-    <div class="container">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p class="loading-text">Loading...</p>
+        </div>
+    </div>
+
+    <div class="container" id="mainContainer" style="display: none;">
         <header>
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                    <h1>🧾 Receipt Generator</h1>
+                    <h1>Receipt Generator</h1>
                     <p>Professional Point of Sale System</p>
                 </div>
                 <button id="logoutBtn" class="btn btn-secondary" style="padding: 10px 20px;">Logout</button>
@@ -28,8 +36,8 @@
                         <label for="country">Select Country *</label>
                         <select id="country" name="country" required>
                             <option value="">-- Select a Country --</option>
-                            <option value="United States of America">🇺🇸 United States of America</option>
-                            <option value="Canada">🇨🇦 Canada</option>
+                            <option value="United States of America">United States of America</option>
+                            <option value="Canada">Canada</option>
                         </select>
                     </div>
                 </div>
