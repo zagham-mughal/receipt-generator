@@ -281,6 +281,7 @@ Everyone is logged out.
 | Symptom | Check |
 |---|---|
 | PM2 shows `errored` or keeps restarting | `pm2 logs receipt-generator --lines 50`. Usually `.env` is missing or invalid |
+| `errored` but the logs show no error | Run it directly to see the error: `NODE_ENV=production PORT=8792 HOST=127.0.0.1 node dist/server.js` |
 | `502 Bad Gateway` | App not running or not on 8792: `pm2 status`, `sudo ss -ltnp \| grep 8792` |
 | `npm ci` fails on `bcrypt` / `better-sqlite3` | `sudo apt-get install -y build-essential python3`, then `npm ci` again |
 | certbot fails | DNS not pointing at the server yet: `dig +short receipts.example.com` |

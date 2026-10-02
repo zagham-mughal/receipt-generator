@@ -7,7 +7,9 @@ module.exports = {
     name: 'receipt-generator',
     script: './dist/server.js',
     cwd: __dirname,
-    // Must stay 1: sessions are in memory and the DB is rebuilt on every start
+    // Must stay 1: sessions are in memory and the DB is rebuilt on every start.
+    // fork (not cluster) so startup errors reach logs/ before the process exits.
+    exec_mode: 'fork',
     instances: 1,
     autorestart: true,
     watch: false,
