@@ -3,6 +3,8 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
+import dotenv from 'dotenv';
 import session from 'express-session';
 import bcrypt from 'bcrypt';
 import { ReceiptGenerator } from './receiptGenerator';
@@ -32,8 +34,26 @@ import {
   Company 
 } from './database';
 
+// Load secrets from .env in the project root (works for both src/ and dist/)
+dotenv.config({ path: path.join(__dirname, '../.env') });
+
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3001;
+const HOST = process.env.HOST || '0.0.0.0';
+const isProduction = process.env.NODE_ENV === 'production';
+
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+// In development a random secret is fine (sessions just reset on restart)
+const SESSION_SECRET = process.env.SESSION_SECRET || (isProduction ? '' : crypto.randomBytes(32).toString('hex'));
+
+if (!ADMIN_PASSWORD) {
+  console.error('❌ ADMIN_PASSWORD is not set. Copy .env.example to .env and fill it in.');
+  process.exit(1);
+}
+if (SESSION_SECRET.length < 32) {
+  console.error('❌ SESSION_SECRET must be at least 32 characters (generate one with: openssl rand -hex 32)');
+  process.exit(1);
+}
 
 // Initialize database
 const dataDir = path.join(__dirname, '../data');
@@ -49,14 +69,13 @@ seedOne9Stores();
 seedTravelcentersStores();
 seedCanadianStores();
 
-// Seed default user (password: admin123)
-const defaultPassword = 'ysxT(mK-_T(+4ufLx+Pw1;Yg"75Q{*745t';
-const hashedPassword = bcrypt.hashSync(defaultPassword, 10);
+// Seed the admin user (username: admin, password from ADMIN_PASSWORD)
+const hashedPassword = bcrypt.hashSync(ADMIN_PASSWORD, 10);
 seedDefaultUser(hashedPassword);
 
 // Session configuration
 app.use(session({
-  secret: 'receipt-generator-secret-key-change-in-production',
+  secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {
@@ -502,7 +521,7 @@ app.get('/', requireAuth, (req: Request, res: Response) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, HOST, () => {
   const companiesCount = getAllCompanies().length;
   
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
