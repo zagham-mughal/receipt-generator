@@ -2678,7 +2678,7 @@ export class HuskyReceiptGenerator {
       doc.fontSize(10).font('OCR-B').text(`#***************${last4}`, leftMargin, doc.y, { continued: true, width: 248 });
       doc.font('OCR-B').text('Exp */* S', 30);
 
-      const now = new Date();
+      const now = receipt.date;
 
       // EFS TCH branding and right-aligned full timestamp (YYYY/MM/DD HH:MM:SS)
       const tchYear = now.getFullYear().toString();
@@ -2706,7 +2706,7 @@ export class HuskyReceiptGenerator {
       const bottomHours = now.getHours();
       const bottomMinutes = now.getMinutes().toString().padStart(2, '0');
       const bottomSeconds = now.getSeconds().toString().padStart(2, '0');
-      const ampm = bottomHours >= 12 ? 'AM' : 'AM';
+      const ampm = bottomHours >= 12 ? 'PM' : 'AM';
       const displayHours = bottomHours % 12 || 12;
       
       doc.fontSize(10).font('OCR-B').text(`${bottomMonth}/${bottomDay}/${bottomYear}`, leftMargin, doc.y, { continued: true, width: 248 });
@@ -2730,7 +2730,7 @@ export class HuskyReceiptGenerator {
       doc.fontSize(10).font('OCR-B').text('MASTERCARD', leftMargin);
 
       // Date/time
-      const now = new Date();
+      const now = receipt.date;
       const mm = (now.getMonth() + 1).toString().padStart(2, '0');
       const dd = now.getDate().toString().padStart(2, '0');
       const yyyy = now.getFullYear();
@@ -2778,7 +2778,7 @@ export class HuskyReceiptGenerator {
       doc.fontSize(8).font('OCR-B').text('--------------------------------------------------', leftMargin);
       const yy2 = yyyy.toString().slice(-2);
       doc.fontSize(10).font('OCR-B').text(`${mm}/${dd}/${yy2}`, leftMargin, doc.y, { continued: true, width: 248 });
-      doc.font('OCR-B').text(`${hh}:${mi}:${ss} AM`, { align: 'center', width: 248 });
+      doc.font('OCR-B').text(`${now.getHours() % 12 || 12}:${mi}:${ss} ${now.getHours() >= 12 ? 'PM' : 'AM'}`, { align: 'center', width: 248 });
       doc.moveDown(1);
       doc.fontSize(10).font('OCR-B').text('Pos:71 Cashier:184 Store:5285', leftMargin);
     } else if (receipt.paymentMethod === 'Interac') {
@@ -2796,7 +2796,7 @@ export class HuskyReceiptGenerator {
       doc.fontSize(10).font('OCR-B').text('Interac', leftMargin);
 
       // Date/time
-      const nowI = new Date();
+      const nowI = receipt.date;
       const mmI = (nowI.getMonth() + 1).toString().padStart(2, '0');
       const ddI = nowI.getDate().toString().padStart(2, '0');
       const yyyyI = nowI.getFullYear();
@@ -2835,7 +2835,7 @@ export class HuskyReceiptGenerator {
       doc.fontSize(8).font('OCR-B').text('--------------------------------------------------', leftMargin);
       const yy2I = yyyyI.toString().slice(-2);
       doc.fontSize(10).font('OCR-B').text(`${mmI}/${ddI}/${yy2I}`, leftMargin, doc.y, { continued: true, width: 248 });
-      doc.font('OCR-B').text(`${hhI}:${miI}:${ssI} AM`, { align: 'center', width: 248 });
+      doc.font('OCR-B').text(`${nowI.getHours() % 12 || 12}:${miI}:${ssI} ${nowI.getHours() >= 12 ? 'PM' : 'AM'}`, { align: 'center', width: 248 });
       doc.moveDown(1);
       doc.fontSize(10).font('OCR-B').text('Pos:71 Cashier:258 Store:7113', leftMargin);
     } else if (receipt.paymentMethod === 'Visa') {
@@ -2855,7 +2855,7 @@ export class HuskyReceiptGenerator {
       doc.fontSize(10).font('OCR-B').text('Interac', leftMargin);
       
       // Date and time - match screenshot format
-      const now = new Date();
+      const now = receipt.date;
       const visaDay = now.getDate().toString().padStart(2, '0');
       const visaMonth = (now.getMonth() + 1).toString().padStart(2, '0');
       const visaYear = now.getFullYear();
@@ -2899,7 +2899,7 @@ export class HuskyReceiptGenerator {
       doc.fontSize(10).font('OCR-B').text('Interac', leftMargin);
       
       // Date and time - match screenshot format
-      const now = new Date();
+      const now = receipt.date;
       const efsDay = now.getDate().toString().padStart(2, '0');
       const efsMonth = (now.getMonth() + 1).toString().padStart(2, '0');
       const efsYear = now.getFullYear();
@@ -2935,7 +2935,7 @@ export class HuskyReceiptGenerator {
       doc.fontSize(8).font('OCR-B').text('----------------------------------------------------', leftMargin);
       
       // Date and time in bottom section
-      const now = new Date();
+      const now = receipt.date;
       const bottomDay = now.getDate().toString().padStart(2, '0');
       const bottomMonth = (now.getMonth() + 1).toString().padStart(2, '0');
       const bottomYear = now.getFullYear().toString().substr(-2);
@@ -3294,9 +3294,9 @@ export class PetroCanadaReceiptGenerator {
     doc.moveDown(1);
 
     // Transaction Details Section - two items per row as requested
-    const now = new Date();
+    const now = receipt.date;
     const timeStr = now.toTimeString().substr(0, 8);
-    const dateStr = now.toISOString().split('T')[0];
+    const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     const invoiceNum = Math.floor(Math.random() * 900000) + 100000;
     const transNum = Math.floor(Math.random() * 900000) + 100000;
     
@@ -3400,8 +3400,9 @@ export class PetroCanadaReceiptGenerator {
       doc.fontSize(10).font('OCR-B').text('Tax paid by Customer:', leftMargin);
       
       // Calculate FHST and PHST (example calculations - adjust as needed)
-      const fhstAmount = subtotal * 0.0442; // Approximate FHST rate
-      const phstAmount = subtotal * 0.0708; // Approximate PHST rate
+      const subtotalwithouttax = subtotal / 1.13;
+      const fhstAmount = subtotalwithouttax * 0.05; // Approximate FHST rate
+      const phstAmount = subtotalwithouttax * 0.08; // Approximate PHST rate
       doc.fontSize(10).font('OCR-B').text(`* FHST INCLUDED IN FUEL $ ${fhstAmount.toFixed(2)}`, leftMargin);
       doc.fontSize(10).font('OCR-B').text(`* PHST INCLUDED IN FUEL $ ${phstAmount.toFixed(2)}`, leftMargin);
     } else if (paymentMethod === 'Interac') {
@@ -3416,10 +3417,11 @@ export class PetroCanadaReceiptGenerator {
       doc.fontSize(10).font('OCR-B').text('Tax paid by Customer:', leftMargin);
       
       // Calculate GST and PST (example calculations - adjust as needed)
-      const gstAmount = subtotal * 0.05; // GST rate (5%)
-      const pstAmount = subtotal * 0.08; // PST rate (8%) - adjust based on province
-      doc.fontSize(10).font('OCR-B').text(`* GST INCLUDED IN FUEL $ ${gstAmount.toFixed(2)}`, leftMargin);
-      doc.fontSize(10).font('OCR-B').text(`* PST INCLUDED IN FUEL $ ${pstAmount.toFixed(2)}`, leftMargin);
+      const subtotalwithouttax = subtotal / 1.13;
+      const fhstAmount = subtotalwithouttax * 0.05; // FHST rate (5%)
+      const phstAmount = subtotalwithouttax * 0.08; // PHST rate (8%) - adjust based on province
+      doc.fontSize(10).font('OCR-B').text(`* FHST INCLUDED IN FUEL $ ${fhstAmount.toFixed(2)}`, leftMargin);
+      doc.fontSize(10).font('OCR-B').text(`* PHST INCLUDED IN FUEL $ ${phstAmount.toFixed(2)}`, leftMargin);
       doc.moveDown(0.8);
     }
     
@@ -3801,7 +3803,7 @@ export class BVDPetroleumReceiptGenerator {
     doc.moveDown(1);
 
     // Date, Time, and Transaction Number Section - using single-line approach
-    const now = new Date();
+    const now = receipt.date;
     const day = now.getDate().toString().padStart(2, '0');
     const month = (now.getMonth() + 1).toString().padStart(2, '0');
     const year = now.getFullYear().toString().substr(-2);
