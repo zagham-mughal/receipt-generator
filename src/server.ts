@@ -336,7 +336,11 @@ app.post('/api/generate-receipt', requireAuth, async (req: Request, res: Respons
       date,
       designId,
       storeData,
-      includeSignature
+      includeSignature,
+      invoiceNumber,
+      receiptNo,
+      transactionNumber,
+      authNumber
     } = req.body;
     
     // If companyId is provided, get company from database
@@ -383,7 +387,8 @@ app.post('/api/generate-receipt', requireAuth, async (req: Request, res: Respons
       storeNumber: storeData.storeCode.replace('Store ', ''),
       phone: storeData.phone,
       address: storeData.address,
-      city: storeData.cityState
+      city: storeData.cityState,
+      taxNumber: storeData.taxNumber || undefined
     } : {
       storeNumber: Math.floor(Math.random() * 900 + 100).toString(),
       phone: selectedCompany?.phone || '',
@@ -413,7 +418,11 @@ app.post('/api/generate-receipt', requireAuth, async (req: Request, res: Respons
       driverFirstName: driverFirstName || '',
       driverLastName: driverLastName || '',
       companyData: companyData,
-      includeSignature: includeSignature || false
+      includeSignature: includeSignature || false,
+      invoiceNumber: (invoiceNumber || '').trim() || undefined,
+      receiptNo: (receiptNo || '').trim() || undefined,
+      transactionNumber: (transactionNumber || '').trim() || undefined,
+      authNumber: (authNumber || '').trim() || undefined
     };
 
     // Generate PDF

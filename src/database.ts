@@ -22,6 +22,7 @@ export interface Store {
   cityState: string;
   phone: string;
   items: string;
+  taxNumber: string | null; // GST/HST registration number printed on the receipt, if known
   createdAt: string;
 }
 
@@ -88,6 +89,7 @@ export function initializeDatabase(): void {
       cityState TEXT NOT NULL,
       phone TEXT NOT NULL,
       items TEXT,
+      taxNumber TEXT,
       createdAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (companyId) REFERENCES companies(id) ON DELETE CASCADE
     )
@@ -533,17 +535,17 @@ export function seedCanadianStores(): void {
   const bvdPetroleumCompany = db.prepare('SELECT id FROM companies WHERE name = ?').get('BVD Petroleum') as { id: number } | undefined;
 
   const insert = db.prepare(`
-    INSERT INTO stores (companyId, storeCode, address, cityState, phone, items)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO stores (companyId, storeCode, address, cityState, phone, items, taxNumber)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
   `);
 
   const insertMany = db.transaction((stores) => {
     for (const store of stores) {
-      insert.run(store.companyId, store.storeCode, store.address, store.cityState, store.phone, store.items);
+      insert.run(store.companyId, store.storeCode, store.address, store.cityState, store.phone, store.items, store.taxNumber || null);
     }
   });
 
-  const canadianStores = [];
+  const canadianStores: Array<{ companyId: number; storeCode: string; address: string; cityState: string; phone: string; items: string; taxNumber?: string }> = [];
 
   // Flying J stores (Canada) - Updated with real store data
   if (flyingJCompany) {
@@ -562,11 +564,10 @@ export function seedCanadianStores(): void {
   // Husky stores
   if (huskyCompany) {
     const huskyStores = [
-      { companyId: huskyCompany.id, storeCode: 'DIXIE MART (MISSISSAUGA)', address: '7280 DIXIE RD', cityState: 'MISSISSAUGA ON L5S 1E1', phone: '(905) 565-1476', items: 'Truck Diesel' },
-      { companyId: huskyCompany.id, storeCode: 'ST. CATHARINES HUSKY TC/ESSO', address: '615 York Rd', cityState: 'St. Catharines ON L0S 1J0', phone: '(905) 684-1128', items: 'DEF Fuel Item' },
-      { companyId: huskyCompany.id, storeCode: 'KENNEDY RD HUSKY TC/ESSO', address: '6625 Kennedy Road', cityState: 'Mississauga ON L5T 2W1', phone: '(905) 565-9548', items: 'Reefer Fuel' },
-      { companyId: huskyCompany.id, storeCode: 'Dixie Rd Husky Tc/Esso', address: '1553 Shawson Drive', cityState: 'Mississauga ON L4W 1T7', phone: '(905) 565-9090', items: 'Cash Advance Item' },
-      { companyId: huskyCompany.id, storeCode: 'Stouffville Rd Husky Tc/Esso', address: '2210 Stouffville Rd', cityState: 'Gormley ON L0H 1G0', phone: '(905) 887-0040', items: '' }
+      { companyId: huskyCompany.id, storeCode: 'KENNEDY RD HUSKY ESSO', address: '6625 Kennedy Rd', cityState: 'Mississauga ON L5T 2W5', phone: '(905)-565-9548', items: 'Truck Diesel', taxNumber: '872887831' },
+      { companyId: huskyCompany.id, storeCode: 'DRYDEN HUSKY TC/ESSO', address: 'Highway 17 Box 841', cityState: 'Dryden ON P8N 2Z5', phone: '(807)-223-2085', items: 'DEF Fuel Item', taxNumber: '770066728' },
+      { companyId: huskyCompany.id, storeCode: 'WINDSOR HUSKY TC/ESSO', address: '4040 Essex Rd 46 hwy 401', cityState: 'Windsor ON N04 1L0', phone: '(519)-737-6401', items: 'Reefer Fuel', taxNumber: '897470910' },
+      { companyId: huskyCompany.id, storeCode: 'LONDON HUSKY TC/ESSO', address: 'Hwy 407 and 74 PO BOX 130', cityState: 'Belmont ON N0L 1B0', phone: '(519)-558-9526', items: 'Cash Advance Item', taxNumber: 'R838796464' }
     ];
     canadianStores.push(...huskyStores);
   }
@@ -574,11 +575,9 @@ export function seedCanadianStores(): void {
   // Petro-Canada stores
   if (petroCanadaCompany) {
     const petroCanadaStores = [
-      { companyId: petroCanadaCompany.id, storeCode: 'PETRO-CANADA', address: '6070 DIXIE RD', cityState: 'MISSISSAUGA, ONTARIO L5T 1A6', phone: '(605) 564-2295', items: 'Diesel' },
-      { companyId: petroCanadaCompany.id, storeCode: 'PETRO-CANADA', address: '81 UBE DRIVE', cityState: 'SARNIA, ONTARIO N7W 1B6', phone: '(519) 542-2014', items: 'DEF' },
-      { companyId: petroCanadaCompany.id, storeCode: 'PETRO-CANADA', address: '495 YORD RD', cityState: 'NIAGARA, ONTARIO L0S 1J0', phone: '(905) 684-1079', items: '' },
-      { companyId: petroCanadaCompany.id, storeCode: 'PETRO-CANADA', address: '18423 HURONTARIOS', cityState: 'CALEDON, ONTARIO L7K 0A8', phone: '(519) 927-9877', items: '' },
-      { companyId: petroCanadaCompany.id, storeCode: 'PETRO-CANADA', address: '130 DELTA PARK BLV', cityState: 'BRAMPTON, ONTARIO L6T 5E7', phone: '(905) 792-8828', items: '' },
+      { companyId: petroCanadaCompany.id, storeCode: 'PETRO-CANADA', address: '4995 EBENEZER RD', cityState: 'BRAMPTON, ONTARIO L6P2P7', phone: '(905)-913-0743', items: 'Diesel', taxNumber: '766751283' },
+      { companyId: petroCanadaCompany.id, storeCode: 'PETRO-CANADA', address: '1709 KINGSTON RD', cityState: 'PICKERING, ONTARIO L1V1C5', phone: '(905)-686-2505', items: 'DEF', taxNumber: '830351698' },
+      { companyId: petroCanadaCompany.id, storeCode: 'PETRO-CANADA', address: '995 EGLINTON AVE E', cityState: 'MISSISSAUGA, ONTARIO L4W4H3', phone: '(905)-624-3732', items: '', taxNumber: '757229299' },
     ];
     canadianStores.push(...petroCanadaStores);
   }

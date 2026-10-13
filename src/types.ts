@@ -29,6 +29,11 @@ export interface Receipt {
   checkNumber?: string;
   checkNumberConfirm?: string;
   includeSignature?: boolean;
+  // Optional user-entered values; generators fall back to their own numbers when empty
+  invoiceNumber?: string;
+  receiptNo?: string;
+  transactionNumber?: string;
+  authNumber?: string;
   pos?: string;
   clerk?: string;
   companyData?: {
@@ -36,6 +41,7 @@ export interface Receipt {
     phone?: string;
     address?: string;
     city?: string;
+    taxNumber?: string; // GST/HST registration number of the selected store
   };
 }
 

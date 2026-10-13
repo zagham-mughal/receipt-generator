@@ -57,7 +57,7 @@ export class ONE9FuelReceiptGenerator {
 
     // SALE section
     doc.fontSize(10).font('OCR-B').text('SALE', leftMargin);
-    doc.fontSize(9).font('OCR-B').text(`Transaction #:    ${receipt.receiptNumber.replace('REC-', '')}`, leftMargin);
+    doc.fontSize(9).font('OCR-B').text(`Transaction #:    ${receipt.transactionNumber || receipt.receiptNumber.replace('REC-', '')}`, leftMargin);
     
     // Dashed separator
     doc.fontSize(7).font('OCR-B').text('---------------------------------------------------------', leftMargin);
@@ -150,7 +150,7 @@ export class ONE9FuelReceiptGenerator {
       doc.fontSize(9).text('  Approved', leftMargin);
       
       // Generate random authorization number (5 alphanumeric characters)
-      const authNum = Math.random().toString(36).substring(2, 7).toUpperCase();
+      const authNum = receipt.authNumber || Math.random().toString(36).substring(2, 7).toUpperCase();
       doc.fontSize(9).text(`  Auth #:  ${authNum}`, leftMargin);
     } else if (receipt.paymentMethod === 'Master' && receipt.cardLast4) {
       // Master payment format - match screenshot exactly
@@ -169,8 +169,8 @@ export class ONE9FuelReceiptGenerator {
       doc.fontSize(9).font('OCR-B').text('Approved', leftMargin + 10);
       
       // Generate random authorization number (6 digits for Master, e.g., 054292)
-      const authNum = Math.floor(Math.random() * 900000) + 100000;
-      doc.fontSize(9).font('OCR-B').text(`Auth #: ${authNum.toString().padStart(6, '0')}`, leftMargin + 10);
+      const authNum = receipt.authNumber || (Math.floor(Math.random() * 900000) + 100000).toString().padStart(6, '0');
+      doc.fontSize(9).font('OCR-B').text(`Auth #: ${authNum}`, leftMargin + 10);
       doc.moveDown(0.8);
       
       // Transaction Details
@@ -222,7 +222,7 @@ export class ONE9FuelReceiptGenerator {
       doc.fontSize(9).text('  Approved', leftMargin);
       
       // Generate random authorization number (6 digits for TCH)
-      const authNum = Math.floor(Math.random() * 900000) + 100000;
+      const authNum = receipt.authNumber || Math.floor(Math.random() * 900000) + 100000;
       doc.fontSize(9).text(`  Auth #:  ${authNum}`, leftMargin);
       doc.moveDown(0.5);
       
@@ -246,7 +246,7 @@ export class ONE9FuelReceiptGenerator {
       doc.fontSize(9).font('OCR-B').text(`  Tran Amount : $ ${total.toFixed(2)}`, leftMargin);
       
       // Generate random approval code (6 digits)
-      const approvalCode = Math.floor(Math.random() * 900000) + 100000;
+      const approvalCode = receipt.authNumber || Math.floor(Math.random() * 900000) + 100000;
       doc.fontSize(9).font('OCR-B').text('  Approval CD :', leftMargin, doc.y, { continued: true });
       doc.text(`${approvalCode}`, leftMargin + 5);
       
@@ -549,7 +549,7 @@ export class PilotTravelCentersReceiptGenerator {
       
     // Show SALE and Transaction # format
     doc.fontSize(10).font('OCR-B').text('SALE', leftMargin);
-    doc.fontSize(9).font('OCR-B').text(`Transaction #:    ${receipt.receiptNumber.replace('REC-', '')}`, leftMargin, doc.y, { continued: true, width: 240 });
+    doc.fontSize(9).font('OCR-B').text(`Transaction #:    ${receipt.transactionNumber || receipt.receiptNumber.replace('REC-', '')}`, leftMargin, doc.y, { continued: true, width: 240 });
     
     // Dashed separator
     doc.fontSize(7).font('OCR-B').text('----------------------------------------------------------', leftMargin);
@@ -659,7 +659,7 @@ export class PilotTravelCentersReceiptGenerator {
       // Generate authorization code (5 digits + letter, e.g., "06526F")
       const authCodeDigits = Math.floor(Math.random() * 90000) + 10000; // 5-digit number
       const authCodeLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26)); // Random letter A-Z
-      const authCode = `${authCodeDigits.toString().padStart(5, '0')}${authCodeLetter}`;
+      const authCode = receipt.authNumber || `${authCodeDigits.toString().padStart(5, '0')}${authCodeLetter}`;
       doc.fontSize(9).text(`Auth #: ${authCode}`, leftMargin + 10);
       doc.moveDown(0.8);
       
@@ -771,7 +771,7 @@ export class PilotTravelCentersReceiptGenerator {
       // Generate authorization code (5 digits + letter, e.g., "06677Z")
       const authCodeDigits = Math.floor(Math.random() * 90000) + 10000; // 5-digit number
       const authCodeLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26)); // Random letter A-Z
-      const authCode = `${authCodeDigits.toString().padStart(5, '0')}${authCodeLetter}`;
+      const authCode = receipt.authNumber || `${authCodeDigits.toString().padStart(5, '0')}${authCodeLetter}`;
       doc.fontSize(9).text(`Auth #: ${authCode}`, leftMargin + 10);
       doc.moveDown(0.8);
       
@@ -886,11 +886,11 @@ export class PilotTravelCentersReceiptGenerator {
       doc.fontSize(9).text('Approved', leftMargin + 5);
       
       // Generate random authorization number (6 digits for TCH)
-      const authNum = Math.floor(Math.random() * 900000) + 100000;
+      const authNum = receipt.authNumber || Math.floor(Math.random() * 900000) + 100000;
       doc.fontSize(9).text(`Auth #:  ${authNum}`, leftMargin + 5);
       
       // Generate random invoice number (10 digits)
-      const invoiceNum = Math.floor(Math.random() * 9000000000) + 1000000000;
+      const invoiceNum = receipt.invoiceNumber || Math.floor(Math.random() * 9000000000) + 1000000000;
       doc.fontSize(9).text(`Invoice Number: ${invoiceNum}`, leftMargin + 5);
       doc.moveDown(1);
       
@@ -916,7 +916,7 @@ export class PilotTravelCentersReceiptGenerator {
       doc.fontSize(9).font('OCR-B').text(`Tran Amount :    $${total.toFixed(2)}`, leftMargin);
       
       // Generate random approval code (6 digits)
-      const approvalCode = Math.floor(Math.random() * 900000) + 100000;
+      const approvalCode = receipt.authNumber || Math.floor(Math.random() * 900000) + 100000;
       doc.fontSize(9).font('OCR-B').text('Approval CD :   ', leftMargin, doc.y, { continued: true });
       doc.text(`${approvalCode}`);
       
@@ -1117,7 +1117,7 @@ export class FlyingJTravelPlazaReceiptGenerator {
     doc.fontSize(10).font('OCR-B').text('SALE', leftMargin);
     
     // Transaction number
-    const transactionNum = `${Math.floor(Math.random() * 9000000) + 1000000}`;
+    const transactionNum = receipt.transactionNumber || `${Math.floor(Math.random() * 9000000) + 1000000}`;
 
       doc.fontSize(10).font('OCR-B').text(`Transaction #:  ${transactionNum} `, leftMargin);
  
@@ -1204,7 +1204,7 @@ export class FlyingJTravelPlazaReceiptGenerator {
         doc.fontSize(10).font('OCR-B').text(`  Approved`, leftMargin);
         
         // Generate random authorization number (6 digits for TCH)
-        const authNum = Math.floor(Math.random() * 900000) + 100000;
+        const authNum = receipt.authNumber || Math.floor(Math.random() * 900000) + 100000;
         doc.fontSize(10).font('OCR-B').text(`  Auth #:  ${authNum}`, leftMargin);
         doc.moveDown(0.5);
       } else if (receipt.paymentMethod === 'Master') {
@@ -1223,7 +1223,7 @@ export class FlyingJTravelPlazaReceiptGenerator {
         doc.fontSize(10).font('OCR-B').text('Approved', leftMargin+10);
         
         // Generate random authorization number (alphanumeric 6 chars)
-        const authAlphaNum = Math.random().toString(36).substring(2, 8).toUpperCase();
+        const authAlphaNum = receipt.authNumber || Math.random().toString(36).substring(2, 8).toUpperCase();
         doc.fontSize(10).font('OCR-B').text(`Auth #: ${authAlphaNum}`, leftMargin+10);
         doc.moveDown(0.8);
         
@@ -1358,7 +1358,7 @@ export class FlyingJTravelPlazaReceiptGenerator {
         const tranRoute = randNum(6);
         const accountNum = randNum(8);
         const checkNum = randNum(6);
-        const approvalId = randAlphaNum(6);
+        const approvalId = receipt.authNumber || randAlphaNum(6);
         const recordId = randNum(6);
         const clerkId = randNum(3);
         const referenceNum = randNum(6);
@@ -1505,8 +1505,8 @@ export class FlyingJTravelPlazaReceiptGenerator {
         doc.fontSize(9).font('OCR-B').text('Approved', leftMargin + 10);
         
         // Generate authorization code (6 digits, e.g., "004950")
-        const authCode = Math.floor(Math.random() * 900000) + 100000;
-        doc.fontSize(9).text(`Auth #: ${authCode.toString().padStart(6, '0')}`, leftMargin + 10);
+        const authCode = receipt.authNumber || (Math.floor(Math.random() * 900000) + 100000).toString().padStart(6, '0');
+        doc.fontSize(9).text(`Auth #: ${authCode}`, leftMargin + 10);
         doc.moveDown(0.8);
         
         // Transaction Details
@@ -1730,11 +1730,11 @@ export class LovesTravelStopsReceiptGenerator {
       doc.text(total.toFixed(2), { align: 'right', width: 245 });
       
       // Generate random auth number (6 digits with leading zeros) and invoice number (5 digits)
-      const authNum = Math.floor(Math.random() * 999999); // 0-999999
-      const invoiceNum = Math.floor(Math.random() * 99999); // 0-99999
+      const authNum = receipt.authNumber || (Math.floor(Math.random() * 999999)).toString().padStart(6, '0'); // 0-999999
+      const invoiceNum = receipt.invoiceNumber || Math.floor(Math.random() * 99999).toString().padStart(5, '0'); // 0-99999
       
-      doc.fontSize(9).font('OCR-B').text(`Auth No: ${authNum.toString().padStart(6, '0')}`, leftMargin + 10);
-      doc.fontSize(9).font('OCR-B').text(`Invoice Number: ${invoiceNum.toString().padStart(5, '0')}`, leftMargin);
+      doc.fontSize(9).font('OCR-B').text(`Auth No: ${authNum}`, leftMargin + 10);
+      doc.fontSize(9).font('OCR-B').text(`Invoice Number: ${invoiceNum}`, leftMargin);
       doc.moveDown(2);
       
       // Add signature image only if checkbox is checked
@@ -1836,8 +1836,8 @@ export class LovesTravelStopsReceiptGenerator {
       doc.fontSize(9).font('OCR-B').text(`***************${last4} ${entryMethod}`, leftMargin + 5);
       
       // Generate random auth number and invoice number
-      const authNum = Math.floor(Math.random() * 900000) + 100000; // 6-digit number
-      const invoiceNum = Math.floor(Math.random() * 90000) + 10000; // 5-digit number
+      const authNum = receipt.authNumber || Math.floor(Math.random() * 900000) + 100000; // 6-digit number
+      const invoiceNum = receipt.invoiceNumber || Math.floor(Math.random() * 90000) + 10000; // 5-digit number
       
       doc.fontSize(9).font('OCR-B').text(`Auth No:${authNum}`, leftMargin + 10);
       const companyName = receipt.driverCompanyName || 'TCI ACG';
@@ -1861,8 +1861,8 @@ export class LovesTravelStopsReceiptGenerator {
       doc.text(entryMethod, { align: 'right', width: 150 });
       
       // Generate random auth number and invoice number
-      const authNum = Math.floor(Math.random() * 900000) + 100000; // 6-digit number
-      const invoiceNum = Math.floor(Math.random() * 90000) + 10000; // 5-digit number
+      const authNum = receipt.authNumber || Math.floor(Math.random() * 900000) + 100000; // 6-digit number
+      const invoiceNum = receipt.invoiceNumber || Math.floor(Math.random() * 90000) + 10000; // 5-digit number
       
       doc.fontSize(9).font('OCR-B').text(`Auth No: ${authNum}`, leftMargin + 10);
       doc.fontSize(9).font('OCR-B').text(`INVOICE# ${invoiceNum}`, leftMargin + 5);
@@ -1957,11 +1957,11 @@ export class LovesTravelStopsReceiptGenerator {
       doc.fontSize(9).font('OCR-B').text(`************${last4}    ${entryMethod}`, leftMargin + 5);
       
       // Authorization details - match screenshot format
-      const authNum = Math.floor(Math.random() * 900000) + 100000; // 6-digit number (e.g., 091762)
-      doc.fontSize(9).font('OCR-B').text(`Auth No: ${authNum.toString().padStart(6, '0')}`, leftMargin + 10);
+      const authNum = receipt.authNumber || (Math.floor(Math.random() * 900000) + 100000).toString().padStart(6, '0'); // 6-digit number (e.g., 091762)
+      doc.fontSize(9).font('OCR-B').text(`Auth No: ${authNum}`, leftMargin + 10);
       
       // Generate random invoice number (5 digits, e.g., 39287)
-      const invoiceNum = Math.floor(Math.random() * 90000) + 10000;
+      const invoiceNum = receipt.invoiceNumber || Math.floor(Math.random() * 90000) + 10000;
       doc.fontSize(9).font('OCR-B').text(`INVOICE# ${invoiceNum}`, leftMargin + 5);
       
       // AID
@@ -2151,7 +2151,7 @@ export class TravelCentersOfAmericaReceiptGenerator {
     doc.moveDown(0.5);
 
     // Receipt header - match screenshot 1 format
-    doc.fontSize(9).font('OCR-B').text(`Receipt #    ${receipt.receiptNumber.replace('REC-', '')}`, leftMargin);
+    doc.fontSize(9).font('OCR-B').text(`Receipt #    ${receipt.receiptNo || receipt.receiptNumber.replace('REC-', '')}`, leftMargin);
     doc.moveDown(0.3);
     // Format "Wed Sep 6 2023" with *no* comma after weekday
     (() => {
@@ -2260,8 +2260,8 @@ export class TravelCentersOfAmericaReceiptGenerator {
       doc.text(total.toFixed(2), { align: 'right', width: 238 });
       
       // Generate random auth code and invoice number
-      const authCode = Math.floor(Math.random() * 900000) + 100000; // 6-digit number
-      const invoiceNumber = Math.floor(Math.random() * 90000) + 10000; // 5-digit number
+      const authCode = receipt.authNumber || Math.floor(Math.random() * 900000) + 100000; // 6-digit number
+      const invoiceNumber = receipt.invoiceNumber || Math.floor(Math.random() * 90000) + 10000; // 5-digit number
       
       // Add Approved status before Auth Code
       doc.fontSize(9).font('OCR-B').text('Approved', leftMargin +10);
@@ -2306,7 +2306,7 @@ export class TravelCentersOfAmericaReceiptGenerator {
       // Generate authorization code (format: 5 digits + letter)
       const authCodeDigits = Math.floor(Math.random() * 90000) + 10000; // 5-digit number
       const authCodeLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26)); // Random letter A-Z
-      const authCode = `${authCodeDigits}${authCodeLetter}`;
+      const authCode = receipt.authNumber || `${authCodeDigits}${authCodeLetter}`;
       
       // APPROVED with auth code
       doc.fontSize(9).font('OCR-B').text(`APPROVED ${authCode}`, leftMargin + 10);
@@ -2317,7 +2317,7 @@ export class TravelCentersOfAmericaReceiptGenerator {
       doc.moveDown(0.3);
       
       // Invoice NO.
-      const invoiceNo = Math.floor(Math.random() * 90000) + 10000; // 5-digit number
+      const invoiceNo = receipt.invoiceNumber || Math.floor(Math.random() * 90000) + 10000; // 5-digit number
       doc.fontSize(9).font('OCR-B').text(`Invoice NO. ${invoiceNo}`, leftMargin + 10);
       doc.moveDown(0.3);
       
@@ -2388,7 +2388,7 @@ export class TravelCentersOfAmericaReceiptGenerator {
       doc.fontSize(9).font('OCR-B').text('Approved', leftMargin + 10);
       
       // Authorization number
-      const authNumber = Math.floor(Math.random() * 900000) + 100000; // 6-digit number
+      const authNumber = receipt.authNumber || Math.floor(Math.random() * 900000) + 100000; // 6-digit number
       doc.fontSize(9).font('OCR-B').text(`Auth #: ${authNumber}`, leftMargin + 10);
       doc.moveDown(1.5);
       
@@ -2422,8 +2422,8 @@ export class TravelCentersOfAmericaReceiptGenerator {
       doc.moveDown(0.1);
       
       // Transaction details
-      const authCode = Math.floor(Math.random() * 900000) + 100000; // 6-digit number
-      const invoiceNo = Math.floor(Math.random() * 90000) + 10000; // 5-digit number
+      const authCode = receipt.authNumber || Math.floor(Math.random() * 900000) + 100000; // 6-digit number
+      const invoiceNo = receipt.invoiceNumber || Math.floor(Math.random() * 90000) + 10000; // 5-digit number
       const aid = `a${Math.floor(Math.random() * 10000000000000).toString().padStart(13, '0')}`; // Random AID
       const tid = `*********${Math.floor(Math.random() * 9000) + 1000}`; // Random TID with masked digits
       const mid = Math.floor(Math.random() * 9000) + 1000; // Random 4-digit MID
@@ -2572,15 +2572,15 @@ export class HuskyReceiptGenerator {
     doc.moveDown(1);
 
     // Transaction details - match screenshot exactly
-    doc.fontSize(10).font('OCR-B').text('GST# 104885132   Merchant ID:4102536', leftMargin + 10);
+    doc.fontSize(10).font('OCR-B').text(`GST# ${receipt.companyData?.taxNumber || '104885132'}   Merchant ID:4102536`, leftMargin + 10);
     
     // Optional suspended line (hidden for Master and TCH)
     if ((receipt.paymentMethod || '').toLowerCase() !== 'master' && (receipt.paymentMethod || '').toLowerCase() !== 'tch' && (receipt.paymentMethod || '').toLowerCase() !== 'interac') {
-      doc.fontSize(10).font('OCR-B').text('Receipt 71020207 ****SUSPENDED****', leftMargin);
+      doc.fontSize(10).font('OCR-B').text(`Receipt ${receipt.receiptNo || '71020207'} ****SUSPENDED****`, leftMargin);
     }
 
      // Show Receipt number (right-aligned) for ALL payment methods, as in screenshot
-     const huskyReceiptNum = Math.floor(Math.random() * 9000000) + 1000000; // 7 digits
+     const huskyReceiptNum = receipt.receiptNo || Math.floor(Math.random() * 9000000) + 1000000; // 7 digits
      doc.fontSize(10).font('OCR-B').text('Receipt:', leftMargin, doc.y, { continued: true, width: 100 });
      doc.font('OCR-B').text(`${huskyReceiptNum}`, { align: 'right', width: 100 });
     
@@ -2691,7 +2691,7 @@ export class HuskyReceiptGenerator {
       doc.font('OCR-B').text(`${tchYear}/${tchMonth}/${tchDay} ${tchHour}:${tchMin}:${tchSec}`, { align: 'right', width: 248 });
 
       // REG# left and AUTH # right
-      const authTch = Math.floor(Math.random() * 900000) + 100000; // 6 digits
+      const authTch = receipt.authNumber || Math.floor(Math.random() * 900000) + 100000; // 6 digits
       doc.fontSize(10).font('OCR-B').text('REG#: 71', leftMargin, doc.y, { continued: true, width: 248 });
       doc.font('OCR-B').text(`AUTH #: ${authTch}`, 60);
       doc.moveDown(1);
@@ -2755,7 +2755,7 @@ export class HuskyReceiptGenerator {
 
       // Ref/Auth row
       const ref = Math.floor(Math.random() * 900000000000) + 100000000000; // 12 digits
-      const auth = Math.floor(Math.random() * 900000) + 100000; // 6 random digits
+      const auth = receipt.authNumber || Math.floor(Math.random() * 900000) + 100000; // 6 random digits
       doc.fontSize(10).font('OCR-B').text(`Ref:${ref}`, leftMargin, doc.y, { continued: true, width: 170 });
       doc.font('OCR-B').text(`Auth:${auth}`, { align: 'right', width: 170 });
 
@@ -2815,7 +2815,7 @@ export class HuskyReceiptGenerator {
 
       // Ref/Auth row
       const refI = Math.floor(Math.random() * 900000000000) + 100000000000;
-      const authI = Math.random().toString(36).slice(2, 8).toUpperCase();
+      const authI = receipt.authNumber || Math.random().toString(36).slice(2, 8).toUpperCase();
       doc.fontSize(10).font('OCR-B').text(`Ref:${refI}`, leftMargin, doc.y, { continued: true, width: 170 });
       doc.font('OCR-B').text(`Auth:${authI}`, { align: 'right', width: 170 });
 
@@ -2872,7 +2872,7 @@ export class HuskyReceiptGenerator {
       doc.font('OCR-B').text('ISO:00', { align: 'right', width: 248 });
       
       doc.fontSize(10).font('OCR-B').text('Ref: 530001001009', leftMargin, doc.y, { continued: true, width: 248 });
-      doc.font('OCR-B').text('Auth: 015854', { align: 'right', width: 248 });
+      doc.font('OCR-B').text(`Auth: ${receipt.authNumber || '015854'}`, { align: 'right', width: 248 });
       
       doc.fontSize(10).font('OCR-B').text('AID: A0000002771010', leftMargin);
       
@@ -2916,7 +2916,7 @@ export class HuskyReceiptGenerator {
       doc.font('OCR-B').text('ISO:00', { align: 'right', width: 248 });
       
       doc.fontSize(10).font('OCR-B').text('Ref: 530001001009', leftMargin, doc.y, { continued: true, width: 248 });
-      doc.font('OCR-B').text('Auth: 015854', { align: 'right', width: 248 });
+      doc.font('OCR-B').text(`Auth: ${receipt.authNumber || '015854'}`, { align: 'right', width: 248 });
       
       doc.fontSize(10).font('OCR-B').text('AID: A0000002771010', leftMargin);
       
@@ -3022,7 +3022,7 @@ export class CanadianFlyingJReceiptGenerator {
     doc.fontSize(10).font('OCR-B').text('SALE', leftMargin);
     
     // Transaction number - match USA format exactly
-    const transactionNum = `${Math.floor(Math.random() * 9000000) + 1000000}`;
+    const transactionNum = receipt.transactionNumber || `${Math.floor(Math.random() * 9000000) + 1000000}`;
     doc.fontSize(10).font('OCR-B').text(`Transaction #:  ${transactionNum}`, leftMargin, doc.y, { continued: true, width: 220 })
     doc.fontSize(8).font('OCR-B').text('---------------------------------------------------', leftMargin);
     
@@ -3100,7 +3100,7 @@ export class CanadianFlyingJReceiptGenerator {
       doc.fontSize(10).font('OCR-B').text(`  Approved`, leftMargin);
       
       // Generate random authorization number (6 digits for TCH)
-      const authNum = Math.floor(Math.random() * 900000) + 100000;
+      const authNum = receipt.authNumber || Math.floor(Math.random() * 900000) + 100000;
       doc.fontSize(10).font('OCR-B').text(`  Auth #:  ${authNum}`, leftMargin);
       doc.moveDown(1.5);
      
@@ -3116,7 +3116,7 @@ export class CanadianFlyingJReceiptGenerator {
                           receipt.cardEntryMethod === 'TAP' ? 'TAP' : 'SWIPED';
       doc.fontSize(10).font('OCR-B').text(`XXXXXXXXXXXXXXX${last4} ${entryMethod}`, leftMargin + 10);
       doc.fontSize(10).font('OCR-B').text('Approved', leftMargin + 10);
-      const auth = Math.random().toString(36).slice(2, 8).toUpperCase();
+      const auth = receipt.authNumber || Math.random().toString(36).slice(2, 8).toUpperCase();
       doc.fontSize(10).font('OCR-B').text(`Auth #:    ${auth}`, leftMargin + 10);
       doc.fontSize(9).font('OCR-B').text('=========== TRANSACTION RECORD ===========', leftMargin + 10);
       doc.moveDown(1);
@@ -3159,7 +3159,7 @@ export class CanadianFlyingJReceiptGenerator {
       doc.fontSize(10).font('OCR-B').text('Approved', leftMargin + 10);
       
       // Generate random authorization number (5 characters for Visa)
-      const authNum = 'S' + Math.floor(Math.random() * 90000) + 10000;
+      const authNum = receipt.authNumber || 'S' + Math.floor(Math.random() * 90000) + 10000;
       doc.fontSize(10).font('OCR-B').text(`Auth #: ${authNum}`, leftMargin + 10);
       
       // Transaction record separator
@@ -3297,13 +3297,13 @@ export class PetroCanadaReceiptGenerator {
     const now = receipt.date;
     const timeStr = now.toTimeString().substr(0, 8);
     const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    const invoiceNum = Math.floor(Math.random() * 900000) + 100000;
-    const transNum = Math.floor(Math.random() * 900000) + 100000;
+    const invoiceNum = receipt.invoiceNumber || Math.floor(Math.random() * 900000) + 100000;
+    const transNum = receipt.transactionNumber || Math.floor(Math.random() * 900000) + 100000;
     
     // Row 1: FHST and DATE
     const row1Y = doc.y;
     doc.fontSize(10).font('OCR-B').text((receipt.paymentMethod && receipt.paymentMethod.toLowerCase() === 'interac' ? 'GST:' : 'FHST:'), leftMargin, row1Y, { continued: true, width: 100 });
-    doc.font('OCR-B').text('818310427', { align: 'center', width: 100 });
+    doc.font('OCR-B').text(receipt.companyData?.taxNumber || '818310427', { align: 'center', width: 100 });
     doc.fontSize(10).font('OCR-B').text('DATE:', leftMargin + 120, row1Y, { continued: true, width: 100 });
     doc.font('OCR-B').text(dateStr, { align: 'center', width: 100 });
       // For Interac: TIME section alone in one line
@@ -3452,7 +3452,7 @@ export class PetroCanadaReceiptGenerator {
       doc.fontSize(10).font('OCR-B').text('AUTH #:', leftMargin, doc.y, { continued: true, width: 248 });
       const authDigits = Math.floor(Math.random() * 90000) + 10000; // 5 digits
       const authLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26)); // Random letter A-Z
-      const authCode = `${authDigits.toString().padStart(5, '0')}${authLetter}`;
+      const authCode = receipt.authNumber || `${authDigits.toString().padStart(5, '0')}${authLetter}`;
       doc.font('OCR-B').text(authCode, { align: 'center', width: 248 });
       
       doc.moveDown(0.5);
@@ -3490,7 +3490,7 @@ export class PetroCanadaReceiptGenerator {
       
       // AUTH # alphanumeric (6 chars)
       doc.fontSize(10).font('OCR-B').text('AUTH #:', leftMargin, doc.y, { continued: true, width: 190 });
-      const authAlpha = Math.random().toString(36).slice(2, 8).toUpperCase();
+      const authAlpha = receipt.authNumber || Math.random().toString(36).slice(2, 8).toUpperCase();
       doc.font('OCR-B').text(authAlpha, { align: 'right', width: 190 });
       
       doc.moveDown(0.5);
@@ -3522,8 +3522,8 @@ export class PetroCanadaReceiptGenerator {
       doc.font('OCR-B').text(`${refNum} H`, { align: 'right', width: 248 });
       
       doc.fontSize(10).font('OCR-B').text('AUTH #:', leftMargin, doc.y, { continued: true, width: 248 });
-      const authNum = Math.floor(Math.random() * 900000) + 100000;
-      doc.font('OCR-B').text(`${authNum.toString(16).toUpperCase()}`, { align: 'right', width: 248 });
+      const authNum = receipt.authNumber || (Math.floor(Math.random() * 900000) + 100000).toString(16).toUpperCase();
+      doc.font('OCR-B').text(`${authNum}`, { align: 'right', width: 248 });
       
       doc.moveDown(0.5);
       // Approval and Credit Information - match screenshot exactly
@@ -3764,7 +3764,7 @@ export class BVDPetroleumReceiptGenerator {
     doc.moveDown(0.3);
 
     // Auth details - using single-line approach with random values
-    const authNum = Math.floor(Math.random() * 900000) + 100000;
+    const authNum = receipt.authNumber || Math.floor(Math.random() * 900000) + 100000;
     const authLine = `Auth#:`.padEnd(31) + `${authNum}`.padStart(10);
     doc.fontSize(10).font('OCR-B').text(authLine, leftMargin);
     doc.moveDown(0.3);
@@ -3819,7 +3819,7 @@ export class BVDPetroleumReceiptGenerator {
     doc.fontSize(10).font('OCR-B').text(timeLine, leftMargin);
     doc.moveDown(0.3);
 
-    const transNum = Math.floor(Math.random() * 90000) + 10000;
+    const transNum = receipt.transactionNumber || Math.floor(Math.random() * 90000) + 10000;
     const transLine = `Trans#:`.padEnd(31) + `${transNum}`.padStart(10);
     doc.fontSize(10).font('OCR-B').text(transLine, leftMargin);
     doc.moveDown(1);

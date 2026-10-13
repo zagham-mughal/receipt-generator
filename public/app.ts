@@ -53,6 +53,7 @@ interface StoreData {
     cityState: string;
     phone: string;
     items: string;
+    taxNumber?: string | null;
 }
 
 interface GenerateReceiptResponse {
@@ -158,6 +159,9 @@ document.addEventListener('DOMContentLoaded', async (): Promise<void> => {
     if (itemsList) itemsList.addEventListener('input', updateTotal);
     if (countrySelect) countrySelect.addEventListener('change', filterCompaniesByCountry);
     if (paymentMethodSelect) paymentMethodSelect.addEventListener('change', toggleCardFields);
+    if (paymentMethodSelect) paymentMethodSelect.addEventListener('change', updateReferenceNumberFields);
+    if (countrySelect) countrySelect.addEventListener('change', updateReferenceNumberFields);
+    if (companySelect) companySelect.addEventListener('change', updateReferenceNumberFields);
     if (companySelect) {
         companySelect.addEventListener('change', async () => {
             await loadStoresForSelectedCompany();
@@ -4256,6 +4260,14 @@ async function generateReceipt(e: Event): Promise<void> {
         // Get copy type dropdown (for Love's + Visa and TA + Visa)
         const copyTypeInput = document.getElementById('copyType') as HTMLSelectElement;
         
+        // Optional invoice / receipt / transaction / auth numbers (generated on the server side when empty)
+        const invoiceNumberInput = document.getElementById('invoiceNumber') as HTMLInputElement;
+        const receiptNoInput = document.getElementById('receiptNo') as HTMLInputElement;
+        const transactionNumberInput = document.getElementById('transactionNumber') as HTMLInputElement;
+        const authNumberInput = document.getElementById('authNumber') as HTMLInputElement;
+        // Hidden fields belong to another company or payment method, so they are not sent
+        const isVisibleField = (input: HTMLInputElement | null) => !!input && input.offsetParent !== null;
+        
         const formData: any = {
             companyId: selectedCompanyId,
             country: countryInput.value,
@@ -4272,11 +4284,16 @@ async function generateReceipt(e: Event): Promise<void> {
             driverFirstName: driverFirstNameInput?.value || '',
             driverLastName: driverLastNameInput?.value || '',
             includeSignature: includeSignatureInput?.checked || false,
+            invoiceNumber: isVisibleField(invoiceNumberInput) ? invoiceNumberInput.value : '',
+            receiptNo: isVisibleField(receiptNoInput) ? receiptNoInput.value : '',
+            transactionNumber: isVisibleField(transactionNumberInput) ? transactionNumberInput.value : '',
+            authNumber: isVisibleField(authNumberInput) ? authNumberInput.value : '',
             storeData: selectedStore ? {
                 storeCode: selectedStore.storeCode,
                 address: selectedStore.address,
                 cityState: selectedStore.cityState,
-                phone: selectedStore.phone
+                phone: selectedStore.phone,
+                taxNumber: selectedStore.taxNumber || ''
             } : null,
             items: []
         };
@@ -4476,6 +4493,7 @@ function resetForm(): void {
     
     // Reset form visibility and fields
     toggleCardFields();
+    updateReferenceNumberFields();
     
     // Add first item
     addItem();
@@ -4700,6 +4718,66 @@ function generateReceiptPreview(data: ReceiptData): string {
             ||| ${data.receiptNumber} |||
         </div>
     `;
+}
+
+// Show only the invoice / receipt / transaction / auth number fields that the selected
+// company's receipt actually prints for the selected payment method
+function updateReferenceNumberFields(): void {
+    const companySelect = document.getElementById('designId') as HTMLSelectElement;
+    const selectedCompanyId = companySelect?.value ? parseInt(companySelect.value) : null;
+    const company = selectedCompanyId ? companies.find(c => c.id === selectedCompanyId) : null;
+    const name = (company?.name || '').toLowerCase();
+    const country = getCurrentCountry();
+    const paymentMethod = (document.getElementById('paymentMethod') as HTMLSelectElement)?.value || '';
+
+    let showInvoice = false;
+    let showReceipt = false;
+    let showTransaction = false;
+    let showAuth = false;
+
+    if (company && country === 'United States of America') {
+        const isCash = paymentMethod === 'Cash';
+        if (name.includes('one 9') || name.includes('one9')) {
+            showTransaction = true;
+            showAuth = !isCash;
+        } else if (name.includes('pilot')) {
+            showTransaction = true;
+            showInvoice = paymentMethod === 'TCH';
+            showAuth = !isCash;
+        } else if (name.includes('flying j')) {
+            showTransaction = true;
+            showAuth = true; // Cash prints approval numbers too
+        } else if (name.includes('love')) {
+            showInvoice = ['EFS', 'TCH', 'Visa', 'Master'].includes(paymentMethod);
+            showAuth = !isCash;
+        } else if (name.includes('travelcenters') || name.includes('travel centers')) {
+            showReceipt = true;
+            showInvoice = ['EFS', 'Master', 'Visa'].includes(paymentMethod);
+            showAuth = !isCash;
+        }
+    } else if (company && country === 'Canada') {
+        showAuth = ['Husky', 'Petro-Canada', 'Flying J', 'BVD Petroleum'].includes(company.name);
+        if (company.name === 'Husky') {
+            showReceipt = true;
+        } else if (company.name === 'Petro-Canada') {
+            showInvoice = true;
+            showTransaction = true;
+        } else if (company.name === 'Flying J' || company.name === 'BVD Petroleum') {
+            showTransaction = true;
+        }
+    }
+
+    const setVisible = (id: string, visible: boolean) => {
+        const el = document.getElementById(id) as HTMLElement | null;
+        if (el) el.style.display = visible ? '' : 'none';
+    };
+    setVisible('invoiceNumberGroup', showInvoice);
+    setVisible('receiptNoGroup', showReceipt);
+    setVisible('transactionNumberGroup', showTransaction);
+    setVisible('authNumberGroup', showAuth);
+
+    const row = document.getElementById('referenceNumbersRow') as HTMLElement | null;
+    if (row) row.style.display = (showInvoice || showReceipt || showTransaction || showAuth) ? 'grid' : 'none';
 }
 
 // Update payment method options based on selected company
