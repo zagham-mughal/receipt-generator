@@ -119,6 +119,8 @@ export function seedDummyCompanies(): void {
     { name: 'Flying J', address: '1637 Pettit Road, Ft.Erie, ON L2A 1A1', email: 'info@flyingj.ca', phone: '(905) 991-1800', country: 'Canada', designId: 2 },
     { name: 'Husky', address: '456 Trans-Canada Hwy, Calgary, AB T2P 0A1', email: 'service@husky.ca', phone: '(403) 555-0803', country: 'Canada', designId: 2 },
     { name: 'Petro-Canada', address: '789 Trans-Canada Hwy, Calgary, AB T2P 0A1', email: 'service@petro-canada.ca', phone: '(403) 555-0803', country: 'Canada', designId: 2 },
+    // Fictional brand: sample layout with dummy store details and HST number
+    { name: 'Acme Fuel & Mart', address: '123 Sample Rd S, Anytown, ON A1A 1A1', email: 'info@example.com', phone: '(555) 555-0100', country: 'Canada', designId: 2 },
     { name: 'Pearson Mart Esso', address: '321 Airport Road, Toronto, ON M5H 1A1', email: 'info@pearsonmart.ca', phone: '(416) 555-0601', country: 'Canada', designId: 2 },
     { name: 'BVD Petroleum Vancouver', address: '654 Main Street, Vancouver, BC V6B 1A1', email: 'contact@bvdpetroleum.ca', phone: '(604) 555-0702', country: 'Canada', designId: 2 },
     { name: 'BVD Petroleum', address: '495 York Road, Niagara, ON L0S 1J0', email: 'service@bvdpetroleum.ca', phone: '(905) 684-1079', country: 'Canada', designId: 2 }
@@ -530,6 +532,7 @@ export function seedCanadianStores(): void {
   const flyingJCompany = db.prepare('SELECT id FROM companies WHERE name = ? AND country = ?').get('Flying J', 'Canada') as { id: number } | undefined;
   const huskyCompany = db.prepare('SELECT id FROM companies WHERE name = ?').get('Husky') as { id: number } | undefined;
   const petroCanadaCompany = db.prepare('SELECT id FROM companies WHERE name = ?').get('Petro-Canada') as { id: number } | undefined;
+  const acmeFuelCompany = db.prepare('SELECT id FROM companies WHERE name = ?').get('Acme Fuel & Mart') as { id: number } | undefined;
   const pearsonMartCompany = db.prepare('SELECT id FROM companies WHERE name = ?').get('Pearson Mart Esso') as { id: number } | undefined;
   const bvdPetroleumVancouverCompany = db.prepare('SELECT id FROM companies WHERE name = ?').get('BVD Petroleum Vancouver') as { id: number } | undefined;
   const bvdPetroleumCompany = db.prepare('SELECT id FROM companies WHERE name = ?').get('BVD Petroleum') as { id: number } | undefined;
@@ -580,6 +583,14 @@ export function seedCanadianStores(): void {
       { companyId: petroCanadaCompany.id, storeCode: 'PETRO-CANADA', address: '995 EGLINTON AVE E', cityState: 'MISSISSAUGA, ONTARIO L4W4H3', phone: '(905)-624-3732', items: '', taxNumber: '757229299' },
     ];
     canadianStores.push(...petroCanadaStores);
+  }
+
+  // Acme Fuel & Mart stores (fictional: dummy addresses, 555 phone numbers, sample HST number)
+  if (acmeFuelCompany) {
+    canadianStores.push(
+      { companyId: acmeFuelCompany.id, storeCode: 'Store 0001', address: '123 Sample Rd S', cityState: 'Anytown, ON A1A 1A1', phone: '(555) 555-0100', items: 'REG-E, DIESEL, DEF', taxNumber: '123456789RT0001' },
+      { companyId: acmeFuelCompany.id, storeCode: 'Store 0002', address: '456 Example Ave', cityState: 'Sampleville, ON B2B 2B2', phone: '(555) 555-0101', items: 'REG-E, DIESEL, DEF', taxNumber: '123456789RT0001' }
+    );
   }
 
   // Pearson Mart Esso stores

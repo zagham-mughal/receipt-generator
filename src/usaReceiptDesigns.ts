@@ -3916,3 +3916,157 @@ export function getUSACompanyReceiptGenerator(companyName: string): any {
   
   return null;
 }
+
+/**
+ * Acme Fuel & Mart: a fictional brand with an ESSO-style layout.
+ * Store details and the HST number are dummy values from the seed data.
+ */
+export class AcmeFuelReceiptGenerator {
+  async generate(receipt: Receipt, outputPath: string): Promise<void> {
+    const pageSize: [number, number] = [280, 900];
+    const doc = new PDFDocument({ size: pageSize, margin: 15, autoFirstPage: false });
+    doc.registerFont('OCR-B', path.join(__dirname, '../fonts/ocr_b_becker.ttf'));
+    doc.addPage({ size: pageSize, margin: 15 });
+    const writeStream = fs.createWriteStream(outputPath);
+    doc.pipe(writeStream);
+
+    const left = 15;
+    const right = 265; // right edge of the printable area
+    const lineHeight = 12;
+    const font = (size: number) => doc.fontSize(size).font('OCR-B');
+    const digits = (n: number) => Array.from({ length: n }, () => Math.floor(Math.random() * 10)).join('');
+    const hex = (n: number) => Array.from({ length: n }, () => Math.floor(Math.random() * 16).toString(16).toUpperCase()).join('');
+    const pad2 = (n: number) => String(n).padStart(2, '0');
+
+    // Text cells placed on one line at fixed x positions; `rightAlignTo` aligns a cell's right edge
+    const row = (cells: Array<{ text: string; x: number; rightAlignTo?: number }>, size = 10) => {
+      const y = doc.y;
+      font(size);
+      cells.forEach(cell => {
+        if (cell.rightAlignTo !== undefined) {
+          const w = cell.rightAlignTo - cell.x;
+          doc.text(cell.text, cell.x, y, { width: w, align: 'right', lineBreak: false });
+        } else {
+          doc.text(cell.text, cell.x, y, { lineBreak: false });
+        }
+      });
+      doc.x = left;
+      doc.y = y + (size > 10 ? size + 4 : lineHeight);
+    };
+    const centered = (text: string, size = 10) => {
+      font(size).text(text, left, doc.y, { width: right - left, align: 'center' });
+    };
+
+    // --- Header
+    centered('TRANSACTION RECORD');
+    centered('ACME FUEL & MART', 16);
+    centered('****************');
+    const address = (receipt.companyData?.address || '123 Sample Rd S').toUpperCase();
+    const cityState = receipt.companyData?.city || 'Anytown, ON A1A 1A1';
+    const commaAt = cityState.indexOf(',');
+    const cityLine = commaAt > 0
+      ? `${cityState.slice(0, commaAt).trim()}     ${cityState.slice(commaAt + 1).trim()}`.toUpperCase()
+      : cityState.toUpperCase();
+    centered(address);
+    centered(cityLine);
+    doc.moveDown(1);
+
+    // --- Date, store and transaction details (two columns)
+    const d = receipt.date;
+    const dateStr = `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+    const timeStr = `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+    const storeNumber = (receipt.companyData?.storeNumber || '0001').replace(/\D/g, '').padStart(8, '0');
+    const transNum = receipt.transactionNumber || digits(6);
+    const hstNumber = receipt.companyData?.taxNumber || '123456789RT0001';
+    const colL = left, colLv = left + 60, colR = left + 135, colRv = left + 190;
+
+    row([{ text: 'DATE:', x: colL }, { text: dateStr, x: colLv }, { text: 'TIME:', x: colR }, { text: timeStr, x: colRv }]);
+    doc.moveDown(0.6);
+    row([{ text: 'STORE #:', x: colL }, { text: storeNumber, x: colLv }, { text: 'TRANS #:', x: colR }, { text: String(transNum), x: colRv }]);
+    row([{ text: 'Paypoint:', x: colL }, { text: '01K', x: colLv }, { text: 'Cashier:', x: colR }, { text: 'manager', x: colRv }]);
+    row([{ text: 'HST:', x: colL }, { text: hstNumber, x: colLv }]);
+    doc.moveDown(1);
+
+    centered('** PREAUTH RECEIPT ONLY **');
+    doc.moveDown(1);
+
+    // --- Fuel lines
+    const qtyRight = left + 150, priceRight = left + 200, amountRight = right;
+    row([
+      { text: 'FUEL', x: left },
+      { text: '(L)', x: left + 100, rightAlignTo: qtyRight },
+      { text: '($/L)', x: left + 150, rightAlignTo: priceRight },
+      { text: '($)', x: left + 200, rightAlignTo: amountRight },
+    ]);
+    const total = receipt.items.reduce((sum, item) => sum + item.quantity * item.price, 0);
+    receipt.items.forEach(item => {
+      const pump = item.pump !== undefined && item.pump !== null ? item.pump : 2;
+      row([{ text: `Pump ${pump} PREPAID`, x: left }]);
+      row([
+        { text: item.name.toUpperCase().slice(0, 12), x: left },
+        { text: item.quantity.toFixed(3), x: left + 70, rightAlignTo: qtyRight },
+        { text: item.price.toFixed(3), x: left + 150, rightAlignTo: priceRight },
+        { text: (item.quantity * item.price).toFixed(2), x: left + 200, rightAlignTo: amountRight },
+      ]);
+    });
+    doc.moveDown(0.5);
+
+    // --- Totals
+    const totalStr = total.toFixed(2);
+    const hstIncluded = total - total / 1.13;
+    const method = (receipt.paymentMethod || 'Interac').toLowerCase();
+    const isDebit = method === 'interac';
+    const cardName = method === 'master' ? 'MASTERCARD' : method === 'visa' ? 'VISA' : 'INTERAC';
+
+    row([{ text: 'TOTAL', x: left }, { text: 'CAD $', x: left + 95 }, { text: totalStr, x: left + 150, rightAlignTo: right }], 14);
+    row([{ text: isDebit ? 'DEBIT' : 'CREDIT', x: left }, { text: `$ ${totalStr}`, x: left + 100, rightAlignTo: left + 200 }]);
+    row([{ text: `* HST INCLUDED IN FUEL $ ${hstIncluded.toFixed(2)}`, x: left }]);
+    doc.moveDown(0.5);
+    row([{ text: 'PURCHASE', x: left }], 14);
+    row([{ text: `$ ${totalStr}`, x: left + 150, rightAlignTo: right }]);
+
+    // --- Card details
+    const last4 = receipt.cardLast4 || digits(4);
+    const invoiceNum = receipt.invoiceNumber || digits(7);
+    const authNum = receipt.authNumber || digits(6);
+    const valueX = left + 100;
+    row([{ text: cardName, x: left }, { text: `************${last4}`, x: valueX }]);
+    if (isDebit) {
+      row([{ text: 'ACCT:', x: left }, { text: 'CHEQUING', x: valueX }]);
+    }
+    row([{ text: 'REFERENCE #:', x: left }, { text: `****${digits(4)} ${digits(10)} C`, x: valueX }]);
+    row([{ text: 'INVOICE NO:', x: left }, { text: String(invoiceNum), x: valueX }]);
+    row([{ text: 'AUTH #:', x: left }, { text: String(authNum), x: valueX }]);
+    doc.moveDown(1);
+
+    // EMV application details (standard public application IDs per card network)
+    const applicationId = method === 'master' ? 'A0000000041010' : method === 'visa' ? 'A0000000031010' : 'A0000002771010';
+    row([{ text: method === 'visa' ? 'VISA CREDIT' : method === 'master' ? 'MASTERCARD' : 'INTERAC', x: left }]);
+    row([{ text: applicationId, x: left }]);
+    row([{ text: `TVR: ${hex(10)}`, x: left }]);
+    row([{ text: `TSI: ${hex(4)}`, x: left }]);
+    doc.moveDown(1);
+    row([{ text: isDebit ? '00/001 APPROVED - THANK YOU' : '01/027 APPROVED - THANK YOU', x: left }]);
+    doc.moveDown(1);
+
+    // --- Footer
+    row([{ text: 'Reconciliation ID:', x: left }, { text: digits(7), x: left + 150, rightAlignTo: right }]);
+    doc.moveDown(1);
+    row([{ text: 'Customer Inquiries: 1-800-555-0199', x: left }]);
+    doc.moveDown(1);
+    centered('Thank You and', 14);
+    centered('See You again', 14);
+    centered('ALL SALES FINAL', 14);
+    doc.moveDown(1);
+    centered('-- IMPORTANT --');
+    centered('Retain This Copy For Your Records');
+    doc.moveDown(1);
+    centered("--- Customer's Copy ---");
+
+    doc.end();
+    return new Promise((resolve, reject) => {
+      writeStream.on('finish', () => resolve());
+      writeStream.on('error', reject);
+    });
+  }
+}

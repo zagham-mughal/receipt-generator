@@ -414,7 +414,7 @@ function restoreRequiredAttributes(): void {
     const selectedCompanyId = designIdInput?.value ? parseInt(designIdInput.value) : null;
     const selectedCompany = selectedCompanyId ? companies.find(c => c.id === selectedCompanyId) : null;
     const isHuskyCompany = selectedCompany && selectedCompany.name.toLowerCase().includes('husky');
-    const isPetroCanadaCompany = selectedCompany && selectedCompany.name.toLowerCase().includes('petro-canada');
+    const isPetroCanadaCompany = selectedCompany && (selectedCompany.name.toLowerCase().includes('petro-canada') || selectedCompany.name.toLowerCase().includes('acme fuel'));
     const isBVDPetroleumCompany = selectedCompany && selectedCompany.name.toLowerCase().includes('bvd petroleum');
     const isAnyCanadaCompany = selectedCompany && selectedCompany.country === 'Canada';
     const isOne9Company = selectedCompany && (selectedCompany.name.toLowerCase().includes('one 9') || selectedCompany.name.toLowerCase().includes('one9'));
@@ -799,7 +799,7 @@ function toggleCardFields(): void {
     const isTravelCentersCompany = selectedCompany && (selectedCompany.name.toLowerCase().includes('travelcenters') || selectedCompany.name.toLowerCase().includes('travel centers'));
     const isPilotCompany = selectedCompany && selectedCompany.name.toLowerCase().includes('pilot');
     const isHuskyCompany = selectedCompany && selectedCompany.name.toLowerCase().includes('husky');
-    const isPetroCanadaCompany = selectedCompany && selectedCompany.name.toLowerCase().includes('petro-canada');
+    const isPetroCanadaCompany = selectedCompany && (selectedCompany.name.toLowerCase().includes('petro-canada') || selectedCompany.name.toLowerCase().includes('acme fuel'));
     const isBVDPetroleumCompany = selectedCompany && selectedCompany.name.toLowerCase().includes('bvd petroleum');
     const isAnyCanadaCompany = selectedCompany && selectedCompany.country === 'Canada';
     
@@ -4148,7 +4148,7 @@ async function generateReceipt(e: Event): Promise<void> {
     const selectedCompany = selectedCompanyId ? companies.find(c => c.id === selectedCompanyId) : null;
     
     const isHuskyCompany = selectedCompany && selectedCompany.name.toLowerCase().includes('husky');
-    const isPetroCanadaCompany = selectedCompany && selectedCompany.name.toLowerCase().includes('petro-canada');
+    const isPetroCanadaCompany = selectedCompany && (selectedCompany.name.toLowerCase().includes('petro-canada') || selectedCompany.name.toLowerCase().includes('acme fuel'));
     const isBVDPetroleumCompany = selectedCompany && selectedCompany.name.toLowerCase().includes('bvd petroleum');
     const isAnyCanadaCompany = selectedCompany && selectedCompany.country === 'Canada';
     const isHuskyVisa = isHuskyCompany && (paymentMethod === 'Visa' || paymentMethod === 'Master' || paymentMethod === 'Mastercard' || paymentMethod === 'Interac' || paymentMethod === 'American Express' || paymentMethod === 'EFS' || paymentMethod === 'TCH');
@@ -4778,10 +4778,10 @@ function updateReferenceNumberFields(): void {
             showAuth = !isCash;
         }
     } else if (company && country === 'Canada') {
-        showAuth = ['Husky', 'Petro-Canada', 'Flying J', 'BVD Petroleum'].includes(company.name);
+        showAuth = ['Husky', 'Petro-Canada', 'Acme Fuel & Mart', 'Flying J', 'BVD Petroleum'].includes(company.name);
         if (company.name === 'Husky') {
             showReceipt = true;
-        } else if (company.name === 'Petro-Canada') {
+        } else if (company.name === 'Petro-Canada' || company.name === 'Acme Fuel & Mart') {
             showInvoice = true;
             showTransaction = true;
         } else if (company.name === 'Flying J' || company.name === 'BVD Petroleum') {
@@ -4865,6 +4865,7 @@ function updatePaymentMethodOptions(): void {
     
     const isBVDPetroleum = selectedCompany.name.toLowerCase().includes('bvd petroleum');
     const isPetroCanada = selectedCompany.name.toLowerCase().includes('petro-canada');
+    const isAcmeFuel = selectedCompany.name.toLowerCase().includes('acme fuel');
     const isHusky = selectedCompany.name.toLowerCase().includes('husky');
     const isFlyingJCanada = selectedCompany.name.toLowerCase().includes('flying j') && getCurrentCountry() === 'Canada';
     
@@ -4891,6 +4892,14 @@ function updatePaymentMethodOptions(): void {
             <option value="Visa">💳 Visa</option>
         `;
         paymentMethodSelect.value = 'Master';
+    } else if (isAcmeFuel) {
+        // Acme Fuel & Mart (sample layout): Interac debit, Mastercard, Visa
+        paymentMethodSelect.innerHTML = `
+            <option value="Interac">💳 Interac</option>
+            <option value="Master">💳 Master</option>
+            <option value="Visa">💳 Visa</option>
+        `;
+        paymentMethodSelect.value = 'Interac';
     } else if (isPetroCanada) {
         // For Petro-Canada, show Master and Interac payment methods (Visa hidden)
         paymentMethodSelect.innerHTML = `

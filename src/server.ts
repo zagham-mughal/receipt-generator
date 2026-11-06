@@ -10,7 +10,7 @@ import bcrypt from 'bcrypt';
 import { ReceiptGenerator } from './receiptGenerator';
 import { Receipt, ReceiptItem } from './types';
 import { getDesignForCompany, DESIGNS } from './designs';
-import { getUSACompanyReceiptGenerator, CanadianFlyingJReceiptGenerator, HuskyReceiptGenerator, PetroCanadaReceiptGenerator, BVDPetroleumReceiptGenerator } from './usaReceiptDesigns';
+import { getUSACompanyReceiptGenerator, CanadianFlyingJReceiptGenerator, HuskyReceiptGenerator, PetroCanadaReceiptGenerator, BVDPetroleumReceiptGenerator, AcmeFuelReceiptGenerator } from './usaReceiptDesigns';
 import { 
   initializeDatabase, 
   seedDummyCompanies,
@@ -490,6 +490,7 @@ app.post('/api/generate-receipt', requireAuth, async (req: Request, res: Respons
     const isHusky = country === 'Canada' && selectedCompany?.name === 'Husky';
     const isPetroCanada = country === 'Canada' && selectedCompany?.name === 'Petro-Canada';
     const isBVDPetroleum = country === 'Canada' && selectedCompany?.name === 'BVD Petroleum';
+    const isAcmeFuel = country === 'Canada' && selectedCompany?.name === 'Acme Fuel & Mart';
     let designName = 'Default';
     
     console.log('🔍 DEBUG - Country:', country);
@@ -515,6 +516,10 @@ app.post('/api/generate-receipt', requireAuth, async (req: Request, res: Respons
       await petroCanadaGenerator.generate(receipt, outputPath);
       designName = 'Petro-Canada Receipt';
       console.log('✅ Generated Petro-Canada receipt');
+    } else if (isAcmeFuel) {
+      // Fictional brand with an ESSO-style layout
+      await new AcmeFuelReceiptGenerator().generate(receipt, outputPath);
+      designName = 'Acme Fuel & Mart Receipt';
     } else if (isBVDPetroleum) {
       // Use dedicated BVD Petroleum generator
       console.log('✅ Using BVD Petroleum generator for:', customerName);
