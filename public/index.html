@@ -52,13 +52,46 @@
                         </select>
                     </div>
                     <div class="form-group" id="storeSelectionGroup" style="display: none;">
-                        <label for="storeSearch">Select Store Location *</label>
-                        <input type="text" id="storeSearch" placeholder="🔍 Search store by code or location..." autocomplete="off" style="margin-bottom: 8px;">
-                        <select id="storeId" name="storeId" required>
-                            <option value="">-- Select a store --</option>
-                        </select>
+                        <label for="manualAddress" style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                            <input type="checkbox" id="manualAddress" name="manualAddress" style="width: auto;">
+                            Enter address manually
+                        </label>
+                        <div id="storePickerFields">
+                            <label for="storeSearch">Select Store Location *</label>
+                            <input type="text" id="storeSearch" placeholder="🔍 Search store by code or location..." autocomplete="off" style="margin-bottom: 8px;">
+                            <select id="storeId" name="storeId" required>
+                                <option value="">-- Select a store --</option>
+                            </select>
+                        </div>
+                        <div id="manualAddressFields" style="display: none;">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="manualStoreNumber">Store Number</label>
+                                    <input type="text" id="manualStoreNumber" name="manualStoreNumber" placeholder="1001">
+                                </div>
+                                <div class="form-group">
+                                    <label for="manualPhone">Phone</label>
+                                    <input type="text" id="manualPhone" name="manualPhone" placeholder="(905) 991-1800">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="manualStreetAddress">Street Address *</label>
+                                <input type="text" id="manualStreetAddress" name="manualStreetAddress" placeholder="1637 Pettit Road">
+                            </div>
+                            <div class="form-group">
+                                <label for="manualCityState">City, Province &amp; Postal Code *</label>
+                                <input type="text" id="manualCityState" name="manualCityState" placeholder="Ft.Erie, ON L2A 1A1">
+                            </div>
+                        </div>
                         <small style="color: #666; display: block; margin-top: 5px;">
                             📍 Store address and phone will appear on receipt
+                        </small>
+                    </div>
+                    <div class="form-group" id="hstNumberGroup" style="display: none;">
+                        <label for="hstNumber" id="hstNumberLabel">HST #</label>
+                        <input type="text" id="hstNumber" name="hstNumber" placeholder="855506127">
+                        <small id="hstNumberHint" style="color: #666; display: block; margin-top: 5px;">
+                            Tax registration number printed on the receipt
                         </small>
                     </div>
                 </div>

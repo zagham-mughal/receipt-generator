@@ -162,9 +162,16 @@ document.addEventListener('DOMContentLoaded', async (): Promise<void> => {
     if (paymentMethodSelect) paymentMethodSelect.addEventListener('change', updateReferenceNumberFields);
     if (countrySelect) countrySelect.addEventListener('change', updateReferenceNumberFields);
     if (companySelect) companySelect.addEventListener('change', updateReferenceNumberFields);
+    if (countrySelect) countrySelect.addEventListener('change', updateHstNumberField);
+    if (companySelect) companySelect.addEventListener('change', updateHstNumberField);
+    const manualAddressCheckbox = document.getElementById('manualAddress') as HTMLInputElement | null;
+    if (manualAddressCheckbox) manualAddressCheckbox.addEventListener('change', toggleManualAddressFields);
+    if (manualAddressCheckbox) manualAddressCheckbox.addEventListener('change', updateHstNumberField);
+    if (countrySelect) countrySelect.addEventListener('change', toggleManualAddressFields);
     if (companySelect) {
         companySelect.addEventListener('change', async () => {
             await loadStoresForSelectedCompany();
+            toggleManualAddressFields();
             await loadItemsForSelectedCompany();
             
             // Re-evaluate vehicle details visibility when company changes
@@ -4267,7 +4274,13 @@ async function generateReceipt(e: Event): Promise<void> {
         const authNumberInput = document.getElementById('authNumber') as HTMLInputElement;
         // Hidden fields belong to another company or payment method, so they are not sent
         const isVisibleField = (input: HTMLInputElement | null) => !!input && input.offsetParent !== null;
-        
+
+        // Manual store address replaces the store dropdown when its checkbox is visible and checked
+        const manualAddressInput = document.getElementById('manualAddress') as HTMLInputElement;
+        const useManualAddress = isVisibleField(manualAddressInput) && manualAddressInput.checked;
+        const manualValue = (id: string) => ((document.getElementById(id) as HTMLInputElement)?.value || '').trim();
+        const hstNumberInput = document.getElementById('hstNumber') as HTMLInputElement;
+
         const formData: any = {
             companyId: selectedCompanyId,
             country: countryInput.value,
@@ -4288,13 +4301,20 @@ async function generateReceipt(e: Event): Promise<void> {
             receiptNo: isVisibleField(receiptNoInput) ? receiptNoInput.value : '',
             transactionNumber: isVisibleField(transactionNumberInput) ? transactionNumberInput.value : '',
             authNumber: isVisibleField(authNumberInput) ? authNumberInput.value : '',
-            storeData: selectedStore ? {
+            storeData: useManualAddress ? {
+                storeCode: manualValue('manualStoreNumber'),
+                address: manualValue('manualStreetAddress'),
+                cityState: manualValue('manualCityState'),
+                phone: manualValue('manualPhone'),
+                taxNumber: ''
+            } : selectedStore ? {
                 storeCode: selectedStore.storeCode,
                 address: selectedStore.address,
                 cityState: selectedStore.cityState,
                 phone: selectedStore.phone,
                 taxNumber: selectedStore.taxNumber || ''
             } : null,
+            hstNumber: isVisibleField(hstNumberInput) ? hstNumberInput.value : '',
             items: []
         };
         
@@ -4463,6 +4483,8 @@ function resetForm(): void {
     if (receiptForm) {
         receiptForm.reset();
         receiptForm.style.display = 'block';
+        toggleManualAddressFields();
+        updateHstNumberField();
     }
     if (successMessage) successMessage.style.display = 'none';
     if (printReceipt) printReceipt.classList.remove('show-preview');
@@ -4778,6 +4800,60 @@ function updateReferenceNumberFields(): void {
 
     const row = document.getElementById('referenceNumbersRow') as HTMLElement | null;
     if (row) row.style.display = (showInvoice || showReceipt || showTransaction || showAuth) ? 'grid' : 'none';
+}
+
+// Swap the store dropdown for manual address inputs when "Enter address manually" is checked
+function toggleManualAddressFields(): void {
+    const checkbox = document.getElementById('manualAddress') as HTMLInputElement | null;
+    const manual = !!checkbox?.checked;
+    const picker = document.getElementById('storePickerFields') as HTMLElement | null;
+    const fields = document.getElementById('manualAddressFields') as HTMLElement | null;
+    if (picker) picker.style.display = manual ? 'none' : '';
+    if (fields) fields.style.display = manual ? '' : 'none';
+
+    // The browser validates `required` before the submit handler runs, so hidden inputs must not be required
+    const group = document.getElementById('storeSelectionGroup') as HTMLElement | null;
+    const groupVisible = !!group && group.style.display !== 'none';
+    const storeSelect = document.getElementById('storeId') as HTMLSelectElement | null;
+    if (storeSelect) storeSelect.required = groupVisible && !manual;
+    ['manualStreetAddress', 'manualCityState'].forEach(id => {
+        const input = document.getElementById(id) as HTMLInputElement | null;
+        if (input) input.required = groupVisible && manual;
+    });
+}
+
+// Tax registration number field for Canadian receipts that print one.
+// Flying J Canada always shows it; Husky and Petro-Canada take it from the selected store,
+// so the field only appears when the address is entered manually.
+function updateHstNumberField(): void {
+    const company = getSelectedCompany();
+    const name = company?.name.toLowerCase() || '';
+    const isCanada = getCurrentCountry() === 'Canada';
+    const manualAddress = !!(document.getElementById('manualAddress') as HTMLInputElement | null)?.checked;
+
+    let label = '';
+    let placeholder = '';
+    let show = false;
+    if (isCanada && name.includes('flying j')) {
+        label = 'HST #';
+        placeholder = '855506127';
+        show = true;
+    } else if (isCanada && name.includes('husky')) {
+        label = 'GST #';
+        placeholder = '104885132';
+        show = manualAddress;
+    } else if (isCanada && name.includes('petro-canada')) {
+        label = 'FHST / GST #';
+        placeholder = '818310427';
+        show = manualAddress;
+    }
+
+    const group = document.getElementById('hstNumberGroup') as HTMLElement | null;
+    const labelEl = document.getElementById('hstNumberLabel');
+    const input = document.getElementById('hstNumber') as HTMLInputElement | null;
+    if (group) group.style.display = show ? '' : 'none';
+    if (labelEl && label) labelEl.textContent = label;
+    if (input && placeholder) input.placeholder = placeholder;
 }
 
 // Update payment method options based on selected company

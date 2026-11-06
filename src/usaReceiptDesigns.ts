@@ -2961,10 +2961,10 @@ export class HuskyReceiptGenerator {
 
 export class CanadianFlyingJReceiptGenerator {
   async generate(receipt: Receipt, outputPath: string): Promise<void> {
-    const doc = new PDFDocument({ size: [280, 800], margin: 15, autoFirstPage: false });
+    const doc = new PDFDocument({ size: [280, 1000], margin: 15, autoFirstPage: false });
     const fontPath = path.join(__dirname, '../fonts/ocr_b_becker.ttf');
     doc.registerFont('OCR-B', fontPath);
-    doc.addPage({ size: [280, 800], margin: 15 });
+    doc.addPage({ size: [280, 1000], margin: 15 });
     const writeStream = fs.createWriteStream(outputPath);
     doc.pipe(writeStream);
 
@@ -3206,12 +3206,76 @@ export class CanadianFlyingJReceiptGenerator {
       doc.moveDown(1.5);
     }
 
+    // Footer below Odometer: Pos/Clerk, barcode, COPY, HST and dye notice
+    const pos = receipt.pos || '2';
+    const clerk = receipt.clerk || '365';
+    const barcodeNumber = '0' + Array.from({ length: 11 }, () => Math.floor(Math.random() * 10)).join('');
+
+    doc.moveDown(0.5);
+    doc.fontSize(8).font('OCR-B').text('---------------------------------------------------', leftMargin);
+    doc.fontSize(10).font('OCR-B').text(`Pos:${pos} Clerk:${clerk}`, leftMargin);
+    doc.moveDown(0.5);
+    drawCode128C(doc, barcodeNumber, doc.page.width / 2, doc.y, 1.2, 55);
+    doc.moveDown(0.3);
+    doc.fontSize(9).font('OCR-B').text(barcodeNumber, { align: 'center' });
+    doc.moveDown(0.5);
+    doc.fontSize(10).font('OCR-B').text(`Pos:${pos} Clerk:${clerk}`, leftMargin);
+    doc.fontSize(10).font('OCR-B').text('COPY', leftMargin);
+    doc.fontSize(8).font('OCR-B').text('---------------------------------------------------', leftMargin);
+    doc.moveDown(0.8);
+    [
+      '13% HST is included in the posted',
+      'price per litre',
+      `HST# ${receipt.companyData?.taxNumber || '855506127'}`,
+      'This diesel fuel contains no visible',
+      'evidence of dye',
+      'Exposure to heat or direct sunlight',
+      'can affect receipt quality.',
+    ].forEach(line => doc.fontSize(10).font('OCR-B').text(line, leftMargin));
+
     doc.end();
     return new Promise((resolve, reject) => {
       writeStream.on('finish', () => resolve());
       writeStream.on('error', reject);
     });
   }
+}
+
+// Code 128 bar/space width patterns (values 0-106)
+const CODE128_PATTERNS = [
+  '212222','222122','222221','121223','121322','131222','122213','122312','132212','221213',
+  '221312','231212','112232','122132','122231','113222','123122','123221','223211','221132',
+  '221231','213212','223112','312131','311222','321122','321221','312212','322112','322211',
+  '212123','212321','232121','111323','131123','131321','112313','132113','132311','211313',
+  '231113','231311','112133','112331','132131','113123','113321','133121','313121','211331',
+  '231131','213113','213311','213131','311123','311321','331121','312113','312311','332111',
+  '314111','221411','431111','111224','111422','121124','121421','141122','141221','112214',
+  '112412','122114','122411','142112','142211','241211','221114','413111','241112','134111',
+  '111242','121142','121241','114212','124112','124211','411212','421112','421211','212141',
+  '214121','412121','111143','111341','131141','114113','114311','411113','411311','113141',
+  '114131','311141','411131','211412','211214','211232','2331112',
+];
+
+/**
+ * Draws a scannable Code 128 (set C) barcode for an even-length numeric string,
+ * horizontally centered on centerX. Advances doc.y past the bars.
+ */
+function drawCode128C(doc: PDFKit.PDFDocument, digits: string, centerX: number, y: number, moduleWidth: number, height: number): void {
+  const values = [105];
+  for (let i = 0; i < digits.length; i += 2) values.push(parseInt(digits.slice(i, i + 2), 10));
+  const checksum = values.reduce((sum, v, i) => sum + v * (i === 0 ? 1 : i), 0) % 103;
+  values.push(checksum, 106);
+
+  const widths = values.map(v => CODE128_PATTERNS[v]).join('').split('').map(Number);
+  const totalModules = widths.reduce((a, b) => a + b, 0);
+  let x = centerX - (totalModules * moduleWidth) / 2;
+
+  widths.forEach((w, i) => {
+    if (i % 2 === 0) doc.rect(x, y, w * moduleWidth, height).fill('#000000');
+    x += w * moduleWidth;
+  });
+  doc.fillColor('#000000');
+  doc.y = y + height;
 }
 
 export class PetroCanadaReceiptGenerator {

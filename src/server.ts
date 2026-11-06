@@ -340,7 +340,8 @@ app.post('/api/generate-receipt', requireAuth, async (req: Request, res: Respons
       invoiceNumber,
       receiptNo,
       transactionNumber,
-      authNumber
+      authNumber,
+      hstNumber
     } = req.body;
     
     // If companyId is provided, get company from database
@@ -388,12 +389,13 @@ app.post('/api/generate-receipt', requireAuth, async (req: Request, res: Respons
       phone: storeData.phone,
       address: storeData.address,
       city: storeData.cityState,
-      taxNumber: storeData.taxNumber || undefined
+      taxNumber: (hstNumber || '').trim() || storeData.taxNumber || undefined
     } : {
       storeNumber: Math.floor(Math.random() * 900 + 100).toString(),
       phone: selectedCompany?.phone || '',
       address: selectedCompany?.address || companyAddress || '',
-      city: '' // Will be extracted from address if needed
+      city: '', // Will be extracted from address if needed
+      taxNumber: (hstNumber || '').trim() || undefined
     };
 
     // Create receipt data (use selected company data if available)
