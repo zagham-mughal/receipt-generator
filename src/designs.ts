@@ -129,8 +129,8 @@ export function getDesignForCompany(index: number): ReceiptDesign {
 }
 
 export function drawSeparator(doc: PDFKit.PDFDocument, style: string, y: number, width: number): void {
-  const startX = 15;
-  const endX = width - 15;
+  const startX = 10;
+  const endX = width - 10;
   
   switch (style) {
     case 'dashed':

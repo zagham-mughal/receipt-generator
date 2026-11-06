@@ -3,6 +3,8 @@ import fs from 'fs';
 import { Receipt, ReceiptItem } from './types';
 import { ReceiptDesign, drawSeparator, drawBarcode } from './designs';
 
+const RECEIPT_MARGIN = 10;
+
 export class ReceiptGenerator {
   private readonly storeName = 'YOUR BRAND NAME';
   private readonly storeAddress = '123 Main Street';
@@ -19,7 +21,7 @@ export class ReceiptGenerator {
   async generate(receipt: Receipt, outputPath: string): Promise<void> {
     const doc = new PDFDocument({ 
       size: [this.design.width, 750], 
-      margin: 15 
+      margin: RECEIPT_MARGIN
     });
 
     const writeStream = fs.createWriteStream(outputPath);
@@ -101,15 +103,15 @@ export class ReceiptGenerator {
       case 'left':
         doc.fontSize(this.design.fontSize.store)
            .font('Helvetica-Bold')
-           .text(this.storeName.toUpperCase(), 15);
+           .text(this.storeName.toUpperCase(), RECEIPT_MARGIN);
         break;
       
       case 'split':
         doc.fontSize(this.design.fontSize.store)
            .font('Helvetica-Bold')
-           .text(this.storeName, 15);
+           .text(this.storeName, RECEIPT_MARGIN);
         if (this.design.showElements.storeNumber) {
-          doc.fontSize(8).font('Helvetica').text(this.storeNumber, 15, doc.y - 12, { align: 'right' });
+          doc.fontSize(8).font('Helvetica').text(this.storeNumber, RECEIPT_MARGIN, doc.y - 12, { align: 'right' });
         }
         break;
     }
@@ -135,14 +137,14 @@ export class ReceiptGenerator {
 
   private addReceiptDetails(doc: PDFKit.PDFDocument, receipt: Receipt): void {
     doc.fontSize(this.design.fontSize.header).font('Helvetica-Bold');
-    doc.text(`RECEIPT #${receipt.receiptNumber}`, 15);
+    doc.text(`RECEIPT #${receipt.receiptNumber}`, RECEIPT_MARGIN);
     
     doc.fontSize(this.design.fontSize.body).font('Helvetica');
-    doc.text(`Date: ${receipt.date.toLocaleDateString()}  ${receipt.date.toLocaleTimeString()}`, 15);
-    doc.text(`Customer: ${receipt.companyName}`, 15);
+    doc.text(`Date: ${receipt.date.toLocaleDateString()}  ${receipt.date.toLocaleTimeString()}`, RECEIPT_MARGIN);
+    doc.text(`Customer: ${receipt.companyName}`, RECEIPT_MARGIN);
     
     if (this.design.showElements.cashier) {
-      doc.text(this.cashierName, 15);
+      doc.text(this.cashierName, RECEIPT_MARGIN);
     }
     
     doc.moveDown(0.3);
@@ -171,7 +173,7 @@ export class ReceiptGenerator {
     items.forEach(item => {
       const total = item.quantity * item.price;
       const itemName = item.name.length > 20 ? item.name.substring(0, 20) : item.name;
-      doc.text(`${itemName}`, 15, doc.y, { continued: true, width: 120 });
+      doc.text(`${itemName}`, RECEIPT_MARGIN, doc.y, { continued: true, width: 120 });
       doc.text(`${item.quantity}x`, { continued: true, width: 30 });
       doc.text(`$${total.toFixed(2)}`, { align: 'right', width: 50 });
       doc.moveDown(0.3);
@@ -183,7 +185,7 @@ export class ReceiptGenerator {
     
     items.forEach(item => {
       const total = item.quantity * item.price;
-      doc.font('Helvetica-Bold').text(`${item.quantity}x ${item.name}`, 15);
+      doc.font('Helvetica-Bold').text(`${item.quantity}x ${item.name}`, RECEIPT_MARGIN);
       doc.font('Helvetica').text(`$${total.toFixed(2)}`, { align: 'right' });
       doc.moveDown(0.4);
     });
@@ -192,7 +194,7 @@ export class ReceiptGenerator {
   private addItemsTable(doc: PDFKit.PDFDocument, items: ReceiptItem[]): void {
     // Header
     doc.fontSize(this.design.fontSize.small).font('Helvetica-Bold');
-    doc.text('ITEM', 15, doc.y, { continued: true, width: 90 });
+    doc.text('ITEM', RECEIPT_MARGIN, doc.y, { continued: true, width: 90 });
     doc.text('QTY', { continued: true, width: 30 });
     doc.text('PRICE', { continued: true, width: 40 });
     doc.text('TOTAL', { align: 'right', width: 40 });
@@ -203,10 +205,10 @@ export class ReceiptGenerator {
     items.forEach(item => {
       const total = item.quantity * item.price;
       const y = doc.y;
-      doc.text(item.name.substring(0, 15), 15, y, { width: 90 });
-      doc.text(item.quantity.toString(), 105, y, { width: 30 });
-      doc.text(`$${item.price.toFixed(2)}`, 135, y, { width: 40 });
-      doc.text(`$${total.toFixed(2)}`, 175, y, { align: 'right', width: 40 });
+      doc.text(item.name.substring(0, 15), RECEIPT_MARGIN, y, { width: 90 });
+      doc.text(item.quantity.toString(), 100, y, { width: 30 });
+      doc.text(`$${item.price.toFixed(2)}`, 130, y, { width: 40 });
+      doc.text(`$${total.toFixed(2)}`, 170, y, { align: 'right', width: 40 });
       doc.moveDown(0.5);
     });
   }
@@ -216,8 +218,8 @@ export class ReceiptGenerator {
     
     items.forEach((item, index) => {
       const total = item.quantity * item.price;
-      doc.font('Helvetica-Bold').text(`${index + 1}. ${item.name}`, 15);
-      doc.font('Helvetica').text(`   Qty: ${item.quantity} x $${item.price.toFixed(2)} = $${total.toFixed(2)}`, 15);
+      doc.font('Helvetica-Bold').text(`${index + 1}. ${item.name}`, RECEIPT_MARGIN);
+      doc.font('Helvetica').text(`   Qty: ${item.quantity} x $${item.price.toFixed(2)} = $${total.toFixed(2)}`, RECEIPT_MARGIN);
       doc.moveDown(0.4);
     });
   }

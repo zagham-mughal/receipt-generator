@@ -414,7 +414,7 @@ function restoreRequiredAttributes(): void {
     const selectedCompanyId = designIdInput?.value ? parseInt(designIdInput.value) : null;
     const selectedCompany = selectedCompanyId ? companies.find(c => c.id === selectedCompanyId) : null;
     const isHuskyCompany = selectedCompany && selectedCompany.name.toLowerCase().includes('husky');
-    const isPetroCanadaCompany = selectedCompany && (selectedCompany.name.toLowerCase().includes('petro-canada') || selectedCompany.name.toLowerCase().includes('acme fuel'));
+    const isPetroCanadaCompany = selectedCompany && (selectedCompany.name.toLowerCase().includes('petro-canada') || selectedCompany.name.toLowerCase().includes('esso circle k'));
     const isBVDPetroleumCompany = selectedCompany && selectedCompany.name.toLowerCase().includes('bvd petroleum');
     const isAnyCanadaCompany = selectedCompany && selectedCompany.country === 'Canada';
     const isOne9Company = selectedCompany && (selectedCompany.name.toLowerCase().includes('one 9') || selectedCompany.name.toLowerCase().includes('one9'));
@@ -799,7 +799,7 @@ function toggleCardFields(): void {
     const isTravelCentersCompany = selectedCompany && (selectedCompany.name.toLowerCase().includes('travelcenters') || selectedCompany.name.toLowerCase().includes('travel centers'));
     const isPilotCompany = selectedCompany && selectedCompany.name.toLowerCase().includes('pilot');
     const isHuskyCompany = selectedCompany && selectedCompany.name.toLowerCase().includes('husky');
-    const isPetroCanadaCompany = selectedCompany && (selectedCompany.name.toLowerCase().includes('petro-canada') || selectedCompany.name.toLowerCase().includes('acme fuel'));
+    const isPetroCanadaCompany = selectedCompany && (selectedCompany.name.toLowerCase().includes('petro-canada') || selectedCompany.name.toLowerCase().includes('esso circle k'));
     const isBVDPetroleumCompany = selectedCompany && selectedCompany.name.toLowerCase().includes('bvd petroleum');
     const isAnyCanadaCompany = selectedCompany && selectedCompany.country === 'Canada';
     
@@ -4148,7 +4148,7 @@ async function generateReceipt(e: Event): Promise<void> {
     const selectedCompany = selectedCompanyId ? companies.find(c => c.id === selectedCompanyId) : null;
     
     const isHuskyCompany = selectedCompany && selectedCompany.name.toLowerCase().includes('husky');
-    const isPetroCanadaCompany = selectedCompany && (selectedCompany.name.toLowerCase().includes('petro-canada') || selectedCompany.name.toLowerCase().includes('acme fuel'));
+    const isPetroCanadaCompany = selectedCompany && (selectedCompany.name.toLowerCase().includes('petro-canada') || selectedCompany.name.toLowerCase().includes('esso circle k'));
     const isBVDPetroleumCompany = selectedCompany && selectedCompany.name.toLowerCase().includes('bvd petroleum');
     const isAnyCanadaCompany = selectedCompany && selectedCompany.country === 'Canada';
     const isHuskyVisa = isHuskyCompany && (paymentMethod === 'Visa' || paymentMethod === 'Master' || paymentMethod === 'Mastercard' || paymentMethod === 'Interac' || paymentMethod === 'American Express' || paymentMethod === 'EFS' || paymentMethod === 'TCH');
@@ -4778,10 +4778,10 @@ function updateReferenceNumberFields(): void {
             showAuth = !isCash;
         }
     } else if (company && country === 'Canada') {
-        showAuth = ['Husky', 'Petro-Canada', 'Acme Fuel & Mart', 'Flying J', 'BVD Petroleum'].includes(company.name);
+        showAuth = ['Husky', 'Petro-Canada', 'ESSO CIRCLE K', 'Flying J', 'BVD Petroleum'].includes(company.name);
         if (company.name === 'Husky') {
             showReceipt = true;
-        } else if (company.name === 'Petro-Canada' || company.name === 'Acme Fuel & Mart') {
+        } else if (company.name === 'Petro-Canada' || company.name === 'ESSO CIRCLE K') {
             showInvoice = true;
             showTransaction = true;
         } else if (company.name === 'Flying J' || company.name === 'BVD Petroleum') {
@@ -4846,6 +4846,10 @@ function updateHstNumberField(): void {
         label = 'FHST / GST #';
         placeholder = '818310427';
         show = manualAddress;
+    } else if (isCanada && name.includes('esso circle k')) {
+        label = 'HST #';
+        placeholder = '123456789RT0001';
+        show = true;
     }
 
     const group = document.getElementById('hstNumberGroup') as HTMLElement | null;
@@ -4865,7 +4869,7 @@ function updatePaymentMethodOptions(): void {
     
     const isBVDPetroleum = selectedCompany.name.toLowerCase().includes('bvd petroleum');
     const isPetroCanada = selectedCompany.name.toLowerCase().includes('petro-canada');
-    const isAcmeFuel = selectedCompany.name.toLowerCase().includes('acme fuel');
+    const isEssoCircleK = selectedCompany.name.toLowerCase().includes('esso circle k');
     const isHusky = selectedCompany.name.toLowerCase().includes('husky');
     const isFlyingJCanada = selectedCompany.name.toLowerCase().includes('flying j') && getCurrentCountry() === 'Canada';
     
@@ -4892,8 +4896,8 @@ function updatePaymentMethodOptions(): void {
             <option value="Visa">💳 Visa</option>
         `;
         paymentMethodSelect.value = 'Master';
-    } else if (isAcmeFuel) {
-        // Acme Fuel & Mart (sample layout): Interac debit, Mastercard, Visa
+    } else if (isEssoCircleK) {
+        // ESSO CIRCLE K: Interac debit, Mastercard, Visa
         paymentMethodSelect.innerHTML = `
             <option value="Interac">💳 Interac</option>
             <option value="Master">💳 Master</option>

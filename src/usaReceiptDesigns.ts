@@ -6,6 +6,25 @@ import { Receipt, ReceiptItem } from './types';
 // Use require for svg-to-pdfkit to avoid TypeScript issues with ts-node
 const SVGtoPDF = require('svg-to-pdfkit');
 
+// The dedicated receipt layouts were authored on a 280pt canvas. Keep that
+// coordinate system so their spacing stays intact, but emit an 80mm page and
+// compress only the horizontal axis. This preserves readable text height while
+// making the PDF match an 80mm thermal printer without Acrobat scaling it down.
+const LEGACY_RECEIPT_WIDTH = 280;
+const THERMAL_RECEIPT_WIDTH = 226.77;
+// Reserve 2mm of width for the printer's non-printable edge.
+const THERMAL_SAFE_MARGIN = 5.67;
+const LEGACY_TO_THERMAL_X_SCALE =
+  (THERMAL_RECEIPT_WIDTH - THERMAL_SAFE_MARGIN * 2) / LEGACY_RECEIPT_WIDTH;
+
+function use80mmPage(doc: PDFKit.PDFDocument): void {
+  // Keep the content close to the left edge; the scale leaves a matching
+  // safety area on the right for printers with a narrower printable region.
+  doc.transform(LEGACY_TO_THERMAL_X_SCALE, 0, 0, 1, 0, 0);
+  const page = doc.page as any;
+  page.dictionary.data.MediaBox[2] = THERMAL_RECEIPT_WIDTH;
+}
+
 // Company-specific receipt generators matching VISA.pdf designs
 
 export class ONE9FuelReceiptGenerator {
@@ -15,6 +34,7 @@ export class ONE9FuelReceiptGenerator {
     doc.registerFont('OCR-B', fontPath);
 
     doc.addPage({ size: [280, 800], margin: 15 });
+    use80mmPage(doc);
     const writeStream = fs.createWriteStream(outputPath);
     doc.pipe(writeStream);
 
@@ -498,6 +518,7 @@ export class PilotTravelCentersReceiptGenerator {
     const fontPath = path.join(__dirname, '../fonts/ocr_b_becker.ttf');
     doc.registerFont('OCR-B', fontPath);
     doc.addPage({ size: [280, 800], margin: 15 });
+    use80mmPage(doc);
     const writeStream = fs.createWriteStream(outputPath);
     doc.pipe(writeStream);
 
@@ -1061,6 +1082,7 @@ export class FlyingJTravelPlazaReceiptGenerator {
     const fontPath = path.join(__dirname, '../fonts/ocr_b_becker.ttf');
     doc.registerFont('OCR-B', fontPath);
     doc.addPage({ size: [280, 800], margin: 15 });
+    use80mmPage(doc);
     const writeStream = fs.createWriteStream(outputPath);
     doc.pipe(writeStream);
 
@@ -1586,6 +1608,7 @@ export class LovesTravelStopsReceiptGenerator {
     const fontPath = path.join(__dirname, '../fonts/ocr_b_becker.ttf');
     doc.registerFont('OCR-B', fontPath);
     doc.addPage({ size: [280, 800], margin: 15 });
+    use80mmPage(doc);
     const writeStream = fs.createWriteStream(outputPath);
     doc.pipe(writeStream);
 
@@ -2108,6 +2131,7 @@ export class TravelCentersOfAmericaReceiptGenerator {
     doc.registerFont('OCR-B', fontPath);
     doc.registerFont('OCR-B-Bold', fontPath2);
     doc.addPage({ size: [280, 800], margin: 15 });
+    use80mmPage(doc);
     const writeStream = fs.createWriteStream(outputPath);
     doc.pipe(writeStream);
 
@@ -2517,6 +2541,7 @@ export class HuskyReceiptGenerator {
     const fontPath = path.join(__dirname, '../fonts/ocr_b_becker.ttf');
     doc.registerFont('OCR-B', fontPath);
     doc.addPage({ size: [280, 800], margin: 15 });
+    use80mmPage(doc);
     const writeStream = fs.createWriteStream(outputPath);
     doc.pipe(writeStream);
 
@@ -2971,6 +2996,7 @@ export class CanadianFlyingJReceiptGenerator {
     const fontPath = path.join(__dirname, '../fonts/ocr_b_becker.ttf');
     doc.registerFont('OCR-B', fontPath);
     doc.addPage({ size: [280, 1000], margin: 15 });
+    use80mmPage(doc);
     const writeStream = fs.createWriteStream(outputPath);
     doc.pipe(writeStream);
 
@@ -3290,6 +3316,7 @@ export class PetroCanadaReceiptGenerator {
     const fontPath = path.join(__dirname, '../fonts/ocr_b_becker.ttf');
     doc.registerFont('OCR-B', fontPath);
     doc.addPage({ size: [280, 800], margin: 15 });
+    use80mmPage(doc);
     const writeStream = fs.createWriteStream(outputPath);
     doc.pipe(writeStream);
 
@@ -3672,6 +3699,7 @@ export class BVDPetroleumReceiptGenerator {
     const fontPath = path.join(__dirname, '../fonts/ocr_b_becker.ttf');
     doc.registerFont('OCR-B', fontPath);
     doc.addPage({ size: [280, 800], margin: 15 });
+    use80mmPage(doc);
     const writeStream = fs.createWriteStream(outputPath);
     doc.pipe(writeStream);
 
@@ -3929,15 +3957,16 @@ export function getUSACompanyReceiptGenerator(companyName: string): any {
 }
 
 /**
- * Acme Fuel & Mart: a fictional brand with an ESSO-style layout.
+ * ESSO CIRCLE K: a fictional brand with an ESSO-style layout.
  * Store details and the HST number are dummy values from the seed data.
  */
-export class AcmeFuelReceiptGenerator {
+export class EssoCircleKReceiptGenerator {
   async generate(receipt: Receipt, outputPath: string): Promise<void> {
     const pageSize: [number, number] = [280, 900];
     const doc = new PDFDocument({ size: pageSize, margin: 15, autoFirstPage: false });
     doc.registerFont('OCR-B', path.join(__dirname, '../fonts/ocr_b_becker.ttf'));
     doc.addPage({ size: pageSize, margin: 15 });
+    use80mmPage(doc);
     const writeStream = fs.createWriteStream(outputPath);
     doc.pipe(writeStream);
 
@@ -3970,7 +3999,7 @@ export class AcmeFuelReceiptGenerator {
 
     // --- Header
     centered('TRANSACTION RECORD');
-    centered('ACME FUEL & MART', 16);
+    centered('ESSO CIRCLE K', 16);
     centered('****************');
     const address = (receipt.companyData?.address || '123 Sample Rd S').toUpperCase();
     const cityState = receipt.companyData?.city || 'Anytown, ON A1A 1A1';

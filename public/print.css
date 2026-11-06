@@ -102,3 +102,44 @@
     font-family: 'Courier New', monospace;
 }
 
+/* Thermal receipt print layout. These rules come last so the on-screen preview
+   padding and centering do not shrink the printed receipt. */
+@media print {
+    html,
+    body {
+        width: 80mm;
+        min-width: 80mm;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+    }
+
+    #printReceipt {
+        display: block !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 80mm !important;
+        max-width: 80mm !important;
+        min-width: 80mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        box-sizing: border-box;
+        font-size: 14px;
+        line-height: 1.45;
+    }
+
+    .receipt-store-name {
+        font-size: 18px;
+    }
+
+    .receipt-total {
+        font-size: 16px;
+    }
+
+    .receipt-footer {
+        font-size: 12px;
+    }
+}
+
