@@ -8,7 +8,7 @@
     "dev": "npm run build:frontend && ts-node src/server.ts",
     "build": "npm run build:frontend && tsc",
     "build:css": "npx tailwindcss -i ./src/input.css -o ./public/tailwind.css --minify",
-    "build:frontend": "tsc --project tsconfig.frontend.json && mv public/app.js public/app-compiled.js",
+    "build:frontend": "tsc --project tsconfig.frontend.json && mv public/app.js public/app-compiled.js && cp public/login.js public/login-compiled.js",
     "generate-csv": "ts-node src/index.ts",
     "watch:frontend": "tsc --project tsconfig.frontend.json --watch",
     "watch:css": "npx tailwindcss -i ./src/input.css -o ./public/tailwind.css --watch",

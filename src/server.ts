@@ -115,15 +115,44 @@ interface AuthenticatedRequest extends Request {
   };
 }
 
+function isLoggedIn(req: AuthenticatedRequest): boolean {
+  return !!(req.session && req.session.userId);
+}
+
+// True when a person opened the URL in the browser (address bar, link, bookmark),
+// as opposed to the frontend's fetch() calls, which need a JSON 401 to handle themselves
+function isBrowserNavigation(req: Request): boolean {
+  return req.method === 'GET' && (req.get('Sec-Fetch-Mode') === 'navigate' || req.accepts(['json', 'html']) === 'html');
+}
+
+// Send the visitor to the login page, remembering where they were going (same-site path only)
+function redirectToLogin(req: Request, res: Response): void {
+  const target = req.originalUrl;
+  if (!target || target === '/' || target.startsWith('/login')) {
+    return res.redirect('/login');
+  }
+  res.redirect(`/login?next=${encodeURIComponent(target)}`);
+}
+
 function requireAuth(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
-  if (req.session && req.session.userId) {
+  if (isLoggedIn(req)) {
     return next();
+  }
+  if (isBrowserNavigation(req)) {
+    return redirectToLogin(req, res);
   }
   res.status(401).json({ error: 'Authentication required' });
 }
 
-// Generated PDFs contain driver and card details, so they require a login too
-app.use('/receipts', requireAuth, express.static(receiptsDir, { index: false }));
+// Generated PDFs contain driver and card details, so they require a login too.
+// These are opened directly in the browser, so logged-out visitors go to the login page.
+function requireAuthOrRedirect(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
+  if (isLoggedIn(req)) {
+    return next();
+  }
+  redirectToLogin(req, res);
+}
+app.use('/receipts', requireAuthOrRedirect, express.static(receiptsDir, { index: false }));
 
 // Slow down password guessing: 10 failed attempts per IP per 15 minutes
 const loginLimiter = rateLimit({
@@ -554,6 +583,14 @@ app.get('/', (req: AuthenticatedRequest, res: Response) => {
     return res.redirect('/login');
   }
   res.sendFile(path.join(__dirname, '../public/index.html'));
+});
+
+// Unknown URLs: logged-out visitors are sent to the login page, everyone else gets a 404
+app.use((req: AuthenticatedRequest, res: Response) => {
+  if (!isLoggedIn(req) && isBrowserNavigation(req)) {
+    return redirectToLogin(req, res);
+  }
+  res.status(404).json({ error: 'Not found' });
 });
 
 // Start server

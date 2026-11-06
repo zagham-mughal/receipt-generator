@@ -6,6 +6,24 @@ interface LoginResponse {
     error?: string;
 }
 
+// Where to go after login: the ?next= path set by the server, but only if it points
+// to this same site (never an outside URL), and never back to the login page itself
+function getReturnPath(): string {
+    const next = new URLSearchParams(window.location.search).get('next');
+    if (!next || !next.startsWith('/') || next.startsWith('//') || next.startsWith('/\\')) {
+        return '/';
+    }
+    try {
+        const url = new URL(next, window.location.origin);
+        if (url.origin !== window.location.origin || url.pathname.startsWith('/login')) {
+            return '/';
+        }
+        return url.pathname + url.search + url.hash;
+    } catch {
+        return '/';
+    }
+}
+
 document.addEventListener('DOMContentLoaded', (): void => {
     const loginForm = document.getElementById('loginForm') as HTMLFormElement;
     const errorMessage = document.getElementById('errorMessage') as HTMLElement;
@@ -47,8 +65,8 @@ document.addEventListener('DOMContentLoaded', (): void => {
                 const data: LoginResponse = await response.json();
 
                 if (response.ok && data.success) {
-                    // Redirect to main page
-                    window.location.href = '/';
+                    // Go back to the page that sent us here, or the main page
+                    window.location.href = getReturnPath();
                 } else {
                     showError(data.error || 'Invalid username or password');
                 }
