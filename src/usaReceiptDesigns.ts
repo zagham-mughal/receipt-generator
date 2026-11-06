@@ -2552,13 +2552,11 @@ export class HuskyReceiptGenerator {
       doc.moveDown(0.5);
     }
 
-    // Text after logo - match screenshot
-    // Show city/state prominently, as requested
-    // Display dynamic city/state prominently (centered)
+    // Text after logo - show the business name prominently.
     doc.moveDown(1);
-    const prominentCity = (receipt.companyData?.city || 'MISSISSAUGA ON L5S 1E1').split(' ')[0] + ' ' + (receipt.companyData?.city || 'MISSISSAUGA ON L5S 1E1').split(' ')[1];
-    doc.fontSize(16).font('OCR-B').text(`${prominentCity} HUSKY`, { align: 'center' });
-    doc.fontSize(16).font('OCR-B').text('TC/ESSO', leftMargin + 10, doc.y, { align: 'left' });
+    const prominentName = (receipt.companyData?.storeName || receipt.companyName || 'HUSKY' + ' ' + 'TC/ESSO').trim();
+    doc.fontSize(16).font('OCR-B').text(prominentName, { align: 'center' });
+    doc.moveDown(1);
 
     // Store info - match screenshot exactly (center-aligned)
     const storeNumber = receipt.companyData?.storeNumber || 'DIXIE MART (MISSISSAUGA)';
@@ -2566,9 +2564,9 @@ export class HuskyReceiptGenerator {
     const cityState = receipt.companyData?.city || 'MISSISSAUGA ON L5S 1E1';
     const phone = receipt.companyData?.phone || '(905) 565-1476';
 
-    doc.fontSize(10).font('OCR-B').text(address, leftMargin + 70);
-    doc.fontSize(10).font('OCR-B').text(cityState, leftMargin + 70);
-    doc.fontSize(10).font('OCR-B').text(phone, leftMargin + 90);
+    doc.fontSize(10).font('OCR-B').text(address, leftMargin + 60);
+    doc.fontSize(10).font('OCR-B').text(cityState, leftMargin + 60);
+    doc.fontSize(10).font('OCR-B').text(phone, leftMargin + 80);
     doc.moveDown(1);
 
     // Transaction details - match screenshot exactly
@@ -2764,14 +2762,14 @@ export class HuskyReceiptGenerator {
       // Generate a 10-digit random number (digits only, not hex)
       const huskyMasterTvr = Array.from({ length: 10 }, () => Math.floor(Math.random() * 10)).join('');
       doc.fontSize(10).font('OCR-B').text(`AID: ${huskyMasterAid}`, leftMargin);
-      doc.fontSize(10).font('OCR-B').text(`TVR: ${huskyMasterTvr}`, leftMargin, doc.y, { continued: true, width: 170 });
       // Generate random 4-character hex for TSI
       const huskyMasterTsi = Array.from({length: 4}, () => Math.floor(Math.random() * 16).toString(16).toUpperCase()).join('');
-      doc.font('OCR-B').text(`TSI: ${huskyMasterTsi}`, { align: 'right', width: 170 });
+      doc.fontSize(10).font('OCR-B').text(`TSI: ${huskyMasterTsi}`, leftMargin, doc.y, { continued: true, width: 170 });
+      doc.font('OCR-B').text(`TVR: ${huskyMasterTvr}`, { align: 'right', width: 170 });
 
       // Approved centered
       doc.moveDown(0.8);
-      doc.fontSize(10).font('OCR-B').text('Approved', { align: 'center' });
+      doc.fontSize(10).font('OCR-B').text('00 Approved - Thank you 000', { align: 'center' });
       doc.moveDown(2);
 
       // Separator and footer date/pos section
@@ -2823,12 +2821,12 @@ export class HuskyReceiptGenerator {
       const aidI = 'A' + Array.from({ length: 13 }, () => Math.floor(Math.random() * 16).toString(16).toUpperCase()).join('');
       const tvrI = Array.from({ length: 10 }, () => Math.floor(Math.random() * 16).toString(16).toUpperCase()).join('');
       doc.fontSize(10).font('OCR-B').text(`AID: ${aidI}`, leftMargin);
-      doc.fontSize(10).font('OCR-B').text(`TVR: ${tvrI}`, leftMargin, doc.y, { continued: true, width: 170 });
-      doc.font('OCR-B').text('TSI: E800', { align: 'right', width: 170 });
+      doc.fontSize(10).font('OCR-B').text('TSI: E800', leftMargin, doc.y, { continued: true, width: 170 });
+      doc.font('OCR-B').text(`TVR: ${tvrI}`, { align: 'right', width: 170 });
 
       // Approved centered
       doc.moveDown(0.8);
-      doc.fontSize(10).font('OCR-B').text('Approved', { align: 'center' });
+      doc.fontSize(10).font('OCR-B').text('00 Approved - Thank you 000', { align: 'center' });
       doc.moveDown(1.5);
 
       // Separator and footer date/pos section
@@ -2876,8 +2874,8 @@ export class HuskyReceiptGenerator {
       
       doc.fontSize(10).font('OCR-B').text('AID: A0000002771010', leftMargin);
       
-      doc.fontSize(10).font('OCR-B').text('TVR: 0080008000', leftMargin, doc.y, { continued: true, width: 248 });
-      doc.font('OCR-B').text('TSI: E800', { align: 'right', width: 248 });
+      doc.fontSize(10).font('OCR-B').text('TSI: E800', leftMargin, doc.y, { continued: true, width: 248 });
+      doc.font('OCR-B').text('TVR: 0080008000', { align: 'right', width: 248 });
       
       // Approved status - centered
       doc.fontSize(10).font('OCR-B').text('Approved', { align: 'center' });
@@ -2920,8 +2918,8 @@ export class HuskyReceiptGenerator {
       
       doc.fontSize(10).font('OCR-B').text('AID: A0000002771010', leftMargin);
       
-      doc.fontSize(10).font('OCR-B').text('TVR: 0080008000', leftMargin, doc.y, { continued: true, width: 248 });
-      doc.font('OCR-B').text('TSI: E800', { align: 'right', width: 248 });
+      doc.fontSize(10).font('OCR-B').text('TSI: E800', leftMargin, doc.y, { continued: true, width: 248 });
+      doc.font('OCR-B').text('TVR: 0080008000', { align: 'right', width: 248 });
       
       // Approved status - centered
       doc.fontSize(10).font('OCR-B').text('Approved', { align: 'center' });

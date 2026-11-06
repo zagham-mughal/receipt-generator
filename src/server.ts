@@ -437,6 +437,7 @@ app.post('/api/generate-receipt', requireAuth, async (req: Request, res: Respons
     // Parse company data for store number and phone
     // Use storeData if provided, otherwise use company data
     const companyData = storeData ? {
+      storeName: storeData.storeCode,
       storeNumber: storeData.storeCode.replace('Store ', ''),
       phone: storeData.phone,
       address: storeData.address,

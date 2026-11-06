@@ -37,6 +37,7 @@ export interface Receipt {
   pos?: string;
   clerk?: string;
   companyData?: {
+    storeName?: string;
     storeNumber?: string;
     phone?: string;
     address?: string;
