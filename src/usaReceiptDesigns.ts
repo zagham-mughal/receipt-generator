@@ -2617,11 +2617,19 @@ export class HuskyReceiptGenerator {
       } else {
         // For other payment methods: show Qty, Name, Price, Total values
         const total = item.quantity * item.price;
+        const priceStr = `$ ${item.price.toFixed(3)}`; // price per litre
+        const totalStr = `$ ${total.toFixed(2)}`;
+        // Line is 41 characters wide. Price and Total keep fixed right edges; when an
+        // amount is longer (e.g. $ 2000.22) the name column gives up the space so the
+        // line never wraps.
+        const priceWidth = Math.max(8, priceStr.length);
+        const totalWidth = Math.max(11, totalStr.length + 1);
+        const nameWidth = Math.max(6, 41 - 4 - priceWidth - totalWidth);
         line =
           qtyStr.padEnd(4) + // always 3 spaces for qty
-          nameStr.padEnd(18).slice(0, 18) + // force name to 18 chars
-          `$ ${total.toFixed(2)}`.padStart(8) + // price (3 decimals) with $ sign
-          `$ ${total.toFixed(2)}`.padStart(11); // total (2 decimals) with $ sign
+          nameStr.padEnd(nameWidth).slice(0, nameWidth) +
+          priceStr.padStart(priceWidth) + // price with $ sign
+          totalStr.padStart(totalWidth); // total with $ sign
       }
 
       doc.fontSize(10).font('OCR-B').text(line, leftMargin);
@@ -2632,7 +2640,7 @@ export class HuskyReceiptGenerator {
 
       doc.fontSize(10).font('OCR-B').text(`   Pump:        ${pumpNumber}`, leftMargin + 16);
       doc.fontSize(10).font('OCR-B').text(`   Liters:      ${liters}`, leftMargin + 16);
-      doc.fontSize(10).font('OCR-B').text(`   Price/Liter: $${liters}`, leftMargin + 16);
+      doc.fontSize(10).font('OCR-B').text(`   Price/Liter: $${item.price.toFixed(3)}`, leftMargin + 16);
 
       // Show price per liter only for non-TCH payment methods
       if (!isTCHPayment) {
@@ -3396,8 +3404,8 @@ export class PetroCanadaReceiptGenerator {
     // Headers section - PRODUCT QTY PRICE AMOUNT (Husky style)
     let headerLine;
     if ((receipt.paymentMethod || '').toLowerCase() === 'master' || (receipt.paymentMethod || '').toLowerCase() === 'interac') {
-      // For Master payment method, use (L), ($/L), ($)
-      headerLine = 'FUEL                (L)   ' + '($/L)   ' + '($)';
+      // For Master/Interac use (L), ($/L), ($), right-aligned over their values (41 chars wide)
+      headerLine = 'FUEL'.padEnd(13) + '(L)'.padStart(10) + '($/L)'.padStart(8) + '($)'.padStart(10);
     } else {
       // For others, default Husky style
       headerLine = 'PRODUCT'.padEnd(20) + 'QTY'.padEnd(5) + 'PRICE'.padEnd(7) + 'AMOUNT';
@@ -3430,7 +3438,12 @@ export class PetroCanadaReceiptGenerator {
       // Align the values by using consistent padding
       if ((receipt.paymentMethod || '').toLowerCase() === 'master' || (receipt.paymentMethod || '').toLowerCase() === 'interac') {
         doc.fontSize(10).font('OCR-B').text(`Pump ${pumpNumber}`);
-        const itemLine = item.name.padEnd(20) + qtyStr.padEnd(5) + item.price.toFixed(2).padEnd(7) + total.toFixed(2);
+        // NAME  litres  $/L  amount: same column widths as the header above
+        const itemLine =
+          item.name.padEnd(13).slice(0, 13) +
+          liters.padStart(10) +
+          item.price.toFixed(2).padStart(8) +
+          total.toFixed(2).padStart(10);
         doc.fontSize(10).font('OCR-B').text(itemLine, leftMargin);
       } else {
         doc.fontSize(10).font('OCR-B').text(` Pump:   ${pumpNumber}`, leftMargin + 16);
