@@ -1,6 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import bodyParser from 'body-parser';
-import cors from 'cors';
+import rateLimit from 'express-rate-limit';
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
@@ -73,29 +73,33 @@ seedCanadianStores();
 const hashedPassword = bcrypt.hashSync(ADMIN_PASSWORD, 10);
 seedDefaultUser(hashedPassword);
 
+// Nginx terminates HTTPS in production; trust its X-Forwarded-* headers so secure
+// cookies work and req.ip is the real client IP (used by the login rate limit)
+app.set('trust proxy', 1);
+// Don't advertise the framework in response headers
+app.disable('x-powered-by');
+
 // Session configuration
 app.use(session({
   secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false, // Set to true if using HTTPS
+    secure: isProduction, // HTTPS-only in production; plain http://localhost works in development
     httpOnly: true,
+    sameSite: 'lax',
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
 
 // Middleware
-app.use(cors({
-  credentials: true,
-  origin: true
-}));
+// No CORS: the frontend is served from this same origin, so cross-origin access is not needed
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, '../public')));
 
-// Serve receipts folder
-app.use('/receipts', express.static(path.join(__dirname, '../receipts')));
+// index.html is only served through the authenticated "/" route below
+app.get('/index.html', (req: Request, res: Response) => res.redirect('/'));
+app.use(express.static(path.join(__dirname, '../public'), { index: false }));
 
 // Ensure receipts directory exists
 const receiptsDir = path.join(__dirname, '../receipts');
@@ -118,12 +122,25 @@ function requireAuth(req: AuthenticatedRequest, res: Response, next: NextFunctio
   res.status(401).json({ error: 'Authentication required' });
 }
 
+// Generated PDFs contain driver and card details, so they require a login too
+app.use('/receipts', requireAuth, express.static(receiptsDir, { index: false }));
+
+// Slow down password guessing: 10 failed attempts per IP per 15 minutes
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  skipSuccessfulRequests: true,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { error: 'Too many failed login attempts. Please try again in 15 minutes.' }
+});
+
 // Public routes - login page and login endpoint
 app.get('/login', (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, '../public/login.html'));
 });
 
-app.post('/api/login', async (req: AuthenticatedRequest, res: Response) => {
+app.post('/api/login', loginLimiter, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { username, password } = req.body;
     
@@ -141,10 +158,16 @@ app.post('/api/login', async (req: AuthenticatedRequest, res: Response) => {
       return res.status(401).json({ error: 'Invalid username or password' });
     }
     
-    req.session.userId = user.id;
-    req.session.username = user.username;
-    
-    res.json({ success: true, username: user.username });
+    // Issue a fresh session ID on login so a pre-set session cookie can't be reused
+    req.session.regenerate((err) => {
+      if (err) {
+        console.error('Error regenerating session:', err);
+        return res.status(500).json({ error: 'Login failed' });
+      }
+      req.session.userId = user.id;
+      req.session.username = user.username;
+      res.json({ success: true, username: user.username });
+    });
   } catch (error) {
     console.error('Error during login:', error);
     res.status(500).json({ error: 'Login failed' });
@@ -428,7 +451,8 @@ app.post('/api/generate-receipt', requireAuth, async (req: Request, res: Respons
     };
 
     // Generate PDF
-    const fileName = `receipt-${receiptNumber}.pdf`;
+    // Random file name so receipt URLs can't be guessed
+    const fileName = `receipt-${crypto.randomUUID()}.pdf`;
     const outputPath = path.join(receiptsDir, fileName);
 
     // Check which generator to use based on country and company
@@ -514,10 +538,8 @@ app.post('/api/generate-receipt', requireAuth, async (req: Request, res: Respons
 
   } catch (error) {
     console.error('Error generating receipt:', error);
-    res.status(500).json({ 
-      error: 'Failed to generate receipt',
-      message: error instanceof Error ? error.message : 'Unknown error'
-    });
+    // Details stay in the server log; the browser only gets a generic message
+    res.status(500).json({ error: 'Failed to generate receipt' });
   }
 });
 
@@ -526,8 +548,11 @@ app.get('/api/health', (req: Request, res: Response) => {
   res.json({ status: 'ok', message: 'Receipt Generator API is running' });
 });
 
-// Serve main page (protected)
-app.get('/', requireAuth, (req: Request, res: Response) => {
+// Serve main page (protected); logged-out visitors are sent to the login page
+app.get('/', (req: AuthenticatedRequest, res: Response) => {
+  if (!req.session || !req.session.userId) {
+    return res.redirect('/login');
+  }
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
